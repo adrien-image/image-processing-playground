@@ -126,8 +126,13 @@ export async function trainModel(
       const loss = (history.history.loss![0] as number) ?? 0;
       const accuracy = (history.history.acc![0] as number) ?? 0;
 
-      // Skip per-epoch validation on mobile for speed; full eval runs at the end
-      if (onEpoch) onEpoch({ epoch: epoch + 1, loss, accuracy, valLoss: 0, valAccuracy: 0 });
+      // Per-epoch validation on the test set
+      const evalResult = model.evaluate(testXs, testYs, { batchSize }) as tf.Scalar[];
+      const valLoss = (await evalResult[0].data())[0];
+      const valAccuracy = (await evalResult[1].data())[0];
+      tf.dispose(evalResult);
+
+      if (onEpoch) onEpoch({ epoch: epoch + 1, loss, accuracy, valLoss, valAccuracy });
 
       if (isNaN(loss)) break;
     }
