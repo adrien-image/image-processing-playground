@@ -43,4 +43,4 @@ In short: create a file in `src/processors/your-filter/` that exports a `Process
 ## Tech Stack
 
 React + TypeScript + Vite
-# image-processing-playground
+
