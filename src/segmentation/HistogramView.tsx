@@ -1,105 +1,98 @@
-import { useRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import './HistogramView.css';
 
 interface HistogramViewProps {
+  /** Display histogram (any number of bins spanning gray levels 0–255). */
   histogram: Uint32Array;
-  threshold: number;
-  otsuThreshold: number;
+  /** User threshold t (0–255): bins with values ≤ t are drawn as background. */
+  threshold?: number;
+  /** Otsu's threshold, drawn as a dashed marker. */
+  otsuThreshold?: number;
   width?: number;
   height?: number;
+  label: string;
 }
 
-export function HistogramView({ histogram, threshold, otsuThreshold, width = 360, height = 160 }: HistogramViewProps) {
+const BACKGROUND = [108, 140, 255];
+const FOREGROUND = [248, 113, 113];
+
+export function HistogramView({ histogram, threshold, otsuThreshold, width = 360, height = 160, label }: HistogramViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d')!;
-    canvas.width = width;
-    canvas.height = height;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    // Render at device resolution so bars and labels stay sharp on HiDPI screens.
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
     const bins = histogram.length;
-    const pad = { top: 8, right: 8, bottom: 20, left: 8 };
+    const pad = { top: 14, right: 8, bottom: 20, left: 8 };
     const plotW = width - pad.left - pad.right;
     const plotH = height - pad.top - pad.bottom;
+    /** x position of the boundary just after gray level v. */
+    const xOfLevel = (v: number) => pad.left + ((v + 1) / 256) * plotW;
 
-    // Clear
+    ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.fillRect(0, 0, width, height);
 
-    // Find max frequency
     let maxFreq = 0;
-    for (let i = 0; i < bins; i++) {
-      if (histogram[i] > maxFreq) maxFreq = histogram[i];
-    }
+    for (let i = 0; i < bins; i++) if (histogram[i] > maxFreq) maxFreq = histogram[i];
     if (maxFreq === 0) return;
 
     const barW = plotW / bins;
-
-    // Draw bars
     for (let i = 0; i < bins; i++) {
       const h = (histogram[i] / maxFreq) * plotH;
       const x = pad.left + i * barW;
       const y = pad.top + plotH - h;
-
-      // Colour bins — single neutral colour when threshold < 0, else split at threshold
-      const binVal = i / bins;
-      if (threshold < 0) {
-        ctx.fillStyle = `rgba(108, 140, 255, ${0.25 + (h / plotH) * 0.55})`;
-      } else if (binVal <= threshold) {
-        ctx.fillStyle = `rgba(108, 140, 255, ${0.3 + (h / plotH) * 0.5})`;
-      } else {
-        ctx.fillStyle = `rgba(248, 113, 113, ${0.3 + (h / plotH) * 0.5})`;
-      }
+      // A bin covers gray levels [start, end]; colour it by which side its centre falls on.
+      const centre = ((i + 0.5) * 256) / bins - 0.5;
+      const [r, g, b] = threshold === undefined || centre <= threshold ? BACKGROUND : FOREGROUND;
+      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${0.3 + (h / plotH) * 0.5})`;
       ctx.fillRect(x, y, Math.max(1, barW - 1), h);
     }
 
-    // Otsu threshold line (optional)
-    // Otsu threshold line
-    if (otsuThreshold >= 0) {
-      const otsuX = pad.left + otsuThreshold * plotW;
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+
+    if (otsuThreshold !== undefined) {
+      const x = xOfLevel(otsuThreshold);
       ctx.strokeStyle = '#34d399';
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 3]);
       ctx.beginPath();
-      ctx.moveTo(otsuX, pad.top);
-      ctx.lineTo(otsuX, pad.top + plotH);
+      ctx.moveTo(x, pad.top);
+      ctx.lineTo(x, pad.top + plotH);
       ctx.stroke();
       ctx.setLineDash([]);
-
       ctx.fillStyle = '#34d399';
-      ctx.font = '9px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('Otsu', otsuX, pad.top - 2);
+      ctx.fillText('Otsu', x, pad.top - 3);
     }
 
-    // User threshold line (if different from Otsu)
-    const userX = pad.left + threshold * plotW;
-    if (threshold >= 0 && Math.abs(threshold - otsuThreshold) > 0.01) {
+    if (threshold !== undefined && threshold !== otsuThreshold) {
+      const x = xOfLevel(threshold);
       ctx.strokeStyle = '#fbbf24';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.moveTo(userX, pad.top);
-      ctx.lineTo(userX, pad.top + plotH);
+      ctx.moveTo(x, pad.top);
+      ctx.lineTo(x, pad.top + plotH);
       ctx.stroke();
-
       ctx.fillStyle = '#fbbf24';
-      ctx.fillText('User', userX, pad.top + plotH + 12);
+      ctx.fillText('You', x, pad.top + plotH + 12);
     }
 
-    // X-axis labels
     ctx.fillStyle = '#6b728e';
     ctx.font = '9px monospace';
-    ctx.textAlign = 'center';
+    ctx.textAlign = 'left';
     ctx.fillText('0', pad.left, pad.top + plotH + 14);
-    ctx.fillText('255', pad.left + plotW, pad.top + plotH + 14);
-    
-    // Show bin count badge
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#6b728e';
-    ctx.font = '8px sans-serif';
-    ctx.fillText(`${bins} bins`, width - pad.right, pad.top + plotH + 14);
+    ctx.fillText('255', pad.left + plotW, pad.top + plotH + 14);
+    ctx.fillText(`${bins} bins`, width - pad.right, pad.top - 3);
   }, [histogram, threshold, otsuThreshold, width, height]);
 
-  return <canvas ref={canvasRef} className="histogram-canvas" />;
+  return <canvas ref={canvasRef} className="histogram-canvas" style={{ maxWidth: width, aspectRatio: `${width} / ${height}` }} role="img" aria-label={label} />;
 }

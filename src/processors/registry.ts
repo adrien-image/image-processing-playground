@@ -3,7 +3,8 @@ import type { Processor } from './types';
 const processors = new Map<string, Processor>();
 
 export function registerProcessor(processor: Processor): void {
-  if (processors.has(processor.id)) {
+  const existing = processors.get(processor.id);
+  if (existing && existing !== processor) {
     console.warn(`Processor "${processor.id}" is already registered — overwriting.`);
   }
   processors.set(processor.id, processor);
@@ -15,8 +16,4 @@ export function getProcessor(id: string): Processor | undefined {
 
 export function getAllProcessors(): Processor[] {
   return Array.from(processors.values());
-}
-
-export function getProcessorIds(): string[] {
-  return Array.from(processors.keys());
 }

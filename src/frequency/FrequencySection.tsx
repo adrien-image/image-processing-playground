@@ -1,121 +1,139 @@
-import { CodeViewer } from '../components/CodeViewer';
+import { useMemo, useState } from 'react';
 import fftCode from './fft.ts?raw';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { rgbaToGrayscale, grayscaleToRGBA } from '../processors/utils';
-import { fft2d, ifft2d, pixelsToComplex, magnitudeSpectrum, applyFilter, nextPowerOf2, type FilterKind } from './fft';
+import { ShowCodeButton } from '../components/CodeViewer';
+import { PixelCanvas } from '../components/PixelCanvas';
+import { ImageUploader } from '../components/ImageUploader';
+import { useImageData, type ImageSource } from '../hooks/useImageData';
+import { makeCanvas } from '../lib/demoImages';
+import { grayToImageData } from '../lib/image';
+import { normaliseRange } from '../processors/utils';
+import {
+  applyMask, cropReal, fft2d, filterMask, ifft2d, magnitudeSpectrum, padToPowerOfTwo,
+  type FilterKind, type FilterType,
+} from './fft';
 
-function generateTestImage(): string {
-  const c = document.createElement('canvas');
-  const s = 64; c.width = s; c.height = s;
-  const ctx = c.getContext('2d')!;
-  ctx.fillStyle = '#222'; ctx.fillRect(0, 0, s, s);
-  ctx.fillStyle = '#ddd';
-  ctx.fillRect(8, 8, 20, 20); ctx.fillRect(36, 36, 16, 16);
-  ctx.beginPath(); ctx.arc(48, 16, 8, 0, Math.PI * 2); ctx.fill();
-  ctx.fillRect(8, 40, 10, 12);
-  return c.toDataURL();
+function testImage(): HTMLCanvasElement {
+  return makeCanvas(64, 64, ctx => {
+    ctx.fillStyle = '#222'; ctx.fillRect(0, 0, 64, 64);
+    ctx.fillStyle = '#ddd';
+    ctx.fillRect(8, 8, 20, 20); ctx.fillRect(36, 36, 16, 16);
+    ctx.beginPath(); ctx.arc(48, 16, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.fillRect(8, 40, 10, 12);
+  });
 }
 
-type FilterType = 'low' | 'high' | 'band-pass' | 'band-stop';
+const FILTERS: { key: FilterType; label: string; heading: string }[] = [
+  { key: 'low', label: 'Low-pass', heading: 'Low-pass (blur)' },
+  { key: 'high', label: 'High-pass', heading: 'High-pass (edges)' },
+  { key: 'band-pass', label: 'Band-pass', heading: 'Band-pass' },
+  { key: 'band-stop', label: 'Band-stop', heading: 'Band-stop' },
+];
+
+type SpectrumView = 'original' | 'mask' | 'filtered';
+const SPECTRUM_VIEWS: { key: SpectrumView; label: string }[] = [
+  { key: 'original', label: 'Image spectrum' },
+  { key: 'mask', label: 'Filter' },
+  { key: 'filtered', label: 'Filtered spectrum' },
+];
+
+const DISPLAY = 240;
 
 export function FrequencySection() {
-  const srcRef = useRef<HTMLImageElement>(null);
-  const specRef = useRef<HTMLCanvasElement>(null);
-  const filteredRef = useRef<HTMLCanvasElement>(null);
   const [filterType, setFilterType] = useState<FilterType>('low');
   const [filterKind, setFilterKind] = useState<FilterKind>('gaussian');
-  const [cutoff, setCutoff] = useState(12);
+  const [cutoff, setCutoff] = useState(8);
+  const [cutoff2, setCutoff2] = useState(20);
+  const [spectrumView, setSpectrumView] = useState<SpectrumView>('original');
   const [showCode, setShowCode] = useState(false);
-  const [cutoff2, setCutoff2] = useState(24);
-  const [view, setView] = useState<'filtered' | 'spectrum'>('filtered');
+  const [source, setSource] = useState<ImageSource>(testImage);
+  const [isDemo, setIsDemo] = useState(true);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const { image, error: loadError } = useImageData(source, 128);
 
-  useEffect(() => {
-    if (srcRef.current) srcRef.current.src = generateTestImage();
-  }, []);
+  // The FFT only depends on the image; filters reuse it.
+  const transform = useMemo(() => {
+    if (!image) return null;
+    const padded = padToPowerOfTwo(image.gray, image.width, image.height);
+    const freq = fft2d(padded);
+    return { freq, spectrum: magnitudeSpectrum(freq) };
+  }, [image]);
 
-  const process = useCallback(async () => {
-    const img = srcRef.current;
-    if (!img || !img.complete) return;
-    const w = img.naturalWidth, h = img.naturalHeight;
-    const fw = nextPowerOf2(w), fh = nextPowerOf2(h);
+  const band = filterType === 'band-pass' || filterType === 'band-stop';
+  const maxRadius = transform ? Math.min(transform.freq.width, transform.freq.height) / 2 : 32;
+  // Keep the radii valid whatever the previous filter left them at (inner < outer ≤ max).
+  const r2 = Math.min(Math.max(cutoff2, 2), maxRadius);
+  const r1 = Math.min(cutoff, band ? r2 - 1 : maxRadius);
 
-    // Read image
-    const c = document.createElement('canvas');
-    c.width = fw; c.height = fh;
-    const ctx = c.getContext('2d')!;
-    ctx.drawImage(img, 0, 0);
-    const imageData = ctx.getImageData(0, 0, fw, fh);
-    const gray = rgbaToGrayscale(imageData.data, fw, fh);
+  const filtered = useMemo(() => {
+    if (!image || !transform) return null;
+    const { freq } = transform;
+    const mask = filterMask(freq.width, freq.height, filterType, filterKind, r1, band ? r2 : r1);
+    const result = applyMask(freq, mask);
+    const spatial = cropReal(ifft2d(result), image.width, image.height);
+    // Filters that remove the DC term produce values around 0 (positive and negative):
+    // stretch them so 0 is mid-gray instead of clipping the negative half to black.
+    const removesDc = filterType === 'high' || filterType === 'band-pass';
+    return {
+      mask: mask.map(g => g * 255),
+      spectrum: magnitudeSpectrum(result),
+      output: removesDc ? normaliseRange(spatial) : spatial,
+      removesDc,
+    };
+  }, [image, transform, filterType, filterKind, r1, r2, band]);
 
-    // FFT
-    const complex = pixelsToComplex(gray, fw, fh);
-    const freq = fft2d(complex);
-    const spectrum = magnitudeSpectrum(freq, fw, fh);
+  const spectrumImage = useMemo(() => {
+    if (!transform || !filtered) return null;
+    const { width, height } = transform.freq;
+    const data = spectrumView === 'original' ? transform.spectrum : spectrumView === 'mask' ? filtered.mask : filtered.spectrum;
+    return grayToImageData(data, width, height);
+  }, [transform, filtered, spectrumView]);
 
-    // Draw spectrum
-    const sCanvas = specRef.current;
-    if (sCanvas) {
-      sCanvas.width = fw; sCanvas.height = fh;
-      const sCtx = sCanvas.getContext('2d')!;
-      const sRGBA = grayscaleToRGBA(spectrum, fw, fh);
-      sCtx.putImageData(new ImageData(sRGBA, fw, fh), 0, 0);
-    }
+  const outputImage = useMemo(
+    () => (image && filtered ? grayToImageData(filtered.output, image.width, image.height) : null),
+    [image, filtered],
+  );
 
-    // Filter
-    const filtered = applyFilter(freq, cutoff, filterType, filterKind, cutoff2);
-    const filteredTime = ifft2d(filtered);
-    const result = new Float64Array(fw * fh);
-    for (let y = 0; y < fh; y++)
-      for (let x = 0; x < fw; x++)
-        result[y * fw + x] = Math.max(0, Math.min(255, filteredTime[y][x][0]));
-
-    // Draw filtered
-    const fCanvas = filteredRef.current;
-    if (fCanvas) {
-      fCanvas.width = fw; fCanvas.height = fh;
-      const fCtx = fCanvas.getContext('2d')!;
-      const fRGBA = grayscaleToRGBA(result, fw, fh);
-      fCtx.putImageData(new ImageData(fRGBA, fw, fh), 0, 0);
-    }
-  }, [filterType, cutoff, cutoff2, filterKind]);
-
-  useEffect(() => {
-    const img = srcRef.current;
-    if (!img) return;
-    const onLoad = () => process();
-    img.onload = onLoad;
-    img.src = generateTestImage();
-    if (img.complete && img.naturalWidth) process();
-    return () => { img.onload = null; };
-  }, [process]);
+  const radiusLabel = filterKind === 'gaussian' ? 'σ' : 'Radius';
+  const heading = FILTERS.find(f => f.key === filterType)!.heading;
+  const error = uploadError ?? loadError;
 
   return (
-    <>
     <div className="demo-section">
       <div className="demo-controls">
         <span className="demo-label">Filter:</span>
-        <button className={`btn btn-sm${filterType === 'low' ? ' btn-primary' : ''}`} onClick={() => setFilterType('low')}>Low-pass</button>
-        <button className={`btn btn-sm${filterType === 'high' ? ' btn-primary' : ''}`} onClick={() => setFilterType('high')}>High-pass</button>
-        <button className={`btn btn-sm${filterType === 'band-pass' ? ' btn-primary' : ''}`} onClick={() => setFilterType('band-pass')}>Band-pass</button>
-        <button className={`btn btn-sm${filterType === 'band-stop' ? ' btn-primary' : ''}`} onClick={() => setFilterType('band-stop')}>Band-stop</button>
-        <span className="demo-label" style={{ marginLeft: '1rem' }}>Type:</span>
-        <button className={`btn btn-sm${filterKind === 'gaussian' ? ' btn-primary' : ''}`} onClick={() => setFilterKind('gaussian')}>Gaussian</button>
-        <button className={`btn btn-sm${filterKind === 'ideal' ? ' btn-primary' : ''}`} onClick={() => setFilterKind('ideal')}>Ideal</button>
-        <button className="btn btn-sm" onClick={() => setShowCode(true)} style={{ marginLeft: "0.5rem" }}>💻 Show code</button>
-        <span className="demo-label" style={{ marginLeft: '1rem' }}>View:</span>
-        <button className={`btn btn-sm${view === 'filtered' ? ' btn-primary' : ''}`} onClick={() => setView('filtered')}>Filtered</button>
-        <button className={`btn btn-sm${view === 'spectrum' ? ' btn-primary' : ''}`} onClick={() => setView('spectrum')}>Spectrum</button>
+        {FILTERS.map(f => (
+          <button key={f.key} type="button" aria-pressed={filterType === f.key}
+            className={`btn btn-sm${filterType === f.key ? ' btn-primary' : ''}`} onClick={() => setFilterType(f.key)}>
+            {f.label}
+          </button>
+        ))}
+        <span className="demo-label">Type:</span>
+        <button type="button" aria-pressed={filterKind === 'gaussian'} className={`btn btn-sm${filterKind === 'gaussian' ? ' btn-primary' : ''}`} onClick={() => setFilterKind('gaussian')}>Gaussian</button>
+        <button type="button" aria-pressed={filterKind === 'ideal'} className={`btn btn-sm${filterKind === 'ideal' ? ' btn-primary' : ''}`} onClick={() => setFilterKind('ideal')}>Ideal</button>
+        <ImageUploader label="📁 Upload" onImage={(src) => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
+        {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(testImage()); setIsDemo(true); }}>Demo image</button>}
+        <span className="ml-auto">
+          <ShowCodeButton code={fftCode} title="frequency/fft.ts" open={showCode} onOpenChange={setShowCode} />
+        </span>
       </div>
+
+      {error && <div className="error-banner" role="alert">⚠ {error}</div>}
 
       <div className="demo-slider-section">
         <div className="demo-slider-row">
-          <span className="demo-slider-label">Cutoff 1: <strong>{cutoff}</strong> px</span>
-          <input type="range" min={2} max={31} value={cutoff} onChange={e => setCutoff(Number(e.target.value))} className="demo-slider" />
+          <label className="demo-slider-label" htmlFor="freq-r1">
+            {band ? `Inner ${radiusLabel.toLowerCase()}` : radiusLabel}: <strong>{r1}</strong> {filterKind === 'ideal' ? 'bins' : ''}
+          </label>
+          <input id="freq-r1" type="range" min={1} max={band ? r2 - 1 : maxRadius} value={r1}
+            onChange={e => setCutoff(Number(e.target.value))} className="demo-slider" />
         </div>
-        {(filterType === 'band-pass' || filterType === 'band-stop') && (
+        {band && (
           <div className="demo-slider-row">
-            <span className="demo-slider-label">Cutoff 2: <strong>{cutoff2}</strong> px</span>
-            <input type="range" min={2} max={31} value={cutoff2} onChange={e => setCutoff2(Number(e.target.value))} className="demo-slider" />
+            <label className="demo-slider-label" htmlFor="freq-r2">
+              Outer {radiusLabel.toLowerCase()}: <strong>{r2}</strong> {filterKind === 'ideal' ? 'bins' : ''}
+            </label>
+            <input id="freq-r2" type="range" min={r1 + 1} max={maxRadius} value={r2}
+              onChange={e => setCutoff2(Number(e.target.value))} className="demo-slider" />
           </div>
         )}
       </div>
@@ -123,33 +141,38 @@ export function FrequencySection() {
       <div className="demo-images">
         <div className="demo-panel">
           <h3>Original</h3>
-          <img ref={srcRef} className="color-img" alt="original" />
+          <PixelCanvas image={image?.imageData ?? null} size={DISPLAY} label="Original image" />
         </div>
         <div className="demo-panel">
           <h3>Spectrum</h3>
-          <canvas ref={specRef} className="color-img" />
-        </div>
-        {view === 'filtered' && (
-          <div className="demo-panel">
-            <h3>{filterType === 'low' ? 'Low-pass (blur)' : filterType === 'high' ? 'High-pass (edges)' : filterType === 'band-pass' ? 'Band-pass' : 'Band-stop'}</h3>
-            <canvas ref={filteredRef} className="color-img" />
+          <div className="segmented" role="group" aria-label="Spectrum view">
+            {SPECTRUM_VIEWS.map(v => (
+              <button key={v.key} type="button" aria-pressed={spectrumView === v.key}
+                className={`btn btn-sm${spectrumView === v.key ? ' btn-primary' : ''}`} onClick={() => setSpectrumView(v.key)}>
+                {v.label}
+              </button>
+            ))}
           </div>
-        )}
+          <PixelCanvas image={spectrumImage} size={DISPLAY} label={SPECTRUM_VIEWS.find(v => v.key === spectrumView)!.label} />
+          <p className="caption">Centre = low frequencies · log magnitude</p>
+        </div>
+        <div className="demo-panel">
+          <h3>{heading}</h3>
+          <PixelCanvas image={outputImage} size={DISPLAY} label={`${heading} result`} />
+          {filtered?.removesDc && <p className="caption">Contrast-stretched: mid-gray = 0</p>}
+        </div>
       </div>
 
       <div className="demo-explanation">
         <h4>Frequency Domain</h4>
         <p>The <strong>Fourier transform</strong> decomposes an image into sine/cosine waves of different frequencies.
-        Each pixel in the spectrum represents the strength of a particular frequency and orientation.</p>
-        <p><strong>Low-pass filter:</strong> removes high frequencies (sharp edges, noise), leaving only smooth variations → blur.</p>
-        <p><strong>High-pass filter:</strong> removes low frequencies (smooth areas), leaving only sharp transitions → edges.</p>
-        <p>The cutoff radius controls how much of the spectrum is kept. A smaller cutoff with low-pass = more blur.
-        A larger cutoff with high-pass = fewer edges preserved.</p>
-        <p>The bright centre of the spectrum represents low frequencies (the overall brightness/shape).
-        The spokes outward represent edges at different orientations.</p>
+        Each point in the spectrum is one wave: its distance from the centre is the frequency, its direction the orientation, its brightness the strength.</p>
+        <p><strong>Low-pass:</strong> keeps the centre (smooth variations) → blur. <strong>High-pass:</strong> keeps the outside (sharp transitions) → edges.
+        Band filters keep or remove a ring between two radii. Switch the spectrum to <em>Filter</em> to see exactly which frequencies are kept (white) or removed (black).</p>
+        <p><strong>Ideal</strong> filters cut sharply, which causes ringing (ripples next to edges); <strong>Gaussian</strong> filters roll off smoothly and avoid it.
+        For Gaussian filters the slider sets σ of the Gaussian, for ideal filters the cut-off radius.</p>
+        <p>The FFT needs power-of-two sizes, so images are padded with their mean value before the transform and cropped back afterwards.</p>
       </div>
     </div>
-      {showCode && <CodeViewer code={fftCode} title="fft.ts" onClose={() => setShowCode(false)} />}
-    </>
   );
 }

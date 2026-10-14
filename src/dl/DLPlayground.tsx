@@ -1,146 +1,213 @@
-import { CodeViewer } from '../components/CodeViewer';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type * as tf from '@tensorflow/tfjs';
 import lenetCode from './lenet.ts?raw';
-import { useState, useCallback, useRef } from 'react';
-import * as tf from '@tensorflow/tfjs';
-import { buildLeNet, loadMnistData, trainModel, predictDigit, evaluateTestSet, type TrainingEpochData, type EvalResult } from './lenet';
+import { ShowCodeButton } from '../components/CodeViewer';
+import { buildLeNet, evaluateTestSet, LENET_PARAMS, predictDigit, trainModel, type EvalResult, type TrainingEpochData } from './lenet';
+import { loadMnist, type MnistData } from './mnist';
+import { toMnistInput } from './preprocess';
 import { TrainingProgress } from './TrainingProgress';
-import { DrawingCanvas } from './DrawingCanvas';
+import { DRAW_SIZE, DrawingCanvas } from './DrawingCanvas';
 import { PredictionDisplay } from './PredictionDisplay';
 import { ConfusionMatrix } from './ConfusionMatrix';
-import { TestResults } from './TestResults';
+import { DigitCanvas, TestResults } from './TestResults';
+import './dl.css';
 
-type Status = 'idle' | 'loading' | 'training' | 'done' | 'error' | 'predicting';
+type Status = 'idle' | 'loading' | 'training' | 'done' | 'error';
 type DlTab = 'training' | 'prediction' | 'test-results' | 'confusion-matrix';
+
+const TABS: { key: DlTab; label: string; needsModel: boolean }[] = [
+  { key: 'training', label: 'Training', needsModel: false },
+  { key: 'prediction', label: 'Prediction', needsModel: true },
+  { key: 'test-results', label: 'Test Results', needsModel: true },
+  { key: 'confusion-matrix', label: 'Confusion Matrix', needsModel: true },
+];
+
+const ARCH = [
+  { name: 'Input', size: '28×28×1', color: '#6c8cff' },
+  { name: 'Conv1', size: '24×24×6', color: '#a78bfa' },
+  { name: 'Pool1', size: '12×12×6', color: '#f472b6' },
+  { name: 'Conv2', size: '8×8×16', color: '#fb923c' },
+  { name: 'Pool2', size: '4×4×16', color: '#34d399' },
+  { name: 'FC', size: '256→120→84→10', color: '#f87171' },
+  { name: 'Output', size: '0–9', color: '#fff' },
+];
 
 export function DLPlayground() {
   const modelRef = useRef<tf.LayersModel | null>(null);
-  const dataRef = useRef<Awaited<ReturnType<typeof loadMnistData>> | null>(null);
+  const dataRef = useRef<MnistData | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const animTimers = useRef<number[]>([]);
+  const epochsTrained = useRef(0);
+
   const [status, setStatus] = useState<Status>('idle');
-  const [currentEpoch, setCurrentEpoch] = useState(0);
-  const [showCode, setShowCode] = useState(false);
-  const [totalEpochs, setTotalEpochs] = useState(10);
+  const [epochsToRun, setEpochsToRun] = useState(10);
+  const [run, setRun] = useState({ epochs: 0, done: 0 });
   const [history, setHistory] = useState<TrainingEpochData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [predictions, setPredictions] = useState<Float32Array | null>(null);
+  const [networkInput, setNetworkInput] = useState<Float32Array | null>(null);
   const [archStep, setArchStep] = useState(0);
   const [batchProgress, setBatchProgress] = useState<{ current: number; total: number } | null>(null);
-  const [dlTab, setDlTab] = useState<DlTab>('training');
+  const [tab, setTab] = useState<DlTab>('training');
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null);
+  const [showCode, setShowCode] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const [emptyDrawing, setEmptyDrawing] = useState(false);
 
-  const isTrained = modelRef.current !== null && history.length > 0;
-  const isTraining = status === 'training' || status === 'loading';
-  const trainedTabs = ['prediction', 'test-results', 'confusion-matrix'];
+  const clearAnimation = () => {
+    animTimers.current.forEach(clearTimeout);
+    animTimers.current = [];
+  };
 
-  const startTraining = useCallback(async () => {
+  // Leaving the section stops training and frees the model's GPU memory.
+  useEffect(() => () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    modelRef.current?.dispose();
+    modelRef.current = null;
+    clearAnimation();
+  }, []);
+
+  const isTrained = history.length > 0 && modelRef.current !== null;
+  const busy = status === 'loading' || status === 'training';
+  // Clear the "stopping" flag once training has actually ended.
+  if (stopping && !busy) setStopping(false);
+
+  const startTraining = async () => {
+    const controller = new AbortController();
+    abortRef.current = controller;
+    // Reset or unmount replaces/clears abortRef: this run's results are then stale.
+    const stale = () => abortRef.current !== controller;
     setStatus('loading');
     setError(null);
-    if (!isTrained) setHistory([]);
     setPredictions(null);
+    setNetworkInput(null);
     setEvalResult(null);
+    setBatchProgress(null);
 
     try {
-      if (!dataRef.current) dataRef.current = await loadMnistData();
+      if (!dataRef.current) dataRef.current = await loadMnist();
+      if (stale()) return;
       if (!modelRef.current) modelRef.current = buildLeNet();
+      const model = modelRef.current;
+      const data = dataRef.current;
 
       setStatus('training');
-      await trainModel(modelRef.current, dataRef.current, totalEpochs, 128, (data) => {
-        setHistory(prev => [...prev, data]);
-        setCurrentEpoch(data.epoch);
-        setBatchProgress(null);
-      }, (_batch, _total) => {
-        setBatchProgress({ current: _batch, total: _total });
+      setRun({ epochs: epochsToRun, done: 0 });
+      await trainModel(model, data, {
+        epochs: epochsToRun,
+        firstEpoch: epochsTrained.current + 1,
+        signal: controller.signal,
+        onEpoch: (epochData) => {
+          if (stale()) return;
+          epochsTrained.current = epochData.epoch;
+          setHistory(prev => [...prev, epochData]);
+          setRun(r => ({ ...r, done: r.done + 1 }));
+          setBatchProgress(null);
+        },
+        onBatch: (current, total) => { if (!stale()) setBatchProgress({ current, total }); },
       });
+      if (stale()) return;
 
-      // Evaluate on test set
-      const result = evaluateTestSet(modelRef.current, dataRef.current);
-      setEvalResult(result);
-      setStatus('done');
+      // Finished, or stopped by the user: evaluate whatever has been learned.
+      setBatchProgress(null);
+      if (epochsTrained.current > 0) {
+        setEvalResult(evaluateTestSet(model, data.test));
+        setStatus('done');
+      } else {
+        setStatus('idle');
+      }
     } catch (err) {
+      if (stale()) return;
       setStatus('error');
       setError(err instanceof Error ? err.message : 'Training failed');
     }
-  }, [totalEpochs, isTrained]);
+  };
 
-  const resetModel = useCallback(() => {
+  /** Ask training to stop after the current batch; `startTraining` then evaluates. */
+  const stopTraining = () => {
+    abortRef.current?.abort();
+    setStopping(true);
+  };
+
+  const resetModel = () => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    epochsTrained.current = 0;
+    modelRef.current?.dispose();
     modelRef.current = null;
+    clearAnimation();
     setHistory([]);
     setEvalResult(null);
     setPredictions(null);
-    setCurrentEpoch(0);
+    setNetworkInput(null);
+    setRun({ epochs: 0, done: 0 });
     setBatchProgress(null);
     setStatus('idle');
     setError(null);
-  }, []);
+    setTab('training');
+  };
 
-  const classify = useCallback(async () => {
+  const classify = () => {
     const canvas = canvasRef.current;
     const model = modelRef.current;
-    if (!canvas || !model) return;
-    setStatus('predicting');
-    setPredictions(null);
+    const ctx = canvas?.getContext('2d', { willReadFrequently: true });
+    if (!canvas || !model || !ctx) return;
+
+    const rgba = ctx.getImageData(0, 0, DRAW_SIZE, DRAW_SIZE).data;
+    const ink = new Float32Array(DRAW_SIZE * DRAW_SIZE);
+    for (let i = 0; i < ink.length; i++) ink[i] = rgba[i * 4] / 255;
+    const input = toMnistInput(ink, DRAW_SIZE, DRAW_SIZE);
+    setNetworkInput(input);
+    setEmptyDrawing(!input);
+    if (!input) {
+      setPredictions(null);
+      return;
+    }
+
+    clearAnimation();
     setArchStep(0);
-
-    // Clear any existing animation timers
-    if (animTimers.current.length) {
-      animTimers.current.forEach(clearTimeout);
-      animTimers.current = [];
-    }
-
-    // Start architecture animation independently (non-blocking)
-    for (let i = 1; i <= 6; i++) {
-      animTimers.current.push(setTimeout(() => setArchStep(i), i * 150));
-    }
-
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = 28; tempCanvas.height = 28;
-    const tempCtx = tempCanvas.getContext('2d')!;
-    tempCtx.drawImage(canvas, 0, 0, 28, 28);
-    const imageData = tempCtx.getImageData(0, 0, 28, 28);
-    const pixels = new Float32Array(28 * 28);
-    for (let i = 0; i < 28 * 28; i++) pixels[i] = imageData.data[i * 4] / 255;
-    const tensor = tf.tensor4d(pixels, [1, 28, 28, 1]);
-    const probs = predictDigit(model, tensor);
-    tensor.dispose();
-    setPredictions(probs);
-    setTimeout(() => setArchStep(7), 1050);
-    setStatus('done');
-  }, []);
+    for (let i = 1; i <= ARCH.length; i++) animTimers.current.push(window.setTimeout(() => setArchStep(i), i * 150));
+    setPredictions(predictDigit(model, input));
+  };
 
   const handleCanvasReady = useCallback((canvas: HTMLCanvasElement) => { canvasRef.current = canvas; }, []);
-  const handleClear = useCallback(() => { setPredictions(null); setArchStep(0); }, []);
+  const handleClear = useCallback(() => {
+    setPredictions(null);
+    setNetworkInput(null);
+    setEmptyDrawing(false);
+    setArchStep(0);
+  }, []);
 
-  // Redirect to training tab if not trained and trying to access trained-only tabs
-  const activeTab = !isTrained && trainedTabs.includes(dlTab) ? 'training' : dlTab;
+  const activeTab = !isTrained && TABS.find(t => t.key === tab)?.needsModel ? 'training' : tab;
 
   return (
-    <>
     <div className="dl-playground">
-      {/* Top bar */}
       <div className="dl-topbar">
         <div className="dl-topbar-left">
-          <button className="btn btn-primary" onClick={startTraining} disabled={isTraining}>
-            {status === 'idle' && '🚀 Train LeNet on MNIST'}
-            {status === 'done' && '🔄 Train more epochs'}
-            {status === 'loading' && '⏳ Loading MNIST data…'}
-            {status === 'training' && `⏳ Epoch ${currentEpoch}/${totalEpochs}`}
-          </button>
-          <button className="btn btn-sm" onClick={() => setShowCode(true)} style={{ marginLeft: '0.5rem' }}>💻 Show code</button>
-          {isTrained && (
-            <button className="btn btn-sm" onClick={resetModel} disabled={isTraining} style={{ marginLeft: '0.5rem' }}>
-              🔄 Reset model
+          {busy ? (
+            <button type="button" className="btn btn-primary" onClick={stopTraining} disabled={status === 'loading' || stopping}>
+              {status === 'loading' ? '⏳ Loading MNIST…' : stopping ? '⏳ Stopping…' : `⏹ Stop (epoch ${Math.min(run.done + 1, run.epochs)}/${run.epochs})`}
+            </button>
+          ) : (
+            <button type="button" className="btn btn-primary" onClick={startTraining}>
+              {status === 'error' ? '🔁 Retry training' : isTrained ? `🔄 Train ${epochsToRun} more epoch${epochsToRun === 1 ? '' : 's'}` : '🚀 Train LeNet on MNIST'}
             </button>
           )}
           <label className="dl-epoch-label">
             Epochs:
-            <input type="number" min={1} max={20} value={totalEpochs}
-              onChange={(e) => setTotalEpochs(Math.max(1, Math.min(20, Number(e.target.value))))}
-              className="dl-epoch-input" disabled={isTraining} />
+            <input type="number" min={1} max={20} value={epochsToRun}
+              onChange={(e) => setEpochsToRun(Math.max(1, Math.min(20, Number(e.target.value) || 1)))}
+              className="dl-epoch-input" disabled={busy} />
           </label>
+          {isTrained && !busy && (
+            <button type="button" className="btn btn-sm" onClick={resetModel}>🗑 Reset model</button>
+          )}
+          <ShowCodeButton code={lenetCode} title="dl/lenet.ts" open={showCode} onOpenChange={setShowCode} />
         </div>
-        <div className="dl-topbar-right">
-          {status === 'idle' && !isTrained && <span className="dl-model-status dl-model-untrained">⚪ Model not trained</span>}
+        <div className="dl-topbar-right" role="status">
+          {!isTrained && !busy && status !== 'error' && <span className="dl-model-status dl-model-untrained">⚪ Model not trained</span>}
           {isTrained && (
             <span className="dl-model-status dl-model-trained">
               ✅ Trained — {history.length} epoch{history.length > 1 ? 's' : ''}
@@ -151,99 +218,87 @@ export function DLPlayground() {
         </div>
       </div>
 
-      {/* Sub-tabs */}
       <div className="tab-bar">
-        <button className={`tab-btn${activeTab === 'training' ? ' tab-active' : ''}`} onClick={() => setDlTab('training')}>Training</button>
-        <button className={`tab-btn${activeTab === 'prediction' ? ' tab-active' : ''}`} onClick={() => setDlTab('prediction')} disabled={!isTrained}>Prediction</button>
-        <button className={`tab-btn${activeTab === 'test-results' ? ' tab-active' : ''}`} onClick={() => setDlTab('test-results')} disabled={!isTrained}>Test Results</button>
-        <button className={`tab-btn${activeTab === 'confusion-matrix' ? ' tab-active' : ''}`} onClick={() => setDlTab('confusion-matrix')} disabled={!isTrained}>Confusion Matrix</button>
+        <div className="tab-list" role="tablist" aria-label="Classification views">
+          {TABS.map(t => (
+            <button key={t.key} type="button" role="tab" id={`dl-tab-${t.key}`} aria-controls="dl-panel"
+              aria-selected={activeTab === t.key} disabled={t.needsModel && !isTrained}
+              className={`tab-btn${activeTab === t.key ? ' tab-active' : ''}`} onClick={() => setTab(t.key)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Training tab */}
-      {activeTab === 'training' && (
-        <div className="dl-tab-content">
-          {isTraining && <TrainingProgress history={history} currentEpoch={currentEpoch} totalEpochs={totalEpochs} status={status === 'loading' ? 'loading' : 'training'} batchProgress={batchProgress} />}
-          {status === 'idle' && !isTrained && (
-            <div className="dl-welcome">
-              <h2>🧠 LeNet-5 on MNIST</h2>
-              <p>Click <strong>Train LeNet on MNIST</strong> above to start training a convolutional neural network on 6,000 handwritten digit images (600 per digit).</p>
-              <p>The model learns to recognise digits 0–9. After training, explore the <strong>Prediction</strong>, <strong>Test Results</strong>, and <strong>Confusion Matrix</strong> tabs.</p>
-              <div className="dl-welcome-info">
-                <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">6,000</span><span className="dl-welcome-stat-label">Training samples</span></div>
-                <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">1,000</span><span className="dl-welcome-stat-label">Test samples</span></div>
-                <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">60k</span><span className="dl-welcome-stat-label">Parameters</span></div>
-                <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">{totalEpochs}</span><span className="dl-welcome-stat-label">Epochs</span></div>
+      <div id="dl-panel" role="tabpanel" aria-labelledby={`dl-tab-${activeTab}`} className="dl-tab-content">
+        {activeTab === 'training' && (
+          <>
+            {(busy || history.length > 0) && (
+              <TrainingProgress history={history} runEpochs={run.epochs} runDone={run.done}
+                status={status === 'loading' ? 'loading' : status === 'training' ? 'training' : 'done'}
+                batchProgress={batchProgress} />
+            )}
+            {!busy && history.length === 0 && (
+              <div className="dl-welcome">
+                <h2>🧠 LeNet-5 on MNIST</h2>
+                <p>Click <strong>Train LeNet on MNIST</strong> to train a convolutional neural network in your browser on 6,000 handwritten digits (600 per digit).
+                After every epoch it is checked on 1,000 separate <em>validation</em> digits; a further 1,000 <em>test</em> digits are kept aside for the final evaluation.</p>
+                <p>After training, explore the <strong>Prediction</strong>, <strong>Test Results</strong>, and <strong>Confusion Matrix</strong> tabs.</p>
+                <div className="dl-welcome-info">
+                  <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">6,000</span><span className="dl-welcome-stat-label">Training</span></div>
+                  <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">1,000</span><span className="dl-welcome-stat-label">Validation</span></div>
+                  <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">1,000</span><span className="dl-welcome-stat-label">Test</span></div>
+                  <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">{(LENET_PARAMS / 1000).toFixed(1)}k</span><span className="dl-welcome-stat-label">Parameters</span></div>
+                </div>
               </div>
-            </div>
-          )}
-          {isTrained && status !== 'training' && <TrainingProgress history={history} currentEpoch={history.length} totalEpochs={history.length} status="done" />}
-        </div>
-      )}
+            )}
+          </>
+        )}
 
-      {/* Prediction tab */}
-      {activeTab === 'prediction' && (
-        <div className="dl-tab-content">
+        {activeTab === 'prediction' && (
           <div className="dl-layout">
             <div className="dl-left">
               <DrawingCanvas onCanvasReady={handleCanvasReady} onClear={handleClear} />
-              <button className="btn btn-primary btn-classify" onClick={classify}>🔍 Classify</button>
+              <button type="button" className="btn btn-primary btn-classify" onClick={classify}>🔍 Classify</button>
+              {networkInput ? (
+                <div className="network-input">
+                  <DigitCanvas pixels={networkInput} className="network-input-canvas" label="The 28×28 image given to the network" />
+                  <p className="caption">What the network sees: your drawing scaled to a 20×20 box and centred by its centre of mass in 28×28, like the MNIST digits.</p>
+                </div>
+              ) : emptyDrawing && (
+                <p className="note-warning" role="alert">Nothing drawn yet — draw a digit first.</p>
+              )}
               <PredictionDisplay predictions={predictions} />
             </div>
             <div className="dl-right">
               <div className="arch-diagram">
                 <h3>LeNet Architecture</h3>
                 <div className="arch-flow">
-                  <ArchLayer name="Input" size="28×28×1" color="#6c8cff" active={archStep >= 1} />
-                  <ArchArrow />
-                  <ArchLayer name="Conv1" size="24×24×6" color="#a78bfa" active={archStep >= 2} />
-                  <ArchArrow />
-                  <ArchLayer name="Pool1" size="12×12×6" color="#f472b6" active={archStep >= 3} />
-                  <ArchArrow />
-                  <ArchLayer name="Conv2" size="8×8×16" color="#fb923c" active={archStep >= 4} />
-                  <ArchArrow />
-                  <ArchLayer name="Pool2" size="4×4×16" color="#34d399" active={archStep >= 5} />
-                  <ArchArrow />
-                  <ArchLayer name="FC" size="120→84→10" color="#f87171" active={archStep >= 6} />
-                  <ArchArrow />
-                  <ArchLayer name="Output" size="0–9" color="#fff" active={archStep >= 7} />
+                  {ARCH.map((layer, i) => (
+                    <div key={layer.name} className="arch-step">
+                      {i > 0 && <div className="arch-arrow" aria-hidden="true">▼</div>}
+                      <div className={`arch-layer${archStep > i ? ' arch-layer-active' : ''}`} style={{ borderColor: layer.color }}>
+                        <div className="arch-layer-name">{layer.name}</div>
+                        <div className="arch-layer-size">{layer.size}</div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="arch-desc">LeNet-5 alternates convolution and pooling, followed by fully connected layers. ~60k parameters.</p>
+                <p className="arch-desc">
+                  LeNet-5 alternates convolution and pooling, followed by fully connected layers — {LENET_PARAMS.toLocaleString()} trainable parameters
+                  for 28×28 input (the original 32×32 version has ~60k).
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Test Results tab */}
-      {activeTab === 'test-results' && evalResult && (
-        <div className="dl-tab-content">
-          <TestResults examples={evalResult.examples} accuracy={evalResult.accuracy} />
-        </div>
-      )}
+        {activeTab === 'test-results' && evalResult && (
+          <TestResults examples={evalResult.examples} accuracy={evalResult.accuracy} total={evalResult.total} />
+        )}
 
-      {/* Confusion Matrix tab */}
-      {activeTab === 'confusion-matrix' && evalResult && (
-        <div className="dl-tab-content">
-          <ConfusionMatrix matrix={evalResult.confusionMatrix} />
-        </div>
-      )}
+        {activeTab === 'confusion-matrix' && evalResult && <ConfusionMatrix matrix={evalResult.confusionMatrix} />}
+      </div>
     </div>
-      {showCode && <CodeViewer code={lenetCode} title="lenet.ts" onClose={() => setShowCode(false)} />}
-    </>
   );
-}
-
-function ArchLayer({ name, size, color, active }: { name: string; size: string; color: string; active: boolean }) {
-  return (
-    <>
-    <div className={`arch-layer${active ? ' arch-layer-active' : ''}`} style={{ borderColor: color }}>
-      <div className="arch-layer-name">{name}</div>
-      <div className="arch-layer-size">{size}</div>
-    </div>
-    </>
-  );
-}
-
-function ArchArrow() {
-  return <div className="arch-arrow">▼</div>;
 }

@@ -1,124 +1,108 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { ConvolutionSection } from './convolution/ConvolutionSection';
-import { DLPlayground } from './dl/DLPlayground';
-import { SegmentationSection } from './segmentation/SegmentationSection';
-import { MatchingSection } from './matching/MatchingSection';
-import { ColorSection } from './color/ColorSection';
-import { MorphologySection } from './morphology/MorphologySection';
-import { EdgeComparisonSection } from './edges/EdgeComparisonSection';
-import { FrequencySection } from './frequency/FrequencySection';
-import { HoughSection } from './hough/HoughSection';
-import { HistEqSection } from './histogram/HistEqSection';
-import { AugmentationSection } from './augmentation/AugmentationSection';
-import { DenoisingSection } from './denoising/DenoisingSection';
-import { TemplateSection } from './template/TemplateSection';
-import { initProcessors } from './processors';
-import './App.css';
-
-type Section = 'convolution' | 'deep-learning' | 'segmentation' | 'matching' | 'color' | 'morphology' | 'edges' | 'frequency' | 'hough' | 'histeq' | 'augmentation' | 'denoising' | 'template';
-
-const SECTIONS: { key: Section; icon: string; label: string }[] = [
-  { key: 'convolution',   icon: '🖼', label: 'Convolution' },
-  { key: 'segmentation',  icon: '🎯', label: 'Segmentation' },
-  { key: 'matching',      icon: '🔗', label: 'Matching' },
-  { key: 'color',         icon: '🎨', label: 'Color' },
-  { key: 'morphology',    icon: '🔲', label: 'Morphology' },
-  { key: 'edges',         icon: '⚡', label: 'Edges' },
-  { key: 'frequency',     icon: '🌀', label: 'Frequency' },
-  { key: 'hough',         icon: '📐', label: 'Hough' },
-  { key: 'histeq',        icon: '📊', label: 'Histogram' },
-  { key: 'augmentation',  icon: '📦', label: 'Augmentation' },
-  { key: 'denoising',     icon: '🧹', label: 'Denoising' },
-  { key: 'template',      icon: '🔍', label: 'Template' },
-  { key: 'deep-learning', icon: '🧠', label: 'Classification' },
-];
+import { Suspense, useEffect, useRef, useState } from 'react';
+import { SECTIONS, SECTION_KEYS, type SectionKey } from './app/sections';
+import { useHashRoute } from './app/useHashRoute';
+import { SectionErrorBoundary } from './app/SectionErrorBoundary';
 
 function App() {
-  const [section, setSection] = useState<Section>('convolution');
+  const [sectionKey, navigate] = useHashRoute<SectionKey>(SECTION_KEYS, 'convolution');
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const currentSection = SECTIONS.find(s => s.key === section)!;
-
-  const handleKey = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') setMenuOpen(false);
-  }, []);
+  const section = SECTIONS.find(s => s.key === sectionKey) ?? SECTIONS[0];
+  const { Component } = section;
 
   useEffect(() => {
-    initProcessors();
-    document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
-  }, [handleKey]);
+    document.title = `${section.label} — Image Processing Playground`;
+  }, [section.label]);
 
-  // Close menu on outside click
+  // Close on Escape (returning focus to the menu button) or on a click outside the
+  // menu. The toggle button is inside `anchorRef`, so clicking it still toggles.
   useEffect(() => {
     if (!menuOpen) return;
-    const onClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
         setMenuOpen(false);
+        buttonRef.current?.focus();
       }
     };
-    document.addEventListener('mousedown', onClick);
-    return () => document.removeEventListener('mousedown', onClick);
+    const onMouseDown = (e: MouseEvent) => {
+      if (anchorRef.current && !anchorRef.current.contains(e.target as Node)) setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('mousedown', onMouseDown);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.removeEventListener('mousedown', onMouseDown);
+    };
   }, [menuOpen]);
 
-  const navigate = (key: Section) => { setSection(key); setMenuOpen(false); };
+  const go = (key: SectionKey) => {
+    navigate(key);
+    setMenuOpen(false);
+    buttonRef.current?.focus();
+  };
 
   return (
     <div className="app">
       <header className="app-header">
-        <div className="header-menu-anchor">
-          <button className="header-menu-btn" onClick={() => setMenuOpen(!menuOpen)}>
-            {currentSection.icon}{' '}
+        <div className="header-menu-anchor" ref={anchorRef}>
+          <button
+            ref={buttonRef}
+            type="button"
+            className="header-menu-btn"
+            aria-haspopup="true"
+            aria-expanded={menuOpen}
+            aria-controls="section-menu"
+            onClick={() => setMenuOpen(open => !open)}
+          >
+            <span aria-hidden="true">{section.icon}</span>
             <span className="header-menu-title">Image Processing Playground</span>
-            <span className="header-menu-arrow">▾</span>
+            <span className="header-menu-current">· {section.label}</span>
+            <span className="header-menu-arrow" aria-hidden="true">▾</span>
           </button>
 
           {menuOpen && (
-            <>
-              <div className="header-menu-backdrop" onClick={() => setMenuOpen(false)} />
-              <div className="header-menu" ref={menuRef}>
-                <div className="header-menu-grid">
-                  {SECTIONS.map(s => (
-                    <button key={s.key}
-                      className={`header-menu-item${section === s.key ? ' header-menu-item-active' : ''}`}
-                      onClick={() => navigate(s.key)}>
-                      <span className="header-menu-icon">{s.icon}</span>
+            <nav className="header-menu" id="section-menu" aria-label="Sections">
+              <ul className="header-menu-grid">
+                {SECTIONS.map(s => (
+                  <li key={s.key}>
+                    <a
+                      href={`#/${s.key}`}
+                      className={`header-menu-item${s.key === sectionKey ? ' header-menu-item-active' : ''}`}
+                      aria-current={s.key === sectionKey ? 'page' : undefined}
+                      onClick={(e) => { e.preventDefault(); go(s.key); }}
+                    >
+                      <span className="header-menu-icon" aria-hidden="true">{s.icon}</span>
                       <span className="header-menu-label">{s.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
           )}
         </div>
-
+        {menuOpen && <div className="header-menu-backdrop" aria-hidden="true" />}
       </header>
 
-      {section === 'convolution' && <ConvolutionSection />}
-      {section === 'deep-learning' && <div className="dl-container"><DLPlayground /></div>}
-      {section === 'segmentation' && <div className="seg-container"><SegmentationSection /></div>}
-      {section === 'matching' && <div className="matching-container"><MatchingSection /></div>}
-      {section === 'color' && <div className="seg-container"><ColorSection /></div>}
-      {section === 'morphology' && <div className="seg-container"><MorphologySection /></div>}
-      {section === 'edges' && <div className="seg-container"><EdgeComparisonSection /></div>}
-      {section === 'frequency' && <div className="seg-container"><FrequencySection /></div>}
-      {section === 'hough' && <div className="seg-container"><HoughSection /></div>}
-      {section === 'histeq' && <div className="seg-container"><HistEqSection /></div>}
-      {section === 'augmentation' && <div className="seg-container"><AugmentationSection /></div>}
-      {section === 'denoising' && <div className="seg-container"><DenoisingSection /></div>}
-      {section === 'template' && <div className="seg-container"><TemplateSection /></div>}
+      <main className="section-container">
+        <SectionErrorBoundary key={sectionKey}>
+          <Suspense fallback={<div className="section-loading" role="status">⏳ Loading {section.label}…</div>}>
+            <Component />
+          </Suspense>
+        </SectionErrorBoundary>
+      </main>
 
       <footer className="app-footer">
-        <p>Built with the <strong>Processor Registry</strong> pattern —
-          <details className="footer-details">
-            <summary>add your own filter</summary>
-            <div className="footer-details-content">
-              <p>1. Create a file in <code>src/processors/your-filter/index.ts</code> exporting a <code>Processor</code> object.</p>
-              <p>2. Import and register it in <code>src/processors/init.ts</code>.</p>
-              <p>3. The UI discovers it automatically.</p>
-            </div>
-          </details>.</p>
+        <p>Built with the <strong>Processor Registry</strong> pattern.</p>
+        <details className="footer-details">
+          <summary>Add your own convolution filter</summary>
+          <div className="footer-details-content">
+            <p>1. Create <code>src/processors/your-filter/index.ts</code> exporting a <code>Processor</code> (kernel, output mode, params).</p>
+            <p>2. Register it in <code>src/processors/init.ts</code>.</p>
+            <p>3. It appears in the Convolution section's processor list, with controls generated from its params.</p>
+          </div>
+        </details>
       </footer>
     </div>
   );

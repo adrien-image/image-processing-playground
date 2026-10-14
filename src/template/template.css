@@ -1,0 +1,46 @@
+.template-picker {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+  cursor: crosshair;
+  border-radius: var(--radius);
+}
+
+.template-box {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.template-box-cursor {
+  border: 1px dashed rgba(255, 255, 255, 0.45);
+}
+
+.template-picker:not(:focus-visible) .template-box-cursor {
+  display: none;
+}
+
+.template-box-selected {
+  border: 2px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.template-box-match {
+  border: 3px solid #34d399;
+  background: rgba(52, 211, 153, 0.15);
+}
+
+.template-peak {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #34d399;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.template-result {
+  gap: 2rem;
+  font-size: 0.85rem;
+}

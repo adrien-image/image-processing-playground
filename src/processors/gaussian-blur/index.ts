@@ -1,34 +1,18 @@
 import type { Processor } from '../types';
-import { convolve, rgbaToGrayscale, grayscaleToRGBA } from '../utils';
-
-/** 3×3 Gaussian kernel (normalised, sums to 1) */
-export const GAUSSIAN_3x3: number[][] = [
-  [1 / 16, 2 / 16, 1 / 16],
-  [2 / 16, 4 / 16, 2 / 16],
-  [1 / 16, 2 / 16, 1 / 16],
-];
+import { gaussianKernel } from '../kernels';
 
 /**
- * Gaussian Blur processor — smooths the image using a normalised 3×3 Gaussian kernel.
- * Each output pixel is a weighted average of its neighbours.
+ * Gaussian Blur — each output pixel is a weighted average of its 3×3 neighbourhood,
+ * with weights from a 2D Gaussian of adjustable spread.
  */
 export const GaussianBlurProcessor: Processor = {
   id: 'gaussian-blur',
   name: 'Gaussian Blur',
   description:
-    'Smooths the image using a normalised 3×3 Gaussian kernel. Each output pixel becomes a weighted average of its neighbours — reducing noise and softening edges.',
-
-  params: {},
-
-  apply(imageData: ImageData, _config: Record<string, number | boolean | string>): ImageData {
-    const { data, width, height } = imageData;
-    const gray = rgbaToGrayscale(data, width, height);
-    const result = convolve(gray, width, height, GAUSSIAN_3x3);
-
-    return new ImageData(
-      grayscaleToRGBA(result, width, height),
-      width,
-      height,
-    );
+    'Smooths the image with a normalised 3×3 Gaussian kernel. Each output pixel becomes a weighted average of its neighbours — reducing noise and softening edges. Larger σ spreads the weight more evenly.',
+  params: {
+    sigma: { type: 'number', label: 'σ (spread)', default: 0.85, min: 0.3, max: 3, step: 0.05 },
   },
+  kernel: (config) => gaussianKernel(1, Number(config.sigma)),
+  output: 'clamp',
 };

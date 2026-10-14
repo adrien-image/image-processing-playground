@@ -1,8 +1,8 @@
+import { DIGITS } from './constants';
+
 interface ConfusionMatrixProps {
   matrix: number[][];
 }
-
-import { DIGITS } from './constants';
 
 export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
   // Find the maximum value for colour scaling
@@ -12,6 +12,8 @@ export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
       if (v > maxVal) maxVal = v;
     }
   }
+
+  const total = matrix.flat().reduce((a, b) => a + b, 0);
 
   // Compute per-digit stats
   const totalPerDigit = matrix.map(row => row.reduce((a, b) => a + b, 0));
@@ -33,8 +35,8 @@ export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
         <table className="cm-table">
           <thead>
             <tr>
-              <th></th>
-              {DIGITS.map(d => <th key={d} className="cm-col-label">{d}</th>)}
+              <th><span className="visually-hidden">True digit \ predicted digit</span></th>
+              {DIGITS.map(d => <th key={d} scope="col" className="cm-col-label">{d}</th>)}
               <th className="cm-total-label">Total</th>
               <th className="cm-acc-label">Accuracy</th>
             </tr>
@@ -42,7 +44,7 @@ export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
           <tbody>
             {matrix.map((row, i) => (
               <tr key={i}>
-                <td className="cm-row-label">{DIGITS[i]}</td>
+                <th scope="row" className="cm-row-label">{DIGITS[i]}</th>
                 {row.map((v, j) => {
                   const intensity = maxVal > 0 ? v / maxVal : 0;
                   const isDiagonal = i === j;
@@ -87,7 +89,7 @@ export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
           <strong>Off-diagonal cells</strong> (red) show mistakes. For example, if cell (4, 9) has a high value, it means the model often confuses a "4" for a "9".
         </p>
         <p>
-          The confusion matrix is computed by running all 1,000 test images through the trained model,
+          The confusion matrix is computed by running all {total.toLocaleString()} held-out test images through the trained model,
           comparing each predicted digit against the true label, and counting every (true, predicted) pair.
         </p>
 
@@ -99,7 +101,7 @@ export function ConfusionMatrix({ matrix }: ConfusionMatrixProps) {
         <p>
           Start with a 10×10 matrix of zeros. For each test image, find the true digit and the model's predicted digit
           (the class with the highest softmax probability), then increment the cell at (true, predicted).
-          After all 1,000 images are processed, the matrix shows the distribution of predictions per digit.
+          After all {total.toLocaleString()} images are processed, the matrix shows the distribution of predictions per digit.
         </p>
 
         {mostConfused.length > 0 && (

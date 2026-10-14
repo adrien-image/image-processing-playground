@@ -1,0 +1,49 @@
+/* Segmentation section (Otsu / k-means). */
+
+.otsu-optimal {
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--success);
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  transition: background 0.15s;
+}
+
+.otsu-optimal:hover {
+  background: rgba(52, 211, 153, 0.2);
+}
+
+/* ---- K-means centroid display ---- */
+
+.otsu-km-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.otsu-km-centroid {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.otsu-km-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}

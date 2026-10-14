@@ -4,8 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.jsdelivr.net; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self';" />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta name="description" content="Interactive, in-browser lessons on image processing: convolution, edges, segmentation, matching, frequency filtering, Hough transforms and a CNN trained on MNIST." />
+    <meta name="color-scheme" content="dark" />
+    <!--
+      Everything (scripts, styles, fonts, MNIST data) is served from this origin.
+      'wasm-unsafe-eval' lets TensorFlow.js compile its small WebAssembly helpers;
+      blob: and data: images are uploaded files and generated demo images.
+      (Headers such as X-Content-Type-Options cannot be set from a <meta> tag.)
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; font-src 'self'; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none';" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <title>Image Processing Playground</title>
   </head>

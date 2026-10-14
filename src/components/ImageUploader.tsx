@@ -1,59 +1,61 @@
-import { useRef, useCallback } from 'react';
+import { useEffect, useRef, type ChangeEvent } from 'react';
 
 interface ImageUploaderProps {
-  onImage: (img: HTMLImageElement) => void;
+  /** Receives an object URL for the chosen file (valid until the next upload or unmount). */
+  onImage: (src: string) => void;
   onError?: (error: string) => void;
   label?: string;
   disabled?: boolean;
 }
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
-const MAX_DIMENSION = 8192;              // cap each dimension at 8192 px
 
+/**
+ * File picker for images. Decoding, the pixel-count limit and downscaling happen in
+ * `useImageData`, which reports decode failures through its `error` value.
+ */
 export function ImageUploader({ onImage, onError, label = '📁 Upload image', disabled }: ImageUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const urlRef = useRef<string | null>(null);
 
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  // Release the last object URL when the uploader goes away.
+  useEffect(() => () => {
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+  }, []);
+
+  const handleFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.target;
+    const file = input.files?.[0];
+    // Reset so choosing the same file again still fires `change`.
+    input.value = '';
     if (!file) return;
 
-    // Reject oversized files before reading
+    if (!file.type.startsWith('image/')) {
+      onError?.(`"${file.name}" is not an image.`);
+      return;
+    }
     if (file.size > MAX_FILE_SIZE) {
       onError?.(`File too large: ${(file.size / 1024 / 1024).toFixed(1)} MB (max ${MAX_FILE_SIZE / 1024 / 1024} MB)`);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new Image();
-      img.onload = () => {
-        // Clamp dimensions to avoid DoS from massive images
-        if (img.naturalWidth > MAX_DIMENSION || img.naturalHeight > MAX_DIMENSION) {
-          const ratio = Math.min(MAX_DIMENSION / img.naturalWidth, MAX_DIMENSION / img.naturalHeight);
-          const w = Math.round(img.naturalWidth * ratio);
-          const h = Math.round(img.naturalHeight * ratio);
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d')!;
-          ctx.drawImage(img, 0, 0, w, h);
-          const resized = new Image(w, h);
-          resized.src = canvas.toDataURL();
-          resized.onload = () => onImage(resized);
-          return;
-        }
-        onImage(img);
-      };
-      img.onerror = () => onError?.('Failed to decode image');
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
-  }, [onImage, onError]);
+    if (urlRef.current) URL.revokeObjectURL(urlRef.current);
+    urlRef.current = URL.createObjectURL(file);
+    onImage(urlRef.current);
+  };
 
   return (
     <>
-      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
-      <button className="btn btn-sm" onClick={() => inputRef.current?.click()} disabled={disabled}>
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        hidden
+        aria-hidden="true"
+        tabIndex={-1}
+      />
+      <button type="button" className="btn btn-sm" onClick={() => inputRef.current?.click()} disabled={disabled}>
         {label}
       </button>
     </>

@@ -1,40 +1,24 @@
 import type { Processor } from '../types';
-import { convolve, rgbaToGrayscale, grayscaleToRGBA } from '../utils';
-import { SOBEL_X } from './kernels';
+import { SOBEL_X, SOBEL_Y } from '../kernels';
 
-/**
- * Sobel Gx processor — detects vertical edges using only the Gx kernel.
- */
-export const SobelProcessor: Processor = {
-  id: 'sobel',
+/** Sobel Gx — highlights vertical edges (left↔right intensity changes). */
+export const SobelXProcessor: Processor = {
+  id: 'sobel-x',
   name: 'Sobel Gx — Vertical Edges',
   description:
-    'Applies the Sobel Gx 3×3 kernel, which highlights vertical edges (bright→dark transitions). The raw convolution output is normalised to 0–255.',
-
+    'Applies the Sobel Gx 3×3 kernel, which highlights vertical edges (left↔right intensity changes). The absolute response is scaled so the strongest edge is 255.',
   params: {},
+  kernel: () => SOBEL_X,
+  output: 'magnitude',
+};
 
-  apply(imageData: ImageData, _config: Record<string, number | boolean | string>): ImageData {
-    const { data, width, height } = imageData;
-
-    // Convert to grayscale
-    const gray = rgbaToGrayscale(data, width, height);
-
-    // Convolve with Gx only
-    const gx = convolve(gray, width, height, SOBEL_X);
-
-    // Normalise to 0–255
-    let maxVal = 0;
-    for (let i = 0; i < width * height; i++) {
-      const v = Math.abs(gx[i]);
-      if (v > maxVal) maxVal = v;
-    }
-
-    const scale = maxVal > 0 ? 255 / maxVal : 1;
-    const out = new Float64Array(width * height);
-    for (let i = 0; i < width * height; i++) {
-      out[i] = Math.abs(gx[i]) * scale;
-    }
-
-    return new ImageData(grayscaleToRGBA(out, width, height), width, height);
-  },
+/** Sobel Gy — highlights horizontal edges (top↔bottom intensity changes). */
+export const SobelYProcessor: Processor = {
+  id: 'sobel-y',
+  name: 'Sobel Gy — Horizontal Edges',
+  description:
+    'Applies the Sobel Gy 3×3 kernel, which highlights horizontal edges (top↔bottom intensity changes). The absolute response is scaled so the strongest edge is 255.',
+  params: {},
+  kernel: () => SOBEL_Y,
+  output: 'magnitude',
 };

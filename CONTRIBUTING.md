@@ -1,105 +1,91 @@
-# Contributing — Adding a New Image Processor
+# Contributing
 
-This project uses a **Processor Registry** pattern. Adding a new filter requires **zero changes** to existing UI code.
+## Before you push
 
-## Architecture
-
-```
-src/processors/
-├── types.ts          ← Processor interface (the contract)
-├── registry.ts       ← Central registry (auto-discovered by UI)
-├── init.ts           ← Registration bootstrap
-├── utils.ts          ← Shared convolution math helpers
-├── sobel/            ← Example processor
-│   ├── kernels.ts
-│   └── index.ts
-└── your-filter/      ← YOUR NEW PROCESSOR
-    └── index.ts
+```bash
+npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-The UI queries `getAllProcessors()` from the registry and auto-renders:
-- A selector entry (from `name` + `description`)
-- Parameter controls (from `params` schema)
+CI runs the same four checks on every pull request.
 
-## Step-by-Step: Add a Gaussian Blur
+- TypeScript is in `strict` mode.
+- Algorithms live in pure `.ts` modules next to their section and come with a `*.test.ts`. Keep DOM and React out of them, so they run under Vitest in Node.
+- UI state flows one way: section state → `useMemo` derived pixels → `<PixelCanvas image={…} />`. Load images with `useImageData(source, maxSize)`, which also downscales uploads.
 
-### 1. Create the processor file
+## Adding a new convolution filter
+
+The Convolution section uses a **Processor Registry**. A processor describes a kernel; the section
+animates it, shows its math and renders its parameter controls. You don't touch any UI code.
+
+### 1. Create the processor
 
 ```ts
-// src/processors/gaussian-blur/index.ts
+// src/processors/box-blur/index.ts
 import type { Processor } from '../types';
-import { convolve, rgbaToGrayscale, grayscaleToRGBA } from '../utils';
 
-const GAUSSIAN_3x3: number[][] = [
-  [1, 2, 1],
-  [2, 4, 2],
-  [1, 2, 1],
-];
-
-export const GaussianBlurProcessor: Processor = {
-  id: 'gaussian-blur',
-  name: 'Gaussian Blur',
-  description: 'Smooths the image using a 3×3 Gaussian kernel.',
+export const BoxBlurProcessor: Processor = {
+  id: 'box-blur',
+  name: 'Box Blur',
+  description: 'Replaces each pixel with the plain average of its neighbourhood.',
 
   params: {
-    strength: {
-      type: 'number',
-      label: 'Strength',
-      default: 1,
-      min: 0,
-      max: 5,
-      step: 1,
-    },
+    // Rendered as a slider; the value arrives in `config.weight`.
+    weight: { type: 'number', label: 'Centre weight', default: 1, min: 1, max: 8, step: 1 },
   },
 
-  apply(imageData, config) {
-    const { data, width, height } = imageData;
-    const strength = (config.strength as number) ?? 1;
-
-    // Normalise kernel
-    const total = GAUSSIAN_3x3.flat().reduce((a, b) => a + b, 0);
-    const kernel = GAUSSIAN_3x3.map(row =>
-      row.map(v => (v / total) * strength)
-    );
-
-    const gray = rgbaToGrayscale(data, width, height);
-    const result = convolve(gray, width, height, kernel);
-    return new ImageData(
-      grayscaleToRGBA(result, width, height),
-      width,
-      height,
-    );
+  // Return the kernel for the current parameter values (square, odd size).
+  kernel(config) {
+    const c = Number(config.weight);
+    const total = 8 + c;
+    return [
+      [1 / total, 1 / total, 1 / total],
+      [1 / total, c / total, 1 / total],
+      [1 / total, 1 / total, 1 / total],
+    ];
   },
+
+  // 'clamp' for kernels whose weights sum to 1 (blur, sharpen);
+  // 'magnitude' for signed edge detectors (|sum| scaled so the strongest response is 255).
+  output: 'clamp',
 };
 ```
+
+Reusable kernels (Sobel, Prewitt, Laplacian, `gaussianKernel`, `sharpenKernel`) are in
+`src/processors/kernels.ts`.
 
 ### 2. Register it
 
 ```ts
 // src/processors/init.ts
-import { GaussianBlurProcessor } from './gaussian-blur';
+import { BoxBlurProcessor } from './box-blur';
 
 export function initProcessors(): void {
-  registerProcessor(SobelProcessor);
-  registerProcessor(GaussianBlurProcessor);    // ← add this line
+  // …existing processors…
+  registerProcessor(BoxBlurProcessor);
 }
 ```
 
-### 3. Done!
+### 3. Done
 
-The UI automatically discovers the new processor on next reload.
+The processor now appears in the Convolution section's list, with its kernel, parameter
+controls, step-by-step animation and math panel. `processors.test.ts` automatically checks that
+every registered processor returns an odd, square kernel. Add a test of your own for its output.
 
-## Processor Interface Reference
+## Processor interface
 
 ```ts
 interface Processor {
-  id: string;                             // Unique key (e.g. "gaussian-blur")
-  name: string;                           // Human-readable name
-  description: string;                    // Shown in selector
-  params: Record<string, ParamDefinition>; // Schema → auto-generated controls
-  apply(data: ImageData, config: Record<string, number | boolean | string>): ImageData;
+  id: string;                               // unique key, e.g. "box-blur"
+  name: string;                             // shown in the selector
+  description: string;                      // shown under the selector
+  params: Record<string, ParamDefinition>;  // schema → auto-generated controls
+  kernel(config: ProcessorConfig): number[][]; // odd, square kernel
+  output: 'magnitude' | 'clamp';            // how raw sums become 0–255
 }
 ```
+
+To run a processor outside the UI, use `applyProcessor(processor, gray, width, height, config)` from
+`src/processors`. It returns `{ raw, output, kernel }`.
 
 ### Supported param types
 
@@ -109,11 +95,12 @@ interface Processor {
 | `boolean` | Checkbox     | —                                |
 | `select`  | Dropdown     | `options: [{label, value}, ...]` |
 
-## Utility Functions
+## Utility functions
 
-All in `src/processors/utils.ts`:
+In `src/processors/utils.ts`:
 
-- **`convolve(pixels, width, height, kernel)`** — 2D convolution, zero-padded borders
-- **`rgbaToGrayscale(data, width, height)`** — RGBA → single-channel Float64Array
-- **`grayscaleToRGBA(pixels, width, height)`** — Float64Array → RGBA Uint8ClampedArray
-- **`generateConvolutionSteps(pixels, width, height, kernel, col, row, count)`** — animation data
+- **`convolve(pixels, width, height, kernel)`** — 2-D sliding-window sum with replicate padding (strictly, cross-correlation: the kernel isn't flipped).
+- **`makeOutputMapper(raw, mode)`** — maps raw sums to 0–255 for an `OutputMode`.
+- **`rgbaToGrayscale(data, width, height)`** / **`grayscaleToRGBA(pixels, width, height)`** — RGBA ↔ single-channel `Float64Array`.
+- **`normaliseMagnitude(data)`** / **`normaliseRange(data)`** — scale values for display.
+- **`sampleClamped(pixels, width, height, x, y)`** — read a pixel with replicate padding.

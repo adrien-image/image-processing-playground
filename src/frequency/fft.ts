@@ -1,182 +1,178 @@
 /**
- * 2D FFT implementation for image frequency analysis.
- * Radix-2 Cooley-Tukey FFT. Works on images whose dimensions are powers of 2.
+ * 2D FFT for image frequency analysis: iterative radix-2 Cooley–Tukey on separate
+ * real/imaginary Float64Arrays (no per-butterfly allocations). Dimensions must be
+ * powers of two — see `padToPowerOfTwo`.
  */
 
-// Complex number as [real, imag]
-type Complex = [number, number];
+/** A complex-valued image stored as two planes. */
+export interface ComplexImage {
+  re: Float64Array;
+  im: Float64Array;
+  width: number;
+  height: number;
+}
 
-/** 1D FFT (in-place, radix-2) */
-function fft1d(data: Complex[]): void {
-  const n = data.length;
+/** In-place 1-D FFT of (re, im); `inverse` computes the unscaled inverse transform. */
+export function fft1d(re: Float64Array, im: Float64Array, inverse = false): void {
+  const n = re.length;
   if (n <= 1) return;
+  if ((n & (n - 1)) !== 0) throw new Error(`FFT length must be a power of two (got ${n})`);
 
   // Bit-reversal permutation
-  let j = 0;
-  for (let i = 0; i < n - 1; i++) {
-    if (i < j) { const t = data[i]; data[i] = data[j]; data[j] = t; }
-    let k = n >> 1;
-    while (k <= j) { j -= k; k >>= 1; }
-    j += k;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = re[i]; re[i] = re[j]; re[j] = t;
+      t = im[i]; im[i] = im[j]; im[j] = t;
+    }
   }
 
-  // Cooley-Tukey iterations
+  // Butterflies
+  const sign = inverse ? 1 : -1;
   for (let len = 2; len <= n; len <<= 1) {
-    const angle = -2 * Math.PI / len;
-    const wlen: Complex = [Math.cos(angle), Math.sin(angle)];
-    for (let i = 0; i < n; i += len) {
-      let wr = 1, wi = 0;
-      for (let j = 0; j < len / 2; j++) {
-        const u = data[i + j];
-        const v: Complex = [data[i + j + len / 2][0] * wr - data[i + j + len / 2][1] * wi,
-                           data[i + j + len / 2][1] * wr + data[i + j + len / 2][0] * wi];
-        data[i + j] = [u[0] + v[0], u[1] + v[1]];
-        data[i + j + len / 2] = [u[0] - v[0], u[1] - v[1]];
-        const nw = wr * wlen[0] - wi * wlen[1];
-        wi = wr * wlen[1] + wi * wlen[0];
-        wr = nw;
+    const angle = (sign * 2 * Math.PI) / len;
+    const wRe = Math.cos(angle), wIm = Math.sin(angle);
+    const half = len >> 1;
+    for (let start = 0; start < n; start += len) {
+      let cRe = 1, cIm = 0;
+      for (let k = 0; k < half; k++) {
+        const a = start + k, b = a + half;
+        const vRe = re[b] * cRe - im[b] * cIm;
+        const vIm = re[b] * cIm + im[b] * cRe;
+        re[b] = re[a] - vRe; im[b] = im[a] - vIm;
+        re[a] += vRe; im[a] += vIm;
+        const next = cRe * wRe - cIm * wIm;
+        cIm = cRe * wIm + cIm * wRe;
+        cRe = next;
       }
     }
   }
 }
 
-/** 1D IFFT (in-place) */
-function ifft1d(data: Complex[]): void {
-  // Conjugate
-  for (let i = 0; i < data.length; i++) data[i][1] = -data[i][1];
-  fft1d(data);
-  // Conjugate and scale
-  const n = data.length;
-  for (let i = 0; i < n; i++) {
-    data[i][1] = -data[i][1];
-    data[i][0] /= n;
-    data[i][1] /= n;
+function transform2d(img: ComplexImage, inverse: boolean): ComplexImage {
+  const { width: w, height: h } = img;
+  const re = new Float64Array(img.re), im = new Float64Array(img.im);
+
+  const rowRe = new Float64Array(w), rowIm = new Float64Array(w);
+  for (let y = 0; y < h; y++) {
+    rowRe.set(re.subarray(y * w, (y + 1) * w));
+    rowIm.set(im.subarray(y * w, (y + 1) * w));
+    fft1d(rowRe, rowIm, inverse);
+    re.set(rowRe, y * w);
+    im.set(rowIm, y * w);
   }
-}
 
-/** 2D FFT: applies 1D FFT to each row, then each column */
-export function fft2d(image: Complex[][]): Complex[][] {
-  const h = image.length, w = image[0].length;
-  const result = image.map(row => row.map(c => [c[0], c[1]] as Complex));
-
-  // Rows
-  for (let y = 0; y < h; y++) fft1d(result[y]);
-  // Columns
+  const colRe = new Float64Array(h), colIm = new Float64Array(h);
   for (let x = 0; x < w; x++) {
-    const col: Complex[] = [];
-    for (let y = 0; y < h; y++) col.push(result[y][x]);
-    fft1d(col);
-    for (let y = 0; y < h; y++) result[y][x] = col[y];
+    for (let y = 0; y < h; y++) { colRe[y] = re[y * w + x]; colIm[y] = im[y * w + x]; }
+    fft1d(colRe, colIm, inverse);
+    for (let y = 0; y < h; y++) { re[y * w + x] = colRe[y]; im[y * w + x] = colIm[y]; }
   }
-  return result;
+
+  if (inverse) {
+    const n = w * h;
+    for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+  }
+  return { re, im, width: w, height: h };
 }
 
-/** 2D IFFT */
-export function ifft2d(freq: Complex[][]): Complex[][] {
-  const h = freq.length, w = freq[0].length;
-  const result = freq.map(row => row.map(c => [c[0], c[1]] as Complex));
+/** Forward 2-D FFT (rows, then columns). */
+export const fft2d = (img: ComplexImage) => transform2d(img, false);
+/** Inverse 2-D FFT, scaled by 1/N so ifft2d(fft2d(x)) = x. */
+export const ifft2d = (img: ComplexImage) => transform2d(img, true);
 
-  // Rows
-  for (let y = 0; y < h; y++) ifft1d(result[y]);
-  // Columns
-  for (let x = 0; x < w; x++) {
-    const col: Complex[] = [];
-    for (let y = 0; y < h; y++) col.push(result[y][x]);
-    ifft1d(col);
-    for (let y = 0; y < h; y++) result[y][x] = col[y];
-  }
-  return result;
-}
-
-/** Convert grayscale pixels to complex array (2D) */
-export function pixelsToComplex(pixels: Float64Array, w: number, h: number): Complex[][] {
-  const result: Complex[][] = [];
-  for (let y = 0; y < h; y++) {
-    const row: Complex[] = [];
-    for (let x = 0; x < w; x++) row.push([pixels[y * w + x], 0]);
-    result.push(row);
-  }
-  return result;
-}
-
-/** Compute log magnitude spectrum for display (shifted so DC is at centre) */
-export function magnitudeSpectrum(freq: Complex[][], w: number, h: number): Float64Array {
-  const mag = new Float64Array(w * h);
-  for (let y = 0; y < h; y++)
-    for (let x = 0; x < w; x++)
-      mag[y * w + x] = Math.log(1 + Math.sqrt(freq[y][x][0] ** 2 + freq[y][x][1] ** 2));
-
-  // Normalise to 0-255
-  let max = 0;
-  for (let i = 0; i < w * h; i++) if (mag[i] > max) max = mag[i];
-  const s = max > 0 ? 255 / max : 1;
-  for (let i = 0; i < w * h; i++) mag[i] *= s;
-
-  // Shift: swap quadrants so DC is at centre
-  const shifted = new Float64Array(w * h);
-  for (let y = 0; y < h; y++)
-    for (let x = 0; x < w; x++)
-      shifted[y * w + x] = mag[((y + h / 2) % h) * w + ((x + w / 2) % w)];
-  return shifted;
-}
-
-export type FilterKind = 'ideal' | 'gaussian';
-
-/** Apply circular low-pass, high-pass, band-pass or band-stop filter in frequency domain */
-export function applyFilter(freq: Complex[][], cutoff: number, type: 'low' | 'high' | 'band-pass' | 'band-stop', kind: FilterKind = 'ideal', cutoff2?: number): Complex[][] {
-  const h = freq.length, w = freq[0].length;
-  const cx = w / 2, cy = h / 2;
-  const c2 = cutoff2 ?? cutoff;
-  const result = freq.map(row => row.map(c => [c[0], c[1]] as Complex));
-
-  const shifted: Complex[][] = [];
-  for (let y = 0; y < h; y++) {
-    shifted[y] = [];
-    for (let x = 0; x < w; x++)
-      shifted[y][x] = result[(y + h / 2) % h][(x + w / 2) % w];
-  }
-
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-      let gain: number;
-      if (kind === 'ideal') {
-        if (type === 'low') gain = dist <= cutoff ? 1 : 0;
-        else if (type === 'high') gain = dist >= cutoff ? 1 : 0;
-        else if (type === 'band-pass') gain = (dist >= cutoff && dist <= c2) ? 1 : 0;
-        else gain = (dist >= cutoff && dist <= c2) ? 0 : 1; // band-stop
-      } else {
-        const sigma = cutoff / 2;
-        gain = Math.exp(-(dist * dist) / (2 * sigma * sigma));
-        if (type === 'high') gain = 1 - gain;
-        else if (type === 'band-pass') {
-          const sigma2 = c2 / 2;
-          gain = Math.exp(-(dist * dist) / (2 * sigma2 * sigma2)) - gain;
-          gain = Math.max(0, gain);
-        } else if (type === 'band-stop') {
-          const sigma2 = c2 / 2;
-          gain = 1 - Math.exp(-(dist * dist) / (2 * sigma2 * sigma2)) + Math.exp(-(dist * dist) / (2 * sigma * sigma));
-          gain = Math.min(1, gain);
-        }
-      }
-      shifted[y][x][0] *= gain;
-      shifted[y][x][1] *= gain;
-    }
-  }
-
-  // Shift back
-  const unshifted: Complex[][] = [];
-  for (let y = 0; y < h; y++) {
-    unshifted[y] = [];
-    for (let x = 0; x < w; x++)
-      unshifted[y][x] = shifted[(y + h / 2) % h][(x + w / 2) % w];
-  }
-  return unshifted;
-}
-
-/** Validate that dimensions are powers of 2, pad if needed */
+/** Smallest power of two ≥ n. */
 export function nextPowerOf2(n: number): number {
   let p = 1;
   while (p < n) p <<= 1;
   return p;
+}
+
+/**
+ * Place a real image in a power-of-two buffer. The padding is filled with the
+ * image's mean so the border doesn't add a strong artificial edge to the spectrum.
+ */
+export function padToPowerOfTwo(pixels: Float64Array, width: number, height: number): ComplexImage {
+  const pw = nextPowerOf2(width), ph = nextPowerOf2(height);
+  let mean = 0;
+  for (let i = 0; i < pixels.length; i++) mean += pixels[i];
+  mean /= pixels.length || 1;
+  const re = new Float64Array(pw * ph).fill(mean);
+  for (let y = 0; y < height; y++) re.set(pixels.subarray(y * width, (y + 1) * width), y * pw);
+  return { re, im: new Float64Array(pw * ph), width: pw, height: ph };
+}
+
+/** Real part of the top-left width×height region (undoes `padToPowerOfTwo`). */
+export function cropReal(img: ComplexImage, width: number, height: number): Float64Array {
+  const out = new Float64Array(width * height);
+  for (let y = 0; y < height; y++) out.set(img.re.subarray(y * img.width, y * img.width + width), y * width);
+  return out;
+}
+
+/** Index of (x, y) after swapping quadrants so the DC term sits at the centre. */
+const shiftedIndex = (x: number, y: number, w: number, h: number) =>
+  ((y + (h >> 1)) % h) * w + ((x + (w >> 1)) % w);
+
+/** log(1 + |F|) scaled to 0–255, quadrant-shifted so low frequencies are in the middle. */
+export function magnitudeSpectrum(freq: ComplexImage): Float64Array {
+  const { width: w, height: h } = freq;
+  const out = new Float64Array(w * h);
+  let max = 0;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = shiftedIndex(x, y, w, h);
+      const v = Math.log1p(Math.hypot(freq.re[i], freq.im[i]));
+      out[y * w + x] = v;
+      if (v > max) max = v;
+    }
+  }
+  if (max > 0) for (let i = 0; i < out.length; i++) out[i] *= 255 / max;
+  return out;
+}
+
+export type FilterKind = 'ideal' | 'gaussian';
+export type FilterType = 'low' | 'high' | 'band-pass' | 'band-stop';
+
+/**
+ * Gain (0–1) for every frequency, in the *centred* layout (DC in the middle) so it
+ * can be displayed directly. `radius` is a distance in frequency bins from DC;
+ * band filters use [inner, outer] (the order of the two radii doesn't matter).
+ * For Gaussian filters the radius is the σ of the Gaussian.
+ */
+export function filterMask(w: number, h: number, type: FilterType, kind: FilterKind, r1: number, r2 = r1): Float64Array {
+  const inner = Math.min(r1, r2), outer = Math.max(r1, r2);
+  const mask = new Float64Array(w * h);
+  const lowpass = (d: number, r: number) =>
+    kind === 'ideal' ? (d <= r ? 1 : 0) : Math.exp(-(d * d) / (2 * r * r));
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const d = Math.hypot(x - (w >> 1), y - (h >> 1));
+      let g: number;
+      switch (type) {
+        case 'low': g = lowpass(d, r1); break;
+        case 'high': g = 1 - lowpass(d, r1); break;
+        case 'band-pass': g = Math.max(0, lowpass(d, outer) - (kind === 'ideal' ? lowpass(d, inner - 1e-9) : lowpass(d, inner))); break;
+        case 'band-stop': g = Math.min(1, 1 - lowpass(d, outer) + (kind === 'ideal' ? lowpass(d, inner - 1e-9) : lowpass(d, inner))); break;
+      }
+      mask[y * w + x] = g;
+    }
+  }
+  return mask;
+}
+
+/** Multiply a spectrum (standard, uncentred layout) by a centred gain mask. */
+export function applyMask(freq: ComplexImage, mask: Float64Array): ComplexImage {
+  const { width: w, height: h } = freq;
+  const re = new Float64Array(freq.re), im = new Float64Array(freq.im);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const i = shiftedIndex(x, y, w, h);
+      const g = mask[y * w + x];
+      re[i] *= g;
+      im[i] *= g;
+    }
+  }
+  return { re, im, width: w, height: h };
 }

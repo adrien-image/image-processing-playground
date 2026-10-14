@@ -1,8 +1,27 @@
-import type { ConvolutionStep } from './types';
+/** Clamp v into [lo, hi]. */
+export function clamp(v: number, lo: number, hi: number): number {
+  return v < lo ? lo : v > hi ? hi : v;
+}
 
 /**
- * Apply a 2D kernel via convolution to a single-channel (grayscale) image.
- * Pixels outside the border are treated as 0 (zero-padding).
+ * Read pixel (x, y) with replicate padding: coordinates outside the image are
+ * clamped to the nearest edge pixel.
+ */
+export function sampleClamped(pixels: Float64Array, width: number, height: number, x: number, y: number): number {
+  return pixels[clamp(y, 0, height - 1) * width + clamp(x, 0, width - 1)];
+}
+
+/**
+ * Slide a kernel over a single-channel image and sum the element-wise products.
+ *
+ * Like OpenCV's `filter2D` and CNN "convolution" layers, this is technically
+ * **cross-correlation**: the kernel is not flipped. For symmetric kernels (Gaussian,
+ * Laplacian, sharpen) that is identical to true convolution; for anti-symmetric ones
+ * such as Sobel, flipping would only change the sign of the result.
+ *
+ * Borders use **replicate padding** (clamp-to-edge): pixels outside the image take the
+ * value of the nearest edge pixel, so a flat image stays flat and no artificial edge
+ * appears around the frame.
  */
 export function convolve(
   pixels: Float64Array,
@@ -20,13 +39,10 @@ export function convolve(
     for (let x = 0; x < width; x++) {
       let sum = 0;
       for (let ky = -halfR; ky <= halfR; ky++) {
+        const row = clamp(y + ky, 0, height - 1) * width;
+        const kRow = kernel[ky + halfR];
         for (let kx = -halfC; kx <= halfC; kx++) {
-          const py = y + ky;
-          const px = x + kx;
-          const pixel = (py >= 0 && py < height && px >= 0 && px < width)
-            ? pixels[py * width + px]
-            : 0;
-          sum += pixel * kernel[ky + halfR][kx + halfC];
+          sum += pixels[row + clamp(x + kx, 0, width - 1)] * kRow[kx + halfC];
         }
       }
       out[y * width + x] = sum;
@@ -36,99 +52,27 @@ export function convolve(
 }
 
 /**
- * Generate step-by-step animation data showing the convolution process
- * for a single pixel path (e.g. a row across the image).
- */
-export function generateConvolutionSteps(
-  pixels: Float64Array,
-  width: number,
-  height: number,
-  kernel: number[][],
-  startCol = 1,
-  startRow = 1,
-  steps = 10,
-): ConvolutionStep[] {
-  const kRows = kernel.length;
-  const kCols = kernel[0].length;
-  const halfR = (kRows - 1) >> 1;
-  const halfC = (kCols - 1) >> 1;
-  const result: ConvolutionStep[] = [];
-
-  // Walk a snake-like path: right across, then down one row, then left, etc.
-  let col = startCol;
-  let row = startRow;
-  let dir = 1; // 1 = right, -1 = left
-
-  for (let s = 0; s < steps; s++) {
-    if (col < 1 || col >= width - 1) {
-      row++;
-      dir = -dir;
-      col = dir === 1 ? 1 : width - 2;
-      if (row >= height - 1) break;
-    }
-
-    const neighbourhood: number[][] = [];
-    const products: number[][] = [];
-    let sum = 0;
-
-    for (let ky = -halfR; ky <= halfR; ky++) {
-      const nRow: number[] = [];
-      const pRow: number[] = [];
-      for (let kx = -halfC; kx <= halfC; kx++) {
-        const py = row + ky;
-        const px = col + kx;
-        const pixel = (py >= 0 && py < height && px >= 0 && px < width)
-          ? pixels[py * width + px]
-          : 0;
-        const kVal = kernel[ky + halfR][kx + halfC];
-        nRow.push(pixel);
-        pRow.push(pixel * kVal);
-        sum += pixel * kVal;
-      }
-      neighbourhood.push(nRow);
-      products.push(pRow);
-    }
-
-    const output = Math.max(0, Math.min(255, Math.round(sum)));
-
-    result.push({
-      col,
-      row,
-      neighbourhood,
-      kernel,
-      products,
-      sum,
-      output,
-    });
-
-    col += dir;
-  }
-
-  return result;
-}
-
-/**
- * Convert RGBA ImageData to grayscale Float64Array (single channel).
+ * Convert RGBA pixel data to a single grayscale channel (0–255) using the
+ * ITU-R BT.601 luma weights.
  */
 export function rgbaToGrayscale(data: Uint8ClampedArray, width: number, height: number): Float64Array {
   const out = new Float64Array(width * height);
   for (let i = 0; i < width * height; i++) {
     const idx = i * 4;
-    // Standard luminance weights
     out[i] = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
   }
   return out;
 }
 
 /**
- * Pack a single-channel Float64Array back into RGBA Uint8ClampedArray.
- * Values are clamped to [0, 255].
+ * Pack a single-channel array back into opaque gray RGBA.
+ * Values are rounded and clamped to [0, 255].
  */
 export function grayscaleToRGBA(pixels: Float64Array, width: number, height: number): Uint8ClampedArray<ArrayBuffer> {
   const out = new Uint8ClampedArray(width * height * 4);
   for (let i = 0; i < width * height; i++) {
     const idx = i * 4;
-    const v = Math.max(0, Math.min(255, Math.round(pixels[i])));
+    const v = clamp(Math.round(pixels[i]), 0, 255);
     out[idx] = v;
     out[idx + 1] = v;
     out[idx + 2] = v;
@@ -137,7 +81,7 @@ export function grayscaleToRGBA(pixels: Float64Array, width: number, height: num
   return out;
 }
 
-/** Normalise absolute values in a Float64Array to [0, 255] */
+/** Scale absolute values so the largest becomes 255. */
 export function normaliseMagnitude(data: Float64Array): Float64Array {
   let max = 0;
   for (let i = 0; i < data.length; i++) { const v = Math.abs(data[i]); if (v > max) max = v; }
@@ -145,4 +89,40 @@ export function normaliseMagnitude(data: Float64Array): Float64Array {
   const s = max > 0 ? 255 / max : 1;
   for (let i = 0; i < data.length; i++) out[i] = Math.abs(data[i]) * s;
   return out;
+}
+
+/** Linearly stretch values so the minimum maps to 0 and the maximum to 255. */
+export function normaliseRange(data: Float64Array): Float64Array {
+  let min = Infinity, max = -Infinity;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i] < min) min = data[i];
+    if (data[i] > max) max = data[i];
+  }
+  const out = new Float64Array(data.length);
+  const range = max - min;
+  if (range === 0) return out;
+  for (let i = 0; i < data.length; i++) out[i] = ((data[i] - min) / range) * 255;
+  return out;
+}
+
+/**
+ * How raw convolution sums are turned into displayable 0–255 values:
+ * - `magnitude`: take |sum| and scale so the strongest response is 255
+ *   (edge detectors, whose raw output is signed and unbounded);
+ * - `clamp`: keep the sum as-is and clamp to [0, 255]
+ *   (smoothing / sharpening kernels whose weights sum to 1).
+ */
+export type OutputMode = 'magnitude' | 'clamp';
+
+/**
+ * Build the function mapping one raw sum to its 0–255 output value. For `magnitude`
+ * the scale depends on the strongest response in the whole image, so the full raw
+ * result is needed up front.
+ */
+export function makeOutputMapper(raw: Float64Array, mode: OutputMode): (sum: number) => number {
+  if (mode === 'clamp') return (sum) => clamp(Math.round(sum), 0, 255);
+  let max = 0;
+  for (let i = 0; i < raw.length; i++) { const v = Math.abs(raw[i]); if (v > max) max = v; }
+  const scale = max > 0 ? 255 / max : 1;
+  return (sum) => clamp(Math.round(Math.abs(sum) * scale), 0, 255);
 }

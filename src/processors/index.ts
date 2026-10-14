@@ -1,3 +1,4 @@
-export { registerProcessor, getProcessor, getAllProcessors, getProcessorIds } from './registry';
+export { registerProcessor, getProcessor, getAllProcessors } from './registry';
 export { initProcessors } from './init';
-export type { Processor, ParamDefinition, ParamType, ConvolutionStep } from './types';
+export { applyProcessor, defaultConfig, resolveConfig } from './apply';
+export type { Processor, ProcessorConfig, ParamDefinition, ParamType, ParamValue } from './types';

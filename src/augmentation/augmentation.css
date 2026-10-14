@@ -1,0 +1,17 @@
+.augment-panel {
+  max-width: 200px;
+}
+
+.augment-panel h3 {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.68rem;
+  min-height: 2.2em;
+}
+
+.augment-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+}
