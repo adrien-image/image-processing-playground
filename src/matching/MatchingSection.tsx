@@ -5,7 +5,7 @@ import transformCode from './transform.ts?raw';
 import { CodeViewer } from '../components/CodeViewer';
 import { PixelCanvas } from '../components/PixelCanvas';
 import { useImageData } from '../hooks/useImageData';
-import { createCanvas } from '../lib/canvas';
+import { createCanvas, quietImageData } from '../lib/canvas';
 import { detectHarris, type Keypoint } from './harris';
 import { matchKeypoints } from './descriptors';
 import { formatSimilarity, ransacSimilarity, type Similarity } from './transform';
@@ -48,7 +48,7 @@ export function MatchingSection() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(imgA.imageData, 0, 0);
     ctx.putImageData(imgB.imageData, imgA.width, 0);
-    return ctx.getImageData(0, 0, canvas.width, canvas.height);
+    return quietImageData(ctx.getImageData(0, 0, canvas.width, canvas.height));
   }, [imgA, imgB]);
 
   const findMatches = () => {

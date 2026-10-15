@@ -1,8 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'matching', 'color', 'morphology', 'edges', 'frequency',
-  'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
+  'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -29,10 +29,14 @@ export const SECTIONS: SectionDef[] = [
     Component: lazy(() => import('../color/ColorSection').then(m => ({ default: m.ColorSection }))) },
   { key: 'morphology', icon: '🔲', label: 'Morphology',
     Component: lazy(() => import('../morphology/MorphologySection').then(m => ({ default: m.MorphologySection }))) },
+  { key: 'regions', icon: '🧩', label: 'Regions',
+    Component: lazy(() => import('../regions/RegionsSection').then(m => ({ default: m.RegionsSection }))) },
   { key: 'edges', icon: '⚡', label: 'Edges',
     Component: lazy(() => import('../edges/EdgeComparisonSection').then(m => ({ default: m.EdgeComparisonSection }))) },
   { key: 'frequency', icon: '🌀', label: 'Frequency',
     Component: lazy(() => import('../frequency/FrequencySection').then(m => ({ default: m.FrequencySection }))) },
+  { key: 'pyramids', icon: '🔺', label: 'Pyramids',
+    Component: lazy(() => import('../pyramids/PyramidsSection').then(m => ({ default: m.PyramidsSection }))) },
   { key: 'hough', icon: '📐', label: 'Hough',
     Component: lazy(() => import('../hough/HoughSection').then(m => ({ default: m.HoughSection }))) },
   { key: 'histogram', icon: '📊', label: 'Histogram',

@@ -824,3 +824,331 @@
   border-radius: 4px;
   background: #000;
 }
+
+/* ---- Inside the CNN ---- */
+
+.cnn-inside {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cnn-segmented {
+  margin-bottom: 0;
+}
+
+.cnn-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cnn-step-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  min-width: 6.5rem;
+  text-align: center;
+}
+
+.cnn-hint {
+  margin-top: 0;
+}
+
+.cnn-inside .btn[aria-disabled='true'] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cnn-inside .btn[aria-disabled='true']:hover {
+  background: var(--surface);
+  border-color: var(--surface-border);
+  box-shadow: var(--shadow);
+  color: var(--text);
+}
+
+.cnn-inside .btn[aria-disabled='true']:active {
+  transform: none;
+}
+
+/* Both status messages sit in the same grid cell; the hidden one still reserves its height. */
+.cnn-status {
+  display: grid;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.cnn-status > span {
+  grid-area: 1 / 1;
+}
+
+.cnn-status-training {
+  color: var(--accent);
+}
+
+.cnn-status-off {
+  visibility: hidden;
+}
+
+.cnn-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.cnn-input-panel,
+.cnn-filters-panel,
+.cnn-occlusion-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.cnn-input-panel { flex: 0 1 220px; }
+.cnn-filters-panel { flex: 0 1 460px; }
+
+.cnn-explain {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.cnn-prediction {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.cnn-pred-digit {
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.cnn-pred-conf {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--success);
+}
+
+.cnn-true-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.cnn-filters,
+.cnn-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cnn-filters {
+  justify-content: center;
+}
+
+.cnn-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+}
+
+.cnn-tile .caption {
+  margin-top: 0.1rem;
+  font-size: 0.6rem;
+  line-height: 1.2;
+}
+
+/* Colour-scale legends */
+
+.cnn-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.cnn-legend-start {
+  justify-content: flex-start;
+  margin-top: 0.75rem;
+}
+
+.cnn-legend-start .caption {
+  margin-top: 0;
+}
+
+.cnn-legend-bar {
+  display: inline-block;
+  width: 120px;
+  max-width: 40vw;
+  height: 10px;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.cnn-legend-gray { background: linear-gradient(90deg, #000, #fff); }
+
+/* Colour bars drawn by the same colour functions as the images (see rampImage) */
+.cnn-legend .cnn-ramp {
+  flex: none;
+  margin: 0;
+  border-radius: 5px;
+}
+
+.cnn-legend-title {
+  flex-basis: 100%;
+  text-align: center;
+}
+
+/* Activation maps */
+
+.cnn-activations {
+  padding: 1rem 1.25rem;
+}
+
+.cnn-layer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.cnn-layer-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.6rem;
+}
+
+.cnn-layer-name {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.cnn-layer-shape {
+  font-size: 0.75rem;
+  color: var(--accent);
+}
+
+.cnn-layer-what {
+  margin-top: 0;
+}
+
+.cnn-text p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-top: 0.5rem;
+  max-width: 900px;
+}
+
+/* Occlusion sensitivity */
+
+.cnn-occlusion {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.cnn-occlusion-panel {
+  flex: 0 1 280px;
+}
+
+.cnn-occlusion-panel .pixel-canvas-el {
+  transition: opacity 0.15s ease;
+}
+
+.cnn-pending .pixel-canvas-el {
+  opacity: 0.55;
+}
+
+.cnn-pending-badge {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--text);
+  font-size: 0.7rem;
+  pointer-events: none;
+}
+
+.cnn-occlusion-side {
+  flex: 1 1 360px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.cnn-occlusion-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cnn-occlusion-controls .demo-slider-row {
+  justify-content: flex-start;
+}
+
+.cnn-occlusion-controls .caption {
+  margin-top: 0;
+}
+
+.cnn-control-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cnn-class-btn {
+  min-width: 2rem;
+  font-family: var(--font-mono);
+}
+
+.cnn-class-predicted {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.cnn-limits {
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.cnn-limits li + li {
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 640px) {
+  .dl-playground .tab-list { flex-wrap: wrap; }
+  .cnn-row, .cnn-occlusion { gap: 0.5rem; }
+  .cnn-input-panel, .cnn-filters-panel, .cnn-occlusion-panel, .cnn-occlusion-side { flex-basis: 100%; }
+  .cnn-activations { padding: 0.75rem; }
+  .cnn-text p, .cnn-limits { font-size: 0.72rem; }
+  .cnn-step-label { min-width: 0; }
+  /* Fixed columns that shrink with the screen instead of leaving one tile on its own row */
+  .cnn-filters, .cnn-tiles-6, .cnn-tiles-16 { display: grid; gap: 0.3rem; }
+  .cnn-filters, .cnn-tiles-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .cnn-tiles-16 { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .cnn-tile { min-width: 0; }
+  .cnn-class-row .segmented { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); width: 100%; }
+  .cnn-class-btn { min-width: 0; padding-left: 0; padding-right: 0; }
+}

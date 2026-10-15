@@ -1,0 +1,264 @@
+/* Regions section (connected components and measurements). */
+
+.regions-otsu {
+  font-family: inherit;
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--success);
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  transition: background 0.15s;
+}
+
+.regions-otsu:hover {
+  background: rgba(52, 211, 153, 0.2);
+}
+
+/* A toolbar label and its buttons wrap as one unit. */
+.regions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: inherit;
+  white-space: nowrap;
+}
+
+/* ---- Region count ---- */
+
+.regions-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  font-size: 0.8rem;
+}
+
+.regions-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.regions-count strong {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--accent);
+  margin-right: 0.15rem;
+}
+
+/* ---- Label map + overlay ---- */
+
+.regions-map {
+  display: inline-block;
+  max-width: 100%;
+  vertical-align: top;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.regions-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Hover/selection: everything outside the active region's box is dimmed by one path. */
+.regions-dim {
+  fill: rgba(0, 0, 0, 0.68);
+}
+
+.regions-bbox {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.65);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.regions-mark-active .regions-bbox {
+  stroke: #fff;
+  stroke-width: 2.5;
+}
+
+.regions-bbox-original {
+  stroke: #fbbf24;
+  stroke-width: 2;
+  fill: rgba(251, 191, 36, 0.12);
+}
+
+.regions-centroid,
+.regions-centroid-halo {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke-linecap: round;
+}
+
+.regions-centroid {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.regions-centroid-halo {
+  stroke: rgba(0, 0, 0, 0.85);
+  stroke-width: 3.5;
+}
+
+/* Font size and outline width are set per image (in image pixels) by the component. */
+.regions-num {
+  fill: #fff;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  dominant-baseline: hanging;
+  paint-order: stroke;
+  stroke: rgba(0, 0, 0, 0.9);
+  stroke-linejoin: round;
+}
+
+.regions-num-above {
+  dominant-baseline: alphabetic;
+}
+
+.regions-key-removed {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.regions-selection {
+  min-height: 1.3em;
+  text-align: center;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+}
+
+/* ---- Table + explanation ---- */
+
+.regions-bottom {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.regions-table-panel {
+  min-width: 0;
+}
+
+.regions-cap-note {
+  font-size: 0.75rem;
+  color: #fbbf24;
+  margin-bottom: 0.5rem;
+}
+
+.regions-table-wrap {
+  max-height: 24rem;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--surface-border);
+}
+
+.regions-table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+  font-family: var(--font-mono);
+}
+
+.regions-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: #171c2a;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.62rem;
+  padding: 0.45rem 0.5rem;
+  border-bottom: 1px solid var(--surface-border-hover);
+  white-space: nowrap;
+}
+
+.regions-table td,
+.regions-table tbody th {
+  padding: 0.25rem 0.5rem;
+  text-align: right;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.regions-table tbody th {
+  text-align: left;
+  font-weight: 400;
+}
+
+.regions-table td[colspan] {
+  text-align: center;
+  white-space: normal;
+  padding: 1rem;
+}
+
+.regions-table tbody tr.regions-row-active > * {
+  background: rgba(108, 140, 255, 0.14);
+  color: var(--text);
+}
+
+.regions-table tbody tr.regions-row-selected > * {
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--text);
+}
+
+/* After the row colours, so dimmed cells (small regions' circularity, the empty-table hint) stay dimmed. */
+.regions-table tbody td.muted {
+  color: var(--text-muted);
+}
+
+.regions-row-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 3.2rem;
+  padding: 0.1rem 0.45rem;
+  font: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--surface-border-hover);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.regions-row-btn:hover {
+  border-color: var(--accent);
+}
+
+.regions-row-btn[aria-pressed="true"] {
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.regions-swatch {
+  display: inline-block;
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 1000px) {
+  .regions-bottom { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .regions-count strong { font-size: 1.6rem; }
+  .regions-summary { font-size: 0.72rem; }
+  .regions-table-wrap { max-height: 20rem; }
+}

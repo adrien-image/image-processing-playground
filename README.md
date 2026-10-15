@@ -12,14 +12,16 @@ on demo images or your own uploads, and every section can show you its source co
 | Matching | Harris corners → rotation-normalised descriptors → RANSAC similarity estimate, compared with the ground truth |
 | Color | RGB / HSV channels, hue, saturation, brightness and gamma adjustments |
 | Morphology | Erosion, dilation, opening and closing on binary and grayscale images |
+| Regions | Connected-component labelling (4/8-connectivity) and per-object measurements: area, centroid, bounding box, perimeter, circularity |
 | Edges | Sobel, Prewitt, Laplacian and Canny side by side |
 | Frequency | 2-D FFT spectrum, ideal and Gaussian low/high/band filters |
+| Pyramids | Resampling and aliasing, nearest/bilinear/bicubic interpolation, Gaussian and Laplacian pyramids, multiband blending |
 | Hough | Line segments and circles from the Hough transform, with the accumulators |
 | Histogram | Histogram equalisation and its mapping curve |
 | Augmentation | Chained random transformations used to grow training sets |
 | Denoising | Median vs. Gaussian filtering on salt-and-pepper or Gaussian noise, scored with PSNR |
 | Template | Normalised cross-correlation template matching with its score map |
-| Classification | Train LeNet-5 on MNIST in the browser (TensorFlow.js), then draw digits to classify |
+| Classification | Train LeNet-5 on MNIST in the browser (TensorFlow.js), draw digits to classify, and look inside the network: learned filters, activation maps and occlusion sensitivity |
 
 Each section is its own lazily-loaded chunk, and the current section is kept in the URL (`#/edges`),
 so sections can be bookmarked and shared.
