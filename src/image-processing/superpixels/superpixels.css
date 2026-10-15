@@ -1,0 +1,23 @@
+.sp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.sp-grid .demo-panel {
+  min-width: 0;
+}
+
+.sp-centres {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.sp-centres circle {
+  fill: #f43f5e;
+  stroke: #fff;
+  stroke-width: 0.4;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import vaeCode from './vae.ts?raw';
+import pythonCode from './vae.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -30,7 +31,7 @@ export function AutoencoderSection() {
       <div className="demo-controls">
         <span className="demo-label">Compress every digit to just two numbers, then decode any point of the plane</span>
         <span className="ml-auto">
-          <ShowCodeButton code={vaeCode} title="autoencoder/vae.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={vaeCode} title="autoencoder/vae.ts" python={{ code: pythonCode, title: 'autoencoder/vae.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}

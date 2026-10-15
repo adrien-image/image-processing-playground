@@ -1,0 +1,51 @@
+.ip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.ip-grid .demo-panel {
+  min-width: 0;
+}
+
+.ip-paint {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.ip-boxes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ip-boxes rect {
+  fill: none;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.ip-source {
+  stroke: #22d3ee;
+}
+
+.ip-target {
+  stroke: #ec4899;
+}
+
+.ip-slider {
+  margin-top: 0.5rem;
+  justify-content: center;
+}
+
+.ip-key-source {
+  color: #22d3ee;
+}
+
+.ip-key-target {
+  color: #ec4899;
+}

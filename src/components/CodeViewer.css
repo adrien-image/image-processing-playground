@@ -93,3 +93,31 @@
 .cv-str  { color: #c3e88d; }  /* strings — green */
 .cv-cmt  { color: #546e7a; font-style: italic; }  /* comments — gray */
 .cv-num  { color: #f78c6c; }  /* numbers — orange */
+
+.code-viewer-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-left: auto;
+  margin-right: 0.75rem;
+}
+
+.code-viewer-tab {
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+
+.code-viewer-tab:hover {
+  color: var(--text);
+}
+
+.code-viewer-tab-active {
+  background: rgba(108, 140, 255, 0.15);
+  border-color: rgba(108, 140, 255, 0.4);
+  color: var(--accent);
+}

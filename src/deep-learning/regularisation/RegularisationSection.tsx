@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import regCode from './regularise.ts?raw';
+import pythonCode from './regularise.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { seededRandom } from '../../lib/random';
@@ -75,7 +76,7 @@ export function RegularisationSection() {
           <input type="checkbox" checked={config.augment} disabled={running} onChange={e => set('augment', e.target.checked)} /> Augmentation
         </label>
         <span className="ml-auto">
-          <ShowCodeButton code={regCode} title="regularisation/regularise.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={regCode} title="regularisation/regularise.ts" python={{ code: pythonCode, title: 'regularisation/regularise.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       <div className="demo-controls">

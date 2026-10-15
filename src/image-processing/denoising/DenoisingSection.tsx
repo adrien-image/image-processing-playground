@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import denoiseCode from './denoise.ts?raw';
+import pythonCode from './denoise.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -71,7 +72,7 @@ export function DenoisingSection() {
         <ImageUploader label="📁 Upload" onImage={(src) => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
         {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(demoImage()); setIsDemo(true); }}>Demo image</button>}
         <span className="ml-auto">
-          <ShowCodeButton code={denoiseCode} title="denoising/denoise.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={denoiseCode} title="denoising/denoise.ts" python={{ code: pythonCode, title: 'denoising/denoise.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

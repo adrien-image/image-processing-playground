@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import rfCode from './receptiveField.ts?raw';
+import pythonCode from './receptive_field.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { hotColor } from '../../image-processing/hough/hough';
 import { dependencyRange, fieldRange, layerGeometry, pathCounts, PRESETS, type LayerKind, type LayerSpec } from './receptiveField';
@@ -63,7 +64,7 @@ export function ReceptiveFieldSection() {
           </button>
         ))}
         <span className="ml-auto">
-          <ShowCodeButton code={rfCode} title="receptive-field/receptiveField.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={rfCode} title="receptive-field/receptiveField.ts" python={{ code: pythonCode, title: 'receptive-field/receptive_field.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

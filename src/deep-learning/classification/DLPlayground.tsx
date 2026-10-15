@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import lenetCode from './lenet.ts?raw';
+import pythonCode from './lenet.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import {
   buildLeNet, disposeLeNet, evaluateTestSet, LENET_PARAMS, predictDigit, snapshotLeNet, trainModel, type EvalResult, type TrainingEpochData,
@@ -240,7 +241,7 @@ export function DLPlayground() {
           {isTrained && !busy && (
             <button type="button" className="btn btn-sm" onClick={resetModel}>🗑 Reset model</button>
           )}
-          <ShowCodeButton code={lenetCode} title="classification/lenet.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={lenetCode} title="classification/lenet.ts" python={{ code: pythonCode, title: 'classification/lenet.py' }} open={showCode} onOpenChange={setShowCode} />
         </div>
         <div className="dl-topbar-right" role="status">
           {!isTrained && !busy && status !== 'error' && <span className="dl-model-status dl-model-untrained">⚪ Model not trained</span>}

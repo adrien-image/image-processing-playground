@@ -6,7 +6,8 @@
 npm run lint && npm run typecheck && npm test && npm run build
 ```
 
-CI runs the same four checks on every pull request.
+CI runs the same four checks on every pull request, plus the Python self-checks
+(`pip install -r requirements.txt && python scripts/check_python.py`).
 
 - TypeScript is in `strict` mode.
 - Algorithms live in pure `.ts` modules next to their section and come with a `*.test.ts`. Keep DOM and React out of them, so they run under Vitest in Node.
@@ -16,6 +17,9 @@ CI runs the same four checks on every pull request.
 
 1. Create a folder in the right group: `src/image-processing/<lesson>/` or `src/deep-learning/<lesson>/`,
    with the algorithm in a `.ts` file (plus its `.test.ts`) and the UI in `<Lesson>Section.tsx`.
+   Add the same algorithm in PyTorch as a `.py` file ending with a `_self_check()` under
+   `if __name__ == "__main__":`, and pass it to `ShowCodeButton` as `python={{ code, title }}`
+   (import it with `?raw`).
 2. Add the lesson's key to `SECTION_KEYS` and an entry to `SECTIONS` in `src/app/sections.ts`, with its
    `group`, icon, label, one-line `blurb` (shown on the home page) and lazy import.
 

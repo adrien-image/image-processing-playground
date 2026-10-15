@@ -41,6 +41,21 @@ jobs:
         with:
           path: dist
 
+  # Every lesson's Python / PyTorch file runs its own self-check on synthetic data.
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - run: pip install -r requirements.txt --index-url https://download.pytorch.org/whl/cpu
+
+      - run: python scripts/check_python.py
+
   deploy:
     needs: check
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'

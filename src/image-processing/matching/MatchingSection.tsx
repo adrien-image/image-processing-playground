@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import harrisCode from './harris.ts?raw';
+import matchingPy from './matching.py?raw';
 import descriptorsCode from './descriptors.ts?raw';
 import transformCode from './transform.ts?raw';
 import { CodeViewer } from '../../components/CodeViewer';
@@ -177,7 +178,12 @@ export function MatchingSection() {
         </div>
       )}
 
-      {showCode && <CodeViewer code={CODE[showCode].code} title={CODE[showCode].title} onClose={() => setShowCode(null)} />}
+      {showCode && (
+        <CodeViewer
+          files={[{ ...CODE[showCode], language: 'ts' }, { title: 'matching/matching.py', code: matchingPy, language: 'py' }]}
+          onClose={() => setShowCode(null)}
+        />
+      )}
     </div>
   );
 }

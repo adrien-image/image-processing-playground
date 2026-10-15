@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import equalizeCode from './equalize.ts?raw';
+import pythonCode from './equalize.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -66,7 +67,7 @@ export function HistEqSection() {
         <ImageUploader onImage={(src) => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} label="📁 Upload photo" />
         {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(testImage()); setIsDemo(true); }}>Demo image</button>}
         <span className="ml-auto">
-          <ShowCodeButton code={equalizeCode} title="histogram/equalize.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={equalizeCode} title="histogram/equalize.ts" python={{ code: pythonCode, title: 'histogram/equalize.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

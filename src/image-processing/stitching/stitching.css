@@ -1,0 +1,48 @@
+.stitch-lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.stitch-lines line {
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.stitch-inlier {
+  stroke: #4ade80;
+}
+
+.stitch-outlier {
+  stroke: #f87171;
+  stroke-dasharray: 3 2;
+}
+
+.stitch-key {
+  display: inline-block;
+  width: 14px;
+  height: 3px;
+  vertical-align: middle;
+  margin-right: 0.25rem;
+}
+
+.stitch-key-in {
+  background: #4ade80;
+}
+
+.stitch-key-out {
+  background: #f87171;
+}
+
+.stitch-panorama-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.stitch-panorama-head h3 {
+  margin: 0 0.5rem 0 0;
+}
