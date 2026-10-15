@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import componentsCode from './components.ts?raw';
+import pythonCode from './components.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -440,7 +441,7 @@ export function RegionsSection() {
           ))}
         </span>
         <span className="ml-auto">
-          <ShowCodeButton code={componentsCode} title="regions/components.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={componentsCode} title="regions/components.ts" python={{ code: pythonCode, title: 'regions/components.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

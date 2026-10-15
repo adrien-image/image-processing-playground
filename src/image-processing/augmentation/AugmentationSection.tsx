@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import augmentCode from './augment.ts?raw';
+import pythonCode from './augment.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -84,7 +85,7 @@ export function AugmentationSection() {
         {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(demoImage()); setIsDemo(true); }}>Demo image</button>}
         <button type="button" className="btn btn-primary btn-sm" onClick={() => setSeed(s => s + 1)}>🎲 Regenerate</button>
         <span className="ml-auto">
-          <ShowCodeButton code={augmentCode} title="augmentation/augment.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={augmentCode} title="augmentation/augment.ts" python={{ code: pythonCode, title: 'augmentation/augment.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

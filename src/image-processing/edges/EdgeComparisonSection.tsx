@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import edgesCode from './edgeDetectors.ts?raw';
+import pythonCode from './edges.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -67,7 +68,7 @@ export function EdgeComparisonSection() {
         <ImageUploader label="📁 Upload" onImage={(src) => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
         {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(testImage()); setIsDemo(true); }}>Demo image</button>}
         <span className="ml-auto">
-          <ShowCodeButton code={edgesCode} title="edges/edgeDetectors.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={edgesCode} title="edges/edgeDetectors.ts" python={{ code: pythonCode, title: 'edges/edges.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

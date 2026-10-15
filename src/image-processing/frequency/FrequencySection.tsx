@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import fftCode from './fft.ts?raw';
+import pythonCode from './fft.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -113,7 +114,7 @@ export function FrequencySection() {
         <ImageUploader label="📁 Upload" onImage={(src) => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
         {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(testImage()); setIsDemo(true); }}>Demo image</button>}
         <span className="ml-auto">
-          <ShowCodeButton code={fftCode} title="frequency/fft.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={fftCode} title="frequency/fft.ts" python={{ code: pythonCode, title: 'frequency/fft.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

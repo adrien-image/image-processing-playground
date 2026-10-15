@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import learnCode from './learnKernel.ts?raw';
+import pythonCode from './learn_kernel.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -120,7 +121,7 @@ export function LearnKernelSection() {
         <button type="button" aria-pressed={inputKind === 'noise'} className={`btn btn-sm${inputKind === 'noise' ? ' btn-primary' : ''}`}
           onClick={() => { setInputKind('noise'); reset(); }}>Random noise</button>
         <span className="ml-auto">
-          <ShowCodeButton code={learnCode} title="learn-kernel/learnKernel.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={learnCode} title="learn-kernel/learnKernel.ts" python={{ code: pythonCode, title: 'learn-kernel/learn_kernel.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

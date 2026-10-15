@@ -1,5 +1,6 @@
 import { useMemo, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import nccCode from './ncc.ts?raw';
+import pythonCode from './ncc.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { useImageData } from '../../hooks/useImageData';
@@ -103,7 +104,7 @@ export function TemplateSection() {
       <div className="demo-controls">
         <span className="demo-label">Template Matching (NCC) — click Scene A, or focus it and use the arrow keys + Enter, to pick a template</span>
         <span className="ml-auto">
-          <ShowCodeButton code={nccCode} title="template/ncc.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={nccCode} title="template/ncc.ts" python={{ code: pythonCode, title: 'template/ncc.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

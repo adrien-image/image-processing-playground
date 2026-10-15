@@ -1,6 +1,7 @@
 import { Suspense, use, useDeferredValue, useMemo, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import insightCode from './insight.ts?raw';
+import pythonCode from './lenet.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { rgbImage } from '../../lib/image';
@@ -273,7 +274,7 @@ export function InsideCnn({ trained, drawing, test, training }: InsideCnnProps) 
           <span id="cnn-drawing-hint" className="caption cnn-hint">✏️ My drawing: draw a digit and click Classify in the Prediction tab first.</span>
         )}
         <span className="ml-auto">
-          <ShowCodeButton code={insightCode} title="classification/insight.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={insightCode} title="classification/insight.ts" python={{ code: pythonCode, title: 'classification/lenet.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import detectionCode from './detection.ts?raw';
+import pythonCode from './detection.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { canvasToImageData } from '../../lib/canvas';
@@ -65,7 +66,7 @@ export function DetectionSection() {
           ))}
         </div>
         <button type="button" className="btn btn-sm" onClick={() => setSeed(s => s + 1)}>🎲 New scene</button>
-        <ShowCodeButton code={detectionCode} title="detection/detection.ts" open={showCode} onOpenChange={setShowCode} />
+        <ShowCodeButton code={detectionCode} title="detection/detection.ts" python={{ code: pythonCode, title: 'detection/detection.py' }} open={showCode} onOpenChange={setShowCode} />
       </div>
 
       {tab === 'nms' && <NmsView key={seed} image={image} truth={truth} dets={dets} />}

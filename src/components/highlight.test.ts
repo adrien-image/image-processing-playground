@@ -34,4 +34,26 @@ describe('highlight', () => {
     const rebuilt = highlight(src).map(l => l.map(t => t.text).join('')).join('\n');
     expect(rebuilt).toBe(src);
   });
+
+  it('highlights Python: # comments, keywords, triple-quoted and prefixed strings, decorators', () => {
+    const src = [
+      '@torch.no_grad()',
+      'def f(x):  # a comment',
+      '    """Doc',
+      '    string"""',
+      '    return f"{x}" if x is None else 1.5e-3',
+    ].join('\n');
+    const lines = highlight(src, 'py');
+    expect(types(lines[0])).toEqual(['kw:@torch.no_grad', 'text:()']);
+    expect(types(lines[1])).toEqual(['kw:def', 'text:f(x):', 'cmt:# a comment']);
+    expect(types(lines[2])).toEqual(['str:"""Doc']);
+    expect(types(lines[3])).toEqual(['str:string"""']);
+    expect(types(lines[4])).toEqual(['kw:return', 'str:f"{x}"', 'kw:if', 'text:x', 'kw:is', 'kw:None', 'kw:else', 'num:1.5e-3']);
+    expect(lines.map(l => l.map(t => t.text).join('')).join('\n')).toBe(src);
+  });
+
+  it('does not treat # inside a Python string as a comment', () => {
+    const [line] = highlight("x = '#not a comment'  # real", 'py');
+    expect(types(line)).toEqual(['text:x =', "str:'#not a comment'", 'cmt:# real']);
+  });
 });

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import kmeansCode from './kmeans.ts?raw';
 import otsuCode from './otsu.ts?raw';
+import kmeansPy from './kmeans.py?raw';
+import otsuPy from './otsu.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -135,6 +137,9 @@ export function SegmentationSection() {
           <ShowCodeButton
             code={method === 'otsu' ? otsuCode : kmeansCode}
             title={method === 'otsu' ? 'segmentation/otsu.ts' : 'segmentation/kmeans.ts'}
+            python={method === 'otsu'
+              ? { code: otsuPy, title: 'segmentation/otsu.py' }
+              : { code: kmeansPy, title: 'segmentation/kmeans.py' }}
             open={showCode}
             onOpenChange={setShowCode}
           />

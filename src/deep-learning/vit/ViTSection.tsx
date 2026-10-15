@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import vitCode from './vit.ts?raw';
+import pythonCode from './vit.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -30,7 +31,7 @@ export function ViTSection() {
       <div className="demo-controls">
         <span className="demo-label">A transformer that reads a digit as 16 patches and lets every patch attend to every other</span>
         <span className="ml-auto">
-          <ShowCodeButton code={vitCode} title="vit/vit.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={vitCode} title="vit/vit.ts" python={{ code: pythonCode, title: 'vit/vit.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}

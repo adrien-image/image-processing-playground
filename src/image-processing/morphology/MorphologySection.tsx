@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import morphCode from './morphology.ts?raw';
+import pythonCode from './morphology.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -108,7 +109,7 @@ export function MorphologySection() {
         <ImageUploader label="📁 Upload" onImage={(src) => { setUpload(src); setUploadError(null); }} onError={setUploadError} />
         {upload && <button type="button" className="btn btn-sm" onClick={() => setUpload(null)}>Demo image</button>}
         <span className="ml-auto">
-          <ShowCodeButton code={morphCode} title="morphology/morphology.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={morphCode} title="morphology/morphology.ts" python={{ code: pythonCode, title: 'morphology/morphology.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

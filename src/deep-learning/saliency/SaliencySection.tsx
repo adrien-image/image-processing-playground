@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import saliencyCode from './saliency.ts?raw';
+import pythonCode from './saliency.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { seededRandom } from '../../lib/random';
@@ -27,7 +28,7 @@ export function SaliencySection() {
       <div className="demo-controls">
         <span className="demo-label">Four ways to ask a trained network "which pixels made you say that?"</span>
         <span className="ml-auto">
-          <ShowCodeButton code={saliencyCode} title="saliency/saliency.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={saliencyCode} title="saliency/saliency.ts" python={{ code: pythonCode, title: 'saliency/saliency.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}

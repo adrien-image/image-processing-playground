@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import unetCode from './unet.ts?raw';
+import pythonCode from './unet.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -120,7 +121,7 @@ export function UNetSection() {
         </label>
         <button type="button" className="btn btn-sm" onClick={() => reset()}>↺ Reset network</button>
         <span className="ml-auto">
-          <ShowCodeButton code={unetCode} title="unet/unet.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={unetCode} title="unet/unet.ts" python={{ code: pythonCode, title: 'unet/unet.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import attackCode from './attacks.ts?raw';
+import pythonCode from './attacks.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -30,7 +31,7 @@ export function AdversarialSection() {
       <div className="demo-controls">
         <span className="demo-label">Fool a trained digit classifier with changes too small to notice</span>
         <span className="ml-auto">
-          <ShowCodeButton code={attackCode} title="adversarial/attacks.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={attackCode} title="adversarial/attacks.ts" python={{ code: pythonCode, title: 'adversarial/attacks.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}

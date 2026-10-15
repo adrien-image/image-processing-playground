@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import * as tf from '@tensorflow/tfjs';
 import diffusionCode from './diffusion.ts?raw';
+import pythonCode from './diffusion.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { LineChart } from '../../components/LineChart';
 import { PixelCanvas } from '../../components/PixelCanvas';
@@ -30,7 +31,7 @@ export function DiffusionSection() {
           <button type="button" role="tab" aria-selected={tab === 'reverse'} className={`tab-btn${tab === 'reverse' ? ' tab-active' : ''}`}
             onClick={() => setTab('reverse')}>2 · Learning to remove it (2-D points)</button>
         </div>
-        <ShowCodeButton code={diffusionCode} title="diffusion/diffusion.ts" open={showCode} onOpenChange={setShowCode} />
+        <ShowCodeButton code={diffusionCode} title="diffusion/diffusion.ts" python={{ code: pythonCode, title: 'diffusion/diffusion.py' }} open={showCode} onOpenChange={setShowCode} />
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}
       {tab === 'forward' && (data ? <Forward test={data.test} /> : !error && <p className="dl-status">Loading MNIST…</p>)}

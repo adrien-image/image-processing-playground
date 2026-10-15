@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import convolveCode from '../processors/utils.ts?raw';
+import pythonCode from './convolution.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { useImageData, type ImageSource } from '../../hooks/useImageData';
@@ -126,7 +127,7 @@ export function ConvolutionSection() {
               aria-selected={tab === 'computation'} className={`tab-btn${tab === 'computation' ? ' tab-active' : ''}`}
               onClick={() => setTab('computation')}>Computation</button>
           </div>
-          <ShowCodeButton code={convolveCode} title="processors/utils.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={convolveCode} title="processors/utils.ts" python={{ code: pythonCode, title: 'convolution/convolution.py' }} open={showCode} onOpenChange={setShowCode} />
         </div>
 
         <div id="conv-panel" role="tabpanel" aria-labelledby={`conv-tab-${tab}`} className="conv-panel">

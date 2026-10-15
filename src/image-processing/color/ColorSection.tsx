@@ -1,5 +1,6 @@
 import { useMemo, useState, type ChangeEvent } from 'react';
 import colorCode from './color.ts?raw';
+import pythonCode from './color.py?raw';
 import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { ImageUploader } from '../../components/ImageUploader';
@@ -83,7 +84,7 @@ export function ColorSection() {
           </button>
         )}
         <span className="ml-auto">
-          <ShowCodeButton code={colorCode} title="color/color.ts" open={showCode} onOpenChange={setShowCode} />
+          <ShowCodeButton code={colorCode} title="color/color.ts" python={{ code: pythonCode, title: 'color/color.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
 
