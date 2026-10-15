@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
-  'learn-kernel', 'receptive-field',
+  'learn-kernel', 'receptive-field', 'detection',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -95,4 +95,7 @@ export const SECTIONS: SectionDef[] = [
   { key: 'receptive-field', group: 'deep-learning', icon: '🔭', label: 'Receptive field',
     blurb: 'Which input pixels can a unit deep in a CNN see? Kernel size, stride, pooling and dilation, layer by layer.',
     Component: lazy(() => import('../deep-learning/receptive-field/ReceptiveFieldSection').then(m => ({ default: m.ReceptiveFieldSection }))) },
+  { key: 'detection', group: 'deep-learning', icon: '📦', label: 'Detection',
+    blurb: 'How detectors turn thousands of boxes into answers: IoU, non-max suppression, precision–recall and anchors.',
+    Component: lazy(() => import('../deep-learning/detection/DetectionSection').then(m => ({ default: m.DetectionSection }))) },
 ];
