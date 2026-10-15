@@ -26,10 +26,10 @@ function leNetLayers(): tf.LayersModel {
 }
 
 /** A fresh LeNet-5 (random weights), ready to train with Adam. */
-export function buildLeNet(): tf.LayersModel {
+export function buildLeNet(learningRate = 0.0005): tf.LayersModel {
   const model = leNetLayers();
   model.compile({
-    optimizer: tf.train.adam(0.0005),
+    optimizer: tf.train.adam(learningRate),
     loss: 'categoricalCrossentropy',
     metrics: ['accuracy'],
   });

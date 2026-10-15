@@ -4,7 +4,9 @@ import { publishLeNet, useSharedLeNet, type SharedLeNet } from './modelStore';
 import { getMnist } from './useMnist';
 import './dl-shared.css';
 
-const QUICK_EPOCHS = 3;
+const QUICK_EPOCHS = 4;
+/** Higher than the Classification lesson's rate, so a few epochs are enough. */
+const QUICK_LEARNING_RATE = 0.002;
 
 /**
  * Renders `children` with the shared trained LeNet. Until one exists (trained in the
@@ -23,7 +25,7 @@ export function LeNetGate({ children, purpose }: { children: (lenet: SharedLeNet
     abortRef.current = controller;
     setError(null);
     setProgress('Loading MNIST…');
-    const model = buildLeNet();
+    const model = buildLeNet(QUICK_LEARNING_RATE);
     try {
       const data = await getMnist();
       await trainModel(model, data, {
@@ -32,7 +34,7 @@ export function LeNetGate({ children, purpose }: { children: (lenet: SharedLeNet
         onBatch: (b, total) => setProgress(`Training… batch ${b}/${total}`),
         onEpoch: e => {
           setProgress(`Epoch ${e.epoch}/${QUICK_EPOCHS}: validation accuracy ${(e.valAccuracy * 100).toFixed(1)}%`);
-          publishLeNet(model, `this lesson (${e.epoch} epoch${e.epoch > 1 ? 's' : ''})`);
+          publishLeNet(model, `a quick run here (${e.epoch} epoch${e.epoch > 1 ? 's' : ''}, ${(e.valAccuracy * 100).toFixed(1)}% validation accuracy)`);
         },
       });
       if (!controller.signal.aborted) setProgress(null);
@@ -58,7 +60,7 @@ export function LeNetGate({ children, purpose }: { children: (lenet: SharedLeNet
       <p>This lesson {purpose}, so it needs a trained digit classifier.</p>
       <p className="muted">
         Train one in the <a href="#/classification">Classification</a> lesson, or train a LeNet-5 here for {QUICK_EPOCHS} epochs
-        (about 97% accurate, usually under a minute).
+        (usually under a minute with a GPU).
       </p>
       <button type="button" className="btn btn-primary" onClick={train} disabled={progress !== null}>
         {progress === null ? `🧠 Train LeNet here (${QUICK_EPOCHS} epochs)` : 'Training…'}

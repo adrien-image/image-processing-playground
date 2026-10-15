@@ -24,6 +24,8 @@ interface LineChartProps {
   height?: number;
   /** A vertical marker at this x index. */
   markerX?: number;
+  /** Label for the tick at index i (default: i + xStart). */
+  xTickLabel?: (i: number) => string;
 }
 
 const W = 480;
@@ -41,7 +43,7 @@ const defaultFormat = (v: number) => {
  * curves and other per-step values. Series may have different lengths.
  */
 export function LineChart({
-  series, title, xLabel, logY = false, yMin, yMax, xStart = 0, formatY = defaultFormat, height = 200, markerX,
+  series, title, xLabel, logY = false, yMin, yMax, xStart = 0, formatY = defaultFormat, height = 200, markerX, xTickLabel,
 }: LineChartProps) {
   const titleId = useId();
   const H = height;
@@ -87,7 +89,7 @@ export function LineChart({
           </g>
         ))}
         {xTicks.map(i => (
-          <text key={i} x={x(i)} y={H - PAD.bottom + 12} className="line-chart-tick" textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}>{i + xStart}</text>
+          <text key={i} x={x(i)} y={H - PAD.bottom + 12} className="line-chart-tick" textAnchor={i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}>{xTickLabel ? xTickLabel(i) : i + xStart}</text>
         ))}
         {xLabel && <text x={PAD.left + plotW / 4} y={H - 2} className="line-chart-tick line-chart-xlabel" textAnchor="middle">{xLabel} →</text>}
         {markerX !== undefined && (

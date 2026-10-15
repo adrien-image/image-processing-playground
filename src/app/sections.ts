@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
-  'learn-kernel', 'receptive-field', 'detection',
+  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'detection',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -95,6 +95,12 @@ export const SECTIONS: SectionDef[] = [
   { key: 'receptive-field', group: 'deep-learning', icon: '🔭', label: 'Receptive field',
     blurb: 'Which input pixels can a unit deep in a CNN see? Kernel size, stride, pooling and dilation, layer by layer.',
     Component: lazy(() => import('../deep-learning/receptive-field/ReceptiveFieldSection').then(m => ({ default: m.ReceptiveFieldSection }))) },
+  { key: 'saliency', group: 'deep-learning', icon: '🔦', label: 'Saliency',
+    blurb: 'Which pixels drove the prediction? Gradients, SmoothGrad, Grad-CAM and occlusion side by side.',
+    Component: lazy(() => import('../deep-learning/saliency/SaliencySection').then(m => ({ default: m.SaliencySection }))) },
+  { key: 'adversarial', group: 'deep-learning', icon: '🎭', label: 'Adversarial',
+    blurb: 'Fool a trained network with changes too small to see: FGSM, targeted and iterative attacks.',
+    Component: lazy(() => import('../deep-learning/adversarial/AdversarialSection').then(m => ({ default: m.AdversarialSection }))) },
   { key: 'detection', group: 'deep-learning', icon: '📦', label: 'Detection',
     blurb: 'How detectors turn thousands of boxes into answers: IoU, non-max suppression, precision–recall and anchors.',
     Component: lazy(() => import('../deep-learning/detection/DetectionSection').then(m => ({ default: m.DetectionSection }))) },

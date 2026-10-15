@@ -1,0 +1,18 @@
+.adv-targets {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.adv-grid .demo-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.adv-fooled {
+  border-color: rgba(248, 113, 113, 0.45);
+  box-shadow: var(--shadow-lg), 0 0 24px rgba(248, 113, 113, 0.15);
+}
