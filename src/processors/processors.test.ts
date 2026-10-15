@@ -97,6 +97,15 @@ describe('processors', () => {
     expect(output[0]).toBe(255); // corner: replicate padding, no dark halo
   });
 
+  it('gaussian blur kernel size follows its param, and a bigger kernel blurs further', () => {
+    expect(GaussianBlurProcessor.kernel({ size: 7, sigma: 2 })).toHaveLength(7);
+    const small = applyProcessor(GaussianBlurProcessor, checkerboard(), 32, 32, { size: 3, sigma: 2 });
+    const large = applyProcessor(GaussianBlurProcessor, checkerboard(), 32, 32, { size: 9, sigma: 2 });
+    // Two pixels inside a white tile: untouched by a 3×3 kernel, darkened by a 9×9 one.
+    expect(small.output[5 * 32 + 5]).toBe(255);
+    expect(large.output[5 * 32 + 5]).toBeLessThan(255);
+  });
+
   it('sobel responds on tile boundaries only', () => {
     const { output } = applyProcessor(SobelXProcessor, checkerboard(), 32, 32);
     expect(output[3 * 32 + 3]).toBe(0);

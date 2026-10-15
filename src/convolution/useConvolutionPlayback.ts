@@ -6,7 +6,7 @@ import { revealPartial, snakeOrder, stepMath } from './playback';
 
 /** Playback speed bounds, in pixels per second. */
 export const MIN_SPEED = 1;
-export const MAX_SPEED = 400;
+export const MAX_SPEED = 20_000;
 const FRAME_MS = 16;
 
 /**
@@ -18,12 +18,18 @@ const FRAME_MS = 16;
  *
  * `resetKey` identifies the image + processor: when it changes playback rewinds; a
  * kernel change from a parameter slider keeps the current position.
+ *
+ * Options:
+ * - `startAtEnd`: after a reset, show the finished output instead of a black image
+ *   (for large images, where watching every pixel would take minutes).
+ * - `defaultSpeed`: the speed to switch to whenever this value changes.
  */
 export function useConvolutionPlayback(
   image: LoadedImage | null,
   kernel: number[][] | null,
   mode: OutputMode | null,
   resetKey: string,
+  { startAtEnd = false, defaultSpeed = 20 }: { startAtEnd?: boolean; defaultSpeed?: number } = {},
 ) {
   const prepared = useMemo(() => {
     if (!image || !kernel || !mode) return null;
@@ -35,17 +41,26 @@ export function useConvolutionPlayback(
     return { gray, width, height, kernel, map, output, order: snakeOrder(width, height) };
   }, [image, kernel, mode]);
 
-  const [stepIndex, setStepIndex] = useState(0);
+  const firstStep = startAtEnd ? Number.MAX_SAFE_INTEGER : 0; // clamped to the last pixel below
+  const [stepIndex, setStepIndex] = useState(firstStep);
   const [playing, setPlaying] = useState(false);
-  const [speed, setSpeed] = useState(20); // pixels per second
+  // True after picking a pixel directly: show the whole output rather than the sweep so far.
+  const [revealAll, setRevealAll] = useState(false);
+  const [speed, setSpeed] = useState(defaultSpeed); // pixels per second
 
   // Rewind when the image or processor changes (adjusting state during render,
   // per https://react.dev/learn/you-might-not-need-an-effect).
   const [lastResetKey, setLastResetKey] = useState(resetKey);
   if (lastResetKey !== resetKey) {
     setLastResetKey(resetKey);
-    setStepIndex(0);
+    setStepIndex(firstStep);
     setPlaying(false);
+    setRevealAll(false);
+  }
+  const [lastDefaultSpeed, setLastDefaultSpeed] = useState(defaultSpeed);
+  if (lastDefaultSpeed !== defaultSpeed) {
+    setLastDefaultSpeed(defaultSpeed);
+    setSpeed(defaultSpeed);
   }
 
   const total = prepared?.order.length ?? 0;
@@ -69,16 +84,19 @@ export function useConvolutionPlayback(
     const pos = order[index];
     return {
       position: pos,
-      partial: grayToImageData(revealPartial(output, order, index + 1, width), width, height),
+      partial: grayToImageData(revealAll ? output : revealPartial(output, order, index + 1, width), width, height),
       math: stepMath(gray, width, height, k, pos, map),
     };
-  }, [prepared, index]);
+  }, [prepared, index, revealAll]);
 
-  const goTo = (i: number) => {
+  /** Jump to step `i`. With `inspect`, keep the full output visible (picking a pixel). */
+  const goTo = (i: number, { inspect = false } = {}) => {
     setStepIndex(Math.max(0, Math.min(i, total - 1)));
+    setRevealAll(inspect);
   };
 
   const togglePlay = () => {
+    setRevealAll(false);
     if (!playing && index >= total - 1) setStepIndex(0);
     setPlaying(p => !p);
   };

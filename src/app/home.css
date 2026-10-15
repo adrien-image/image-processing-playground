@@ -1,0 +1,118 @@
+/* Home page: hero and lesson grid. */
+
+.home {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.home-hero {
+  max-width: 760px;
+  padding: 1.5rem 0 0.5rem;
+}
+
+.home-title {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.home-tagline {
+  margin-top: 0.5rem;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.home-intro {
+  margin-top: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.home-actions {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.home-cta {
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.1rem;
+}
+
+.home-count {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.home-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
+.home-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.home-card:hover,
+.home-card:focus-visible {
+  border-color: rgba(108, 140, 255, 0.35);
+  box-shadow: var(--shadow), 0 0 20px var(--accent-glow);
+  transform: translateY(-2px);
+}
+
+.home-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-card-icon {
+  font-size: 1.4rem;
+}
+
+.home-card-num {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.home-card-title {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.home-card-blurb {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .home { gap: 1.25rem; }
+  .home-hero { padding-top: 0.5rem; }
+  .home-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+  .home-card { padding: 0.75rem 0.9rem; }
+}

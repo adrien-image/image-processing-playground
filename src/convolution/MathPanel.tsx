@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { gridVars } from './gridSize';
 import type { StepMath } from './playback';
 
 /** Up to 2 decimals, without trailing zeros (51.000000001 → "51", 0.0625 → "0.06"). */
@@ -11,7 +11,7 @@ export function MathPanel({ data, outputMode }: { data: StepMath; outputMode: 'm
   const flatNb = neighbourhood.flat();
   const flatK = kernel.flat();
   const expression = flatNb.map((n, i) => `(${fmt(n)} × ${fmt(flatK[i])})`).join(' + ') + ` = ${fmt(sum)}`;
-  const gridStyle = { '--cols': size } as CSSProperties;
+  const gridStyle = gridVars(size, 44);
 
   return (
     <div className="math-panel">
