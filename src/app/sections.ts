@@ -1,7 +1,7 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
+  'convolution', 'segmentation', 'superpixels', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
@@ -50,6 +50,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'segmentation', group: 'image-processing', icon: '🎯', label: 'Segmentation',
     blurb: 'Split an image into regions with Otsu thresholding and k-means clustering.',
     Component: lazy(() => import('../image-processing/segmentation/SegmentationSection').then(m => ({ default: m.SegmentationSection }))) },
+  { key: 'superpixels', group: 'image-processing', icon: '🧩', label: 'Superpixels (SLIC)',
+    blurb: 'Group pixels into compact regions that follow colour edges: k-means on colour and position, step by step.',
+    Component: lazy(() => import('../image-processing/superpixels/SuperpixelsSection').then(m => ({ default: m.SuperpixelsSection }))) },
   { key: 'matching', group: 'image-processing', icon: '🔗', label: 'Matching',
     blurb: 'Harris corners, descriptors and RANSAC to find one image inside another.',
     Component: lazy(() => import('../image-processing/matching/MatchingSection').then(m => ({ default: m.MatchingSection }))) },
