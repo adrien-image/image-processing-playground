@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
-  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'detection',
+  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -104,7 +104,19 @@ export const SECTIONS: SectionDef[] = [
   { key: 'regularisation', group: 'deep-learning', icon: '🛡', label: 'Overfitting',
     blurb: 'Watch a network memorise its training set, then fight back with dropout, weight decay, augmentation and more data.',
     Component: lazy(() => import('../deep-learning/regularisation/RegularisationSection').then(m => ({ default: m.RegularisationSection }))) },
+  { key: 'autoencoder', group: 'deep-learning', icon: '🗜', label: 'Autoencoder',
+    blurb: 'Squeeze every digit into two numbers and explore the latent space: plain vs. variational autoencoder.',
+    Component: lazy(() => import('../deep-learning/autoencoder/AutoencoderSection').then(m => ({ default: m.AutoencoderSection }))) },
+  { key: 'unet', group: 'deep-learning', icon: '🧬', label: 'U-Net',
+    blurb: 'Train a small U-Net to segment shapes where a global threshold fails, with and without skip connections.',
+    Component: lazy(() => import('../deep-learning/unet/UNetSection').then(m => ({ default: m.UNetSection }))) },
   { key: 'detection', group: 'deep-learning', icon: '📦', label: 'Detection',
     blurb: 'How detectors turn thousands of boxes into answers: IoU, non-max suppression, precision–recall and anchors.',
     Component: lazy(() => import('../deep-learning/detection/DetectionSection').then(m => ({ default: m.DetectionSection }))) },
+  { key: 'diffusion', group: 'deep-learning', icon: '🌫', label: 'Diffusion',
+    blurb: 'How image generators work: destroy data with noise step by step, then train a network to undo it.',
+    Component: lazy(() => import('../deep-learning/diffusion/DiffusionSection').then(m => ({ default: m.DiffusionSection }))) },
+  { key: 'vit', group: 'deep-learning', icon: '🔀', label: 'Vision Transformer',
+    blurb: 'Patches become tokens and attend to each other: train a tiny ViT and see where it looks.',
+    Component: lazy(() => import('../deep-learning/vit/ViTSection').then(m => ({ default: m.ViTSection }))) },
 ];

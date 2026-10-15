@@ -50,3 +50,13 @@ export function smooth(values: readonly number[], window: number): number[] {
   }
   return out;
 }
+
+/** 0 … n−1 in random order (Fisher–Yates). */
+export function shuffled(n: number, random: () => number): number[] {
+  const order = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+}

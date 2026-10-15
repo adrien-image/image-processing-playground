@@ -1,0 +1,59 @@
+.vit-note {
+  font-size: 0.75rem;
+}
+
+.vit-charts {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
+.vit-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.vit-pred {
+  display: flex;
+  justify-content: center;
+}
+
+.vit-patches {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
+.vit-patch {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 2px 4px;
+}
+
+.vit-patch span {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 0 3px #000;
+}
+
+.vit-patch:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.vit-patch-active {
+  border: 2px solid #38bdf8;
+}
+
+.vit-sim {
+  display: grid;
+  grid-template-columns: repeat(4, 48px);
+  gap: 6px;
+  justify-content: center;
+}
