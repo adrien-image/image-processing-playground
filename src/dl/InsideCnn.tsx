@@ -334,9 +334,10 @@ export function InsideCnn({ trained, drawing, test, training }: InsideCnnProps) 
           </p>
           <p>
             A red band next to a blue band responds to <strong>edges</strong> of that orientation (like Sobel); a red blob responds
-            to <strong>strokes</strong>. Don't expect textbook detectors, though: these filters start as random noise and training
-            only nudges them — they stay close to their starting values, and the later layers learn to use whatever they pick up.
-            That is enough for MNIST; clean edge and colour detectors appear in large networks trained on photos.
+            to <strong>strokes</strong>. Don't expect textbook detectors here, though: these filters start as random noise, and
+            training mostly raises all 25 weights of a filter together (it drifts towards red and responds more to ink in general)
+            while its pattern stays the random one it started with. The later layers learn to use whatever these filters pick up,
+            which is enough for MNIST; clean edge and colour detectors appear in large networks trained on photos.
           </p>
         </div>
       </div>
