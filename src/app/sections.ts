@@ -2,7 +2,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'classification',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -98,6 +98,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'stereo', group: 'image-processing', icon: '👓', label: 'Stereo depth',
     blurb: 'Depth from two cameras: block matching along each row, window size trade-offs, occlusions and the left–right check.',
     Component: lazy(() => import('../image-processing/stereo/StereoSection').then(m => ({ default: m.StereoSection }))) },
+  { key: 'stitching', group: 'image-processing', icon: '🧷', label: 'Panorama stitching',
+    blurb: 'Match corners between two photos, fit a homography with RANSAC, warp one onto the other and blend the seam.',
+    Component: lazy(() => import('../image-processing/stitching/StitchingSection').then(m => ({ default: m.StitchingSection }))) },
   { key: 'classification', group: 'deep-learning', icon: '🧠', label: 'Classification',
     blurb: 'Train a CNN on MNIST in your browser, draw digits and look inside the network.',
     Component: lazy(() => import('../deep-learning/classification/DLPlayground').then(m => ({ default: m.DLPlayground }))) },
