@@ -9,3 +9,9 @@ export function seededRandom(seed: number): () => number {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
+
+/** A standard normal sample (mean 0, variance 1) from a uniform generator (Box–Muller). */
+export function gaussianRandom(random: () => number): number {
+  const u = 1 - random(); // (0, 1]: log(0) would be −∞
+  return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * random());
+}

@@ -1,0 +1,42 @@
+.diff-t {
+  width: 260px !important;
+}
+
+.diff-forward,
+.diff-reverse {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+}
+
+.diff-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.diff-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+.diff-strip-item:hover {
+  border-color: var(--surface-border-hover);
+}
+
+.diff-cloud {
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--radius);
+}
+
+.diff-frame {
+  justify-content: center;
+  margin-top: 0.6rem;
+}

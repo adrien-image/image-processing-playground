@@ -1,0 +1,28 @@
+.sal-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.sal-row .demo-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sal-coarse {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sal-sanity {
+  margin-left: auto;
+}
+
+.sal-note {
+  text-align: center;
+}

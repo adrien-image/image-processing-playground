@@ -12,6 +12,19 @@ CI runs the same four checks on every pull request.
 - Algorithms live in pure `.ts` modules next to their section and come with a `*.test.ts`. Keep DOM and React out of them, so they run under Vitest in Node.
 - UI state flows one way: section state → `useMemo` derived pixels → `<PixelCanvas image={…} />`. Load images with `useImageData(source, maxSize)`, which also downscales uploads.
 
+## Adding a lesson
+
+1. Create a folder in the right group: `src/image-processing/<lesson>/` or `src/deep-learning/<lesson>/`,
+   with the algorithm in a `.ts` file (plus its `.test.ts`) and the UI in `<Lesson>Section.tsx`.
+2. Add the lesson's key to `SECTION_KEYS` and an entry to `SECTIONS` in `src/app/sections.ts`, with its
+   `group`, icon, label, one-line `blurb` (shown on the home page) and lazy import.
+
+Deep-learning lessons can reuse `src/deep-learning/shared/`: `useMnist()` loads MNIST once per page,
+`LeNetGate` provides the LeNet trained in the Classification lesson (or trains one), `optimise()` runs a
+training loop that keeps the page responsive, and `render.ts` turns arrays into gray, signed or heat-map
+images. Dispose every TensorFlow.js model when the lesson unmounts, and test that functions don't leak
+tensors (`tf.memory().numTensors`), as the existing tests do.
+
 ## Adding a new convolution filter
 
 The Convolution section uses a **Processor Registry**. A processor describes a kernel; the section
@@ -20,7 +33,7 @@ animates it, shows its math and renders its parameter controls. You don't touch 
 ### 1. Create the processor
 
 ```ts
-// src/processors/box-blur/index.ts
+// src/image-processing/processors/box-blur/index.ts
 import type { Processor } from '../types';
 
 export const BoxBlurProcessor: Processor = {
@@ -51,12 +64,12 @@ export const BoxBlurProcessor: Processor = {
 ```
 
 Reusable kernels (Sobel, Prewitt, Laplacian, `gaussianKernel`, `sharpenKernel`) are in
-`src/processors/kernels.ts`.
+`src/image-processing/processors/kernels.ts`.
 
 ### 2. Register it
 
 ```ts
-// src/processors/init.ts
+// src/image-processing/processors/init.ts
 import { BoxBlurProcessor } from './box-blur';
 
 export function initProcessors(): void {
@@ -85,7 +98,7 @@ interface Processor {
 ```
 
 To run a processor outside the UI, use `applyProcessor(processor, gray, width, height, config)` from
-`src/processors`. It returns `{ raw, output, kernel }`.
+`src/image-processing/processors`. It returns `{ raw, output, kernel }`.
 
 ### Supported param types
 
@@ -97,7 +110,7 @@ To run a processor outside the UI, use `applyProcessor(processor, gray, width, h
 
 ## Utility functions
 
-In `src/processors/utils.ts`:
+In `src/image-processing/processors/utils.ts`:
 
 - **`convolve(pixels, width, height, kernel)`** — 2-D sliding-window sum with replicate padding (strictly, cross-correlation: the kernel isn't flipped).
 - **`makeOutputMapper(raw, mode)`** — maps raw sums to 0–255 for an `OutputMode`.

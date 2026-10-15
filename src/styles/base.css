@@ -195,6 +195,8 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   padding: 1rem 1.25rem;
   min-width: 620px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
 .header-menu-grid {
@@ -237,6 +239,16 @@ body {
 }
 .header-menu-label {
   white-space: nowrap;
+}
+.header-menu-group {
+  grid-column: 1 / -1;
+  margin-top: 0.5rem;
+  padding: 0 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
 }
 .header-menu-home {
   grid-column: 1 / -1;

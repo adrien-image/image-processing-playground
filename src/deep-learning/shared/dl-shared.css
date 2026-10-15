@@ -1,0 +1,174 @@
+/* Building blocks shared by the deep-learning lessons. */
+
+.digit-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.digit-picker-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.digit-picker-btn {
+  padding: 2px;
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.digit-picker-btn:hover {
+  border-color: var(--surface-border-hover);
+}
+
+.digit-picker-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.prob-bars {
+  min-width: 220px;
+}
+
+.prob-bars-title {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.35rem;
+}
+
+.prob-bars-title strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.prob-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  height: 90px;
+}
+
+.prob-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.prob-bar-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.prob-bar-fill {
+  width: 100%;
+  background: var(--text-muted);
+  min-height: 1px;
+}
+
+.prob-bar-top .prob-bar-fill {
+  background: var(--accent);
+}
+
+.prob-bar-label {
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.prob-bar-true .prob-bar-label {
+  color: var(--success);
+  font-weight: 700;
+}
+
+.lenet-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 1.25rem 1.5rem;
+  font-size: 0.88rem;
+}
+
+.lenet-gate a {
+  color: var(--accent);
+}
+
+.lenet-progress {
+  font-size: 0.8rem;
+  color: var(--accent);
+}
+
+.lenet-source {
+  font-size: 0.75rem;
+}
+
+/* Controls laid out as a wrapping row of labelled sliders. */
+.dl-sliders {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  align-items: center;
+}
+
+.dl-slider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.dl-slider input[type="range"] {
+  width: 140px;
+  accent-color: var(--accent);
+}
+
+.dl-slider strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+/* A grid of equally sized panels that wraps on narrow screens. */
+.dl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.dl-grid .demo-panel {
+  min-width: 0;
+}
+
+.dl-stat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: center;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.dl-stat-row strong {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.dl-status {
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}

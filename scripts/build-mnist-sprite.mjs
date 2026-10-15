@@ -2,7 +2,7 @@
 //
 // Output (generated, git-ignored):
 //   public/data/mnist.bin   gzip-compressed Uint8 pixels, one 28×28 image (784 bytes) per row
-//   public/data/mnist.json  layout metadata read by src/dl/mnist.ts
+//   public/data/mnist.json  layout metadata read by src/deep-learning/shared/mnist.ts
 //
 // Rows are ordered split-major then digit-major, so labels are implicit:
 //   train: digit 0 × perDigit.train, digit 1 × perDigit.train, … then val, then test.

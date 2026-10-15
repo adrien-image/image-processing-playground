@@ -3,9 +3,14 @@
 An interactive web app that teaches how image processing works — every algorithm runs in your browser,
 on demo images or your own uploads, and every section can show you its source code.
 
-## Sections
+## Lessons
 
-| Section | What you can explore |
+The lessons come in two groups, which are also the two source folders: `src/image-processing/` and
+`src/deep-learning/`.
+
+### Image processing
+
+| Lesson | What you can explore |
 |---|---|
 | Convolution | See Sobel, Gaussian blur (3×3 to 9×9) and sharpen on a 256 px image, or switch to 32 px and step through the kernel pixel by pixel. Click any pixel to see its multiply-and-sum |
 | Segmentation | Otsu thresholding vs. k-means clustering, with the histogram |
@@ -21,7 +26,27 @@ on demo images or your own uploads, and every section can show you its source co
 | Augmentation | Chained random transformations used to grow training sets |
 | Denoising | Median vs. Gaussian filtering on salt-and-pepper or Gaussian noise, scored with PSNR |
 | Template | Normalised cross-correlation template matching with its score map |
-| Classification | Train LeNet-5 on MNIST in the browser (TensorFlow.js), draw digits to classify, and look inside the network: learned filters, activation maps and occlusion sensitivity |
+
+### Deep learning
+
+Everything trains in the browser with TensorFlow.js, on a 6,000-image MNIST subset or synthetic data.
+
+| Lesson | What you can explore |
+|---|---|
+| Classification | Train LeNet-5 on MNIST, draw digits to classify, and look inside the network: learned filters, activation maps and occlusion sensitivity |
+| Learn a kernel | Gradient descent recovers a hidden 3×3 kernel from input/output images: learning rate, momentum, label noise, ill-conditioning |
+| Receptive field | How far a unit sees through stacks of convolutions, pooling, strides and dilation, with path counts (effective receptive field) |
+| Saliency | Vanilla gradients, SmoothGrad, Grad-CAM and occlusion for any class, plus the untrained-network sanity check |
+| Adversarial | FGSM, targeted and iterative (PGD) attacks on LeNet, and accuracy as a function of ε |
+| Overfitting | A perceptron memorising small training sets; dropout, L2, augmentation and data size compared run by run |
+| Autoencoder | A 2-D latent space for MNIST: plain vs. variational autoencoder, hover to decode, decoded grid, β |
+| U-Net | Segmentation of synthetic shapes where Otsu fails, with and without skip connections |
+| Detection | IoU, non-max suppression step by step, precision–recall and AP, anchor assignment |
+| Diffusion | The forward noising process on digits (linear vs. cosine schedule), and a denoiser trained to generate 2-D point clouds |
+| Vision Transformer | A tiny ViT written with tensor ops: attention maps per head, attention rollout, learned position embeddings |
+
+The lessons that need a trained digit classifier (Saliency, Adversarial) share the LeNet trained in
+Classification, or train a quick one themselves.
 
 The home page (`#/home`) introduces the playground and lists every lesson. Each section is its own
 lazily-loaded chunk, and the current section is kept in the URL (`#/edges`), so sections can be
@@ -52,27 +77,33 @@ and push, and deploys `main` to GitHub Pages.
 ```
 src/
 ├── main.tsx                 ← entry: fonts, global styles, processor registration
-├── App.tsx                  ← header, lesson menu, hash routing, lazy sections
-├── app/                     ← home page, site title/tagline, section list, hash router, error boundary
-├── processors/              ← convolution filters for the Convolution section
-│   ├── types.ts             ← Processor interface (the contract)
-│   ├── registry.ts          ← central registry (the UI lists what is registered)
-│   ├── init.ts              ← registers the built-in processors
-│   ├── kernels.ts           ← every shared kernel (Sobel, Prewitt, Laplacian, Gaussian…)
-│   └── utils.ts             ← convolve (replicate padding), output mapping, gray ↔ RGBA
+├── App.tsx                  ← header, lesson menu, hash routing, lazy lessons
+├── app/                     ← home page, site title/tagline, lesson list and groups, hash router, error boundary
+├── image-processing/        ← one folder per image-processing lesson, plus:
+│   └── processors/          ←   convolution filters for the Convolution lesson
+│       ├── types.ts         ←     Processor interface (the contract)
+│       ├── registry.ts      ←     central registry (the UI lists what is registered)
+│       ├── init.ts          ←     registers the built-in processors
+│       ├── kernels.ts       ←     every shared kernel (Sobel, Prewitt, Laplacian, Gaussian…)
+│       └── utils.ts         ←     convolve (replicate padding), output mapping, gray ↔ RGBA
+├── deep-learning/           ← one folder per deep-learning lesson, plus:
+│   └── shared/              ←   MNIST loading, the LeNet shared between lessons, training helpers,
+│                                digit picker, probability bars, colour-mapped rendering
 ├── hooks/useImageData.ts    ← load a URL or canvas → downscaled RGBA + grayscale pixels
-├── components/              ← PixelCanvas, ImageUploader, CodeViewer (+ tokenizer)
-├── lib/                     ← canvas helpers, demo images, seeded random
-├── styles/base.css          ← design tokens and shared building blocks
-└── <section>/               ← one folder per section:
-    ├── <algorithm>.ts       ←   pure algorithm code (what "Show code" displays)
-    ├── <algorithm>.test.ts  ←   its unit tests
-    ├── <Section>.tsx        ←   UI
-    └── <section>.css        ←   section styles
+├── components/              ← PixelCanvas, ImageUploader, CodeViewer (+ tokenizer), LineChart
+├── lib/                     ← canvas helpers, demo images, colour maps, seeded random
+└── styles/base.css          ← design tokens and shared building blocks
+
+<group>/<lesson>/            ← every lesson folder has the same shape:
+├── <algorithm>.ts           ←   algorithm code, no DOM (what "Show code" displays)
+├── <algorithm>.test.ts      ←   its unit tests
+├── <Lesson>Section.tsx      ←   UI
+└── <lesson>.css             ←   styles
 ```
 
 Algorithms are plain TypeScript functions over `Float64Array` pixels with no DOM access, so they are
-unit-tested in Node. The UI derives everything from state with `useMemo`, and images are drawn
+unit-tested in Node. The deep-learning models use TensorFlow.js, whose CPU backend runs the same code
+in the tests; TensorFlow.js is only downloaded when a deep-learning lesson is opened. The UI derives everything from state with `useMemo`, and images are drawn
 through one `PixelCanvas` component that keeps the aspect ratio.
 
 `scripts/build-mnist-sprite.mjs` packs a balanced MNIST subset (600 train / 100 validation /
@@ -81,8 +112,8 @@ downloads the package's 20 MB of JSON.
 
 ## Adding a new convolution filter
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md). In short: create `src/processors/your-filter/index.ts`
-exporting a `Processor` (kernel, output mode, parameters), register it in `src/processors/init.ts`,
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). In short: create `src/image-processing/processors/your-filter/index.ts`
+exporting a `Processor` (kernel, output mode, parameters), register it in `src/image-processing/processors/init.ts`,
 and it appears in the Convolution section with controls generated from its parameters.
 
 ## Tech stack

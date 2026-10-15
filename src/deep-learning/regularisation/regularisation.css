@@ -1,0 +1,65 @@
+.reg-gap {
+  margin-left: 0.75rem;
+}
+
+.reg-note {
+  font-size: 0.75rem;
+}
+
+.reg-charts {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
+.reg-runs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  overflow-x: auto;
+}
+
+.reg-runs table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.reg-runs th {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 0.3rem 0.6rem;
+}
+
+.reg-runs td {
+  padding: 0.3rem 0.6rem;
+  border-top: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+}
+
+.reg-runs tr {
+  cursor: pointer;
+}
+
+.reg-selected td {
+  background: rgba(108, 140, 255, 0.08);
+}
+
+.reg-run-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.reg-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
