@@ -2,19 +2,24 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { SECTIONS, SECTION_KEYS, type SectionKey } from './app/sections';
 import { useHashRoute } from './app/useHashRoute';
 import { SectionErrorBoundary } from './app/SectionErrorBoundary';
+import { Home } from './app/Home';
+import { SITE_TAGLINE, SITE_TITLE } from './app/site';
+
+const ROUTES = ['home', ...SECTION_KEYS] as const;
+type Route = (typeof ROUTES)[number];
 
 function App() {
-  const [sectionKey, navigate] = useHashRoute<SectionKey>(SECTION_KEYS, 'convolution');
+  const [route, navigate] = useHashRoute<Route>(ROUTES, 'home');
+  const sectionKey: SectionKey | null = route === 'home' ? null : route;
   const [menuOpen, setMenuOpen] = useState(false);
   const anchorRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const section = SECTIONS.find(s => s.key === sectionKey) ?? SECTIONS[0];
-  const { Component } = section;
+  const section = sectionKey ? SECTIONS.find(s => s.key === sectionKey) ?? null : null;
 
   useEffect(() => {
-    document.title = `${section.label} — Image Processing Playground`;
-  }, [section.label]);
+    document.title = section ? `${section.label} — ${SITE_TITLE}` : `${SITE_TITLE} — ${SITE_TAGLINE}`;
+  }, [section]);
 
   // Close on Escape (returning focus to the menu button) or on a click outside the
   // menu. The toggle button is inside `anchorRef`, so clicking it still toggles.
@@ -37,15 +42,29 @@ function App() {
     };
   }, [menuOpen]);
 
-  const go = (key: SectionKey) => {
+  const go = (key: Route) => {
     navigate(key);
     setMenuOpen(false);
-    buttonRef.current?.focus();
+    window.scrollTo(0, 0);
   };
 
   return (
     <div className="app">
       <header className="app-header">
+        <a
+          href="#/home"
+          className="header-brand"
+          aria-label={`${SITE_TITLE}: overview of all lessons`}
+          aria-current={route === 'home' ? 'page' : undefined}
+          onClick={(e) => { e.preventDefault(); go('home'); }}
+        >
+          <img className="header-brand-logo" src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={28} height={28} />
+          <span className="header-brand-text">
+            <span className="header-menu-title">{SITE_TITLE}</span>
+            <span className="header-tagline">{SITE_TAGLINE}</span>
+          </span>
+        </a>
+
         <div className="header-menu-anchor" ref={anchorRef}>
           <button
             ref={buttonRef}
@@ -56,15 +75,31 @@ function App() {
             aria-controls="section-menu"
             onClick={() => setMenuOpen(open => !open)}
           >
-            <span aria-hidden="true">{section.icon}</span>
-            <span className="header-menu-title">Image Processing Playground</span>
-            <span className="header-menu-current">· {section.label}</span>
+            {section ? (
+              <>
+                <span aria-hidden="true">{section.icon}</span>
+                <span className="header-menu-current">{section.label}</span>
+              </>
+            ) : (
+              <span className="header-menu-current">Lessons</span>
+            )}
             <span className="header-menu-arrow" aria-hidden="true">▾</span>
           </button>
 
           {menuOpen && (
-            <nav className="header-menu" id="section-menu" aria-label="Sections">
+            <nav className="header-menu" id="section-menu" aria-label="Lessons">
               <ul className="header-menu-grid">
+                <li className="header-menu-home">
+                  <a
+                    href="#/home"
+                    className={`header-menu-item${route === 'home' ? ' header-menu-item-active' : ''}`}
+                    aria-current={route === 'home' ? 'page' : undefined}
+                    onClick={(e) => { e.preventDefault(); go('home'); }}
+                  >
+                    <span className="header-menu-icon" aria-hidden="true">🏠</span>
+                    <span className="header-menu-label">Overview of all lessons</span>
+                  </a>
+                </li>
                 {SECTIONS.map(s => (
                   <li key={s.key}>
                     <a
@@ -86,11 +121,15 @@ function App() {
       </header>
 
       <main className="section-container">
-        <SectionErrorBoundary key={sectionKey}>
-          <Suspense fallback={<div className="section-loading" role="status">⏳ Loading {section.label}…</div>}>
-            <Component />
-          </Suspense>
-        </SectionErrorBoundary>
+        {section ? (
+          <SectionErrorBoundary key={section.key}>
+            <Suspense fallback={<div className="section-loading" role="status">⏳ Loading {section.label}…</div>}>
+              <section.Component />
+            </Suspense>
+          </SectionErrorBoundary>
+        ) : (
+          <Home onOpen={go} />
+        )}
       </main>
 
       <footer className="app-footer">

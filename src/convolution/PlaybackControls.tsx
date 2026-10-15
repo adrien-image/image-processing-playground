@@ -46,9 +46,9 @@ export function PlaybackControls({ index, total, playing, speed, position, onGoT
               step={0.01}
               value={Math.log(speed)}
               onChange={(e) => onSpeedChange(Math.round(Math.exp(Number(e.target.value))))}
-              aria-valuetext={`${speed} pixels per second`}
+              aria-valuetext={`${speed.toLocaleString('en')} pixels per second`}
             />
-            <span className="speed-value">{speed} px/s</span>
+            <span className="speed-value">{speed.toLocaleString('en')} px/s</span>
           </div>
         </div>
       </div>

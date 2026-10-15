@@ -27,6 +27,11 @@ export function snakeOrder(width: number, height: number): PixelPos[] {
   return order;
 }
 
+/** Position of pixel (col, row) in `snakeOrder(width, …)`: its inverse. */
+export function snakeIndex({ col, row }: PixelPos, width: number): number {
+  return row * width + (row % 2 === 0 ? col : width - 1 - col);
+}
+
 /**
  * Recompute one output pixel step by step, using the same replicate padding as
  * `convolve`, so the panel always agrees with the image.

@@ -3,9 +3,11 @@ import convolveCode from '../processors/utils.ts?raw';
 import { ShowCodeButton } from '../components/CodeViewer';
 import { PixelCanvas } from '../components/PixelCanvas';
 import { useImageData, type ImageSource } from '../hooks/useImageData';
-import { checkerboard, circle, corner, verticalEdge } from '../lib/demoImages';
+import { checkerboard, circle, corner, scene, verticalEdge } from '../lib/demoImages';
 import { getProcessor, resolveConfig, type ProcessorConfig } from '../processors';
-import { ImageSourceSelector } from './ImageSourceSelector';
+import { ImageSourceSelector, type Resolution } from './ImageSourceSelector';
+import { PixelPicker } from './PixelPicker';
+import { snakeIndex, type PixelPos } from './playback';
 import type { DemoImage } from './demoImageNames';
 import { ProcessorSelector } from './ProcessorSelector';
 import { KernelMatrixDisplay } from './KernelMatrixDisplay';
@@ -14,29 +16,42 @@ import { MathPanel } from './MathPanel';
 import { useConvolutionPlayback } from './useConvolutionPlayback';
 import './convolution.css';
 
-const DEMOS: Record<DemoImage, () => HTMLCanvasElement> = {
-  checkerboard: () => checkerboard(32, 8),
-  circle: () => circle(32),
-  edges: () => verticalEdge(32),
-  corner: () => corner(32),
+const DEMOS: Record<DemoImage, (size: number) => HTMLCanvasElement> = {
+  scene: (size) => scene(size),
+  checkerboard: (size) => checkerboard(size, size / 4),
+  circle: (size) => circle(size),
+  edges: (size) => verticalEdge(size),
+  corner: (size) => corner(size),
 };
 
-const MAX_SIZE = 64;
-const DISPLAY_SIZE = 400;
+/**
+ * Small images keep every pixel and every number readable while stepping through;
+ * large ones show what the filter actually does to a picture.
+ */
+const RESOLUTIONS: Record<Resolution, { demo: number; maxUpload: number; startAtEnd: boolean; speed: number }> = {
+  small: { demo: 32, maxUpload: 64, startAtEnd: false, speed: 20 },
+  large: { demo: 256, maxUpload: 256, startAtEnd: true, speed: 2000 },
+};
+
+const DISPLAY_SIZE = 480;
 
 type IpTab = 'processing' | 'computation';
 
 export function ConvolutionSection() {
   const [tab, setTab] = useState<IpTab>('processing');
   const [showCode, setShowCode] = useState(false);
-  const [demo, setDemo] = useState<DemoImage | 'upload'>('checkerboard');
-  const [source, setSource] = useState<ImageSource>(() => DEMOS.checkerboard());
+  const [resolution, setResolution] = useState<Resolution>('large');
+  const res = RESOLUTIONS[resolution];
+  const [demo, setDemo] = useState<DemoImage | 'upload'>('scene');
+  const [demoSource, setDemoSource] = useState<ImageSource>(() => DEMOS.scene(res.demo));
+  const [upload, setUpload] = useState<string | null>(null);
+  const source = demo === 'upload' && upload ? upload : demoSource;
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   // Remember parameter values per processor, so switching back keeps them.
   const [configs, setConfigs] = useState<Record<string, ProcessorConfig>>({});
 
-  const { image, error: loadError, loading } = useImageData(source, MAX_SIZE);
+  const { image, error: loadError, loading } = useImageData(source, res.maxUpload);
   const processor = activeId ? getProcessor(activeId) ?? null : null;
   const config = useMemo(
     () => (processor ? resolveConfig(processor, configs[processor.id] ?? {}) : {}),
@@ -48,18 +63,27 @@ export function ConvolutionSection() {
     image,
     kernel,
     processor?.output ?? null,
-    `${demo}|${typeof source === 'string' ? source : ''}|${activeId}`,
+    `${demo}|${resolution}|${upload ?? ''}|${activeId}`,
+    { startAtEnd: res.startAtEnd, defaultSpeed: res.speed },
   );
 
   const selectDemo = (name: DemoImage) => {
     setDemo(name);
-    setSource(DEMOS[name]());
+    setDemoSource(DEMOS[name](res.demo));
     setUploadError(null);
   };
-  const upload = (src: string) => {
+  const selectUpload = (src: string) => {
     setDemo('upload');
-    setSource(src);
+    setUpload(src);
     setUploadError(null);
+  };
+  const selectResolution = (next: Resolution) => {
+    setResolution(next);
+    if (demo !== 'upload') setDemoSource(DEMOS[demo](RESOLUTIONS[next].demo));
+  };
+  const pick = (p: PixelPos) => {
+    playback.stop();
+    playback.goTo(snakeIndex(p, width), { inspect: true });
   };
 
   const error = uploadError ?? loadError;
@@ -72,7 +96,14 @@ export function ConvolutionSection() {
   return (
     <div className="app-layout">
       <aside className="sidebar">
-        <ImageSourceSelector active={demo} onSelect={selectDemo} onUpload={upload} onError={setUploadError} />
+        <ImageSourceSelector
+          active={demo}
+          resolution={resolution}
+          onSelect={selectDemo}
+          onUpload={selectUpload}
+          onResolutionChange={selectResolution}
+          onError={setUploadError}
+        />
         <ProcessorSelector
           activeProcessor={activeId}
           config={config}
@@ -119,6 +150,11 @@ export function ConvolutionSection() {
                           style={{ left: pct(pos.col, width), top: pct(pos.row, height), width: pct(1, width), height: pct(1, height) }}
                         />
                         <div className="position-badge">({pos.col}, {pos.row})</div>
+                        <PixelPicker
+                          width={width} height={height} position={pos}
+                          index={playback.index} total={playback.total}
+                          label="Original image: pick a pixel to inspect" onPick={pick}
+                        />
                       </>
                     )}
                   </PixelCanvas>
@@ -140,10 +176,24 @@ export function ConvolutionSection() {
                         style={{ left: pct(pos.col, width), top: pct(pos.row, height), width: pct(1, width), height: pct(1, height) }}
                       />
                     )}
+                    {pos && (
+                      <PixelPicker
+                        width={width} height={height} position={pos}
+                        index={playback.index} total={playback.total}
+                        label="Processed image: pick a pixel to inspect" onPick={pick}
+                      />
+                    )}
                   </PixelCanvas>
                   <span className="dimensions">{width}×{height}</span>
                 </div>
               </div>
+
+              {processor && (
+                <p className="pick-hint">
+                  Click or drag on either image to inspect any pixel, or press ▶ to watch the kernel sweep the image.
+                  {resolution === 'large' && ' Switch to Small (32 px) to follow every step of the arithmetic.'}
+                </p>
+              )}
 
               {processor && playback.total > 0 && (
                 <PlaybackControls

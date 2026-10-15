@@ -7,7 +7,7 @@ on demo images or your own uploads, and every section can show you its source co
 
 | Section | What you can explore |
 |---|---|
-| Convolution | Step through a kernel pixel by pixel, with the multiply-and-sum for every output pixel (Sobel, Gaussian blur, sharpen — with adjustable parameters) |
+| Convolution | See Sobel, Gaussian blur (3×3 to 9×9) and sharpen on a 256 px image, or switch to 32 px and step through the kernel pixel by pixel. Click any pixel to see its multiply-and-sum |
 | Segmentation | Otsu thresholding vs. k-means clustering, with the histogram |
 | Matching | Harris corners → rotation-normalised descriptors → RANSAC similarity estimate, compared with the ground truth |
 | Color | RGB / HSV channels, hue, saturation, brightness and gamma adjustments |
@@ -23,8 +23,9 @@ on demo images or your own uploads, and every section can show you its source co
 | Template | Normalised cross-correlation template matching with its score map |
 | Classification | Train LeNet-5 on MNIST in the browser (TensorFlow.js), draw digits to classify, and look inside the network: learned filters, activation maps and occlusion sensitivity |
 
-Each section is its own lazily-loaded chunk, and the current section is kept in the URL (`#/edges`),
-so sections can be bookmarked and shared.
+The home page (`#/home`) introduces the playground and lists every lesson. Each section is its own
+lazily-loaded chunk, and the current section is kept in the URL (`#/edges`), so sections can be
+bookmarked and shared.
 
 ## Quick start
 
@@ -51,8 +52,8 @@ and push, and deploys `main` to GitHub Pages.
 ```
 src/
 ├── main.tsx                 ← entry: fonts, global styles, processor registration
-├── App.tsx                  ← header menu, hash routing, lazy sections
-├── app/                     ← section list, hash router, error boundary
+├── App.tsx                  ← header, lesson menu, hash routing, lazy sections
+├── app/                     ← home page, site title/tagline, section list, hash router, error boundary
 ├── processors/              ← convolution filters for the Convolution section
 │   ├── types.ts             ← Processor interface (the contract)
 │   ├── registry.ts          ← central registry (the UI lists what is registered)

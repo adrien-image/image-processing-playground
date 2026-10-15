@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { revealPartial, snakeOrder, stepMath } from './playback';
+import { revealPartial, snakeIndex, snakeOrder, stepMath } from './playback';
 import { applyProcessor } from '../processors';
 import { SharpenProcessor } from '../processors/sharpen';
 import { makeOutputMapper } from '../processors/utils';
@@ -12,6 +12,14 @@ describe('snakeOrder', () => {
     expect(order.slice(0, 5)).toEqual([
       { col: 0, row: 0 }, { col: 1, row: 0 }, { col: 2, row: 0 }, { col: 3, row: 0 }, { col: 3, row: 1 },
     ]);
+  });
+});
+
+describe('snakeIndex', () => {
+  it('is the inverse of snakeOrder', () => {
+    for (const [w, h] of [[4, 3], [5, 4], [1, 3], [7, 1]]) {
+      snakeOrder(w, h).forEach((pos, i) => expect(snakeIndex(pos, w)).toBe(i));
+    }
   });
 });
 
