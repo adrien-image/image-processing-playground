@@ -137,8 +137,8 @@ function App() {
         <details className="footer-details">
           <summary>Add your own convolution filter</summary>
           <div className="footer-details-content">
-            <p>1. Create <code>src/processors/your-filter/index.ts</code> exporting a <code>Processor</code> (kernel, output mode, params).</p>
-            <p>2. Register it in <code>src/processors/init.ts</code>.</p>
+            <p>1. Create <code>src/image-processing/processors/your-filter/index.ts</code> exporting a <code>Processor</code> (kernel, output mode, params).</p>
+            <p>2. Register it in <code>src/image-processing/processors/init.ts</code>.</p>
             <p>3. It appears in the Convolution section's processor list, with controls generated from its params.</p>
           </div>
         </details>

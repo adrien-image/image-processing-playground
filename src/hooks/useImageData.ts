@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { rgbaToGrayscale } from '../processors/utils';
+import { rgbaToGrayscale } from '../image-processing/processors/utils';
 import { createCanvas, fitWithin, quietImageData } from '../lib/canvas';
 
 /** A URL (data:, blob:, same-origin) or an already-drawn canvas. */

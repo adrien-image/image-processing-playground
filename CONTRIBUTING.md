@@ -20,7 +20,7 @@ animates it, shows its math and renders its parameter controls. You don't touch 
 ### 1. Create the processor
 
 ```ts
-// src/processors/box-blur/index.ts
+// src/image-processing/processors/box-blur/index.ts
 import type { Processor } from '../types';
 
 export const BoxBlurProcessor: Processor = {
@@ -51,12 +51,12 @@ export const BoxBlurProcessor: Processor = {
 ```
 
 Reusable kernels (Sobel, Prewitt, Laplacian, `gaussianKernel`, `sharpenKernel`) are in
-`src/processors/kernels.ts`.
+`src/image-processing/processors/kernels.ts`.
 
 ### 2. Register it
 
 ```ts
-// src/processors/init.ts
+// src/image-processing/processors/init.ts
 import { BoxBlurProcessor } from './box-blur';
 
 export function initProcessors(): void {
@@ -85,7 +85,7 @@ interface Processor {
 ```
 
 To run a processor outside the UI, use `applyProcessor(processor, gray, width, height, config)` from
-`src/processors`. It returns `{ raw, output, kernel }`.
+`src/image-processing/processors`. It returns `{ raw, output, kernel }`.
 
 ### Supported param types
 
@@ -97,7 +97,7 @@ To run a processor outside the UI, use `applyProcessor(processor, gray, width, h
 
 ## Utility functions
 
-In `src/processors/utils.ts`:
+In `src/image-processing/processors/utils.ts`:
 
 - **`convolve(pixels, width, height, kernel)`** — 2-D sliding-window sum with replicate padding (strictly, cross-correlation: the kernel isn't flipped).
 - **`makeOutputMapper(raw, mode)`** — maps raw sums to 0–255 for an `OutputMode`.

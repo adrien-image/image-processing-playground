@@ -1,4 +1,4 @@
-import { grayscaleToRGBA } from '../processors/utils';
+import { grayscaleToRGBA } from '../image-processing/processors/utils';
 import { toImageData } from './canvas';
 
 /** A single-channel image with values in 0–255. */

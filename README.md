@@ -81,8 +81,8 @@ downloads the package's 20 MB of JSON.
 
 ## Adding a new convolution filter
 
-See [`CONTRIBUTING.md`](./CONTRIBUTING.md). In short: create `src/processors/your-filter/index.ts`
-exporting a `Processor` (kernel, output mode, parameters), register it in `src/processors/init.ts`,
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md). In short: create `src/image-processing/processors/your-filter/index.ts`
+exporting a `Processor` (kernel, output mode, parameters), register it in `src/image-processing/processors/init.ts`,
 and it appears in the Convolution section with controls generated from its parameters.
 
 ## Tech stack
