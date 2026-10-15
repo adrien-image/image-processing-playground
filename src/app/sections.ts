@@ -2,7 +2,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'classification',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -92,6 +92,12 @@ export const SECTIONS: SectionDef[] = [
   { key: 'template', group: 'image-processing', icon: '🔍', label: 'Template',
     blurb: 'Find a patch in an image with normalised cross-correlation.',
     Component: lazy(() => import('../image-processing/template/TemplateSection').then(m => ({ default: m.TemplateSection }))) },
+  { key: 'optical-flow', group: 'image-processing', icon: '🌊', label: 'Optical flow',
+    blurb: 'Track how every part of the image moves between two frames: Lucas–Kanade, the aperture problem and pyramids.',
+    Component: lazy(() => import('../image-processing/optical-flow/OpticalFlowSection').then(m => ({ default: m.OpticalFlowSection }))) },
+  { key: 'stereo', group: 'image-processing', icon: '👓', label: 'Stereo depth',
+    blurb: 'Depth from two cameras: block matching along each row, window size trade-offs, occlusions and the left–right check.',
+    Component: lazy(() => import('../image-processing/stereo/StereoSection').then(m => ({ default: m.StereoSection }))) },
   { key: 'classification', group: 'deep-learning', icon: '🧠', label: 'Classification',
     blurb: 'Train a CNN on MNIST in your browser, draw digits and look inside the network.',
     Component: lazy(() => import('../deep-learning/classification/DLPlayground').then(m => ({ default: m.DLPlayground }))) },
