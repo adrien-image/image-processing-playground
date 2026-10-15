@@ -1,5 +1,5 @@
-import { Suspense, useEffect, useRef, useState } from 'react';
-import { SECTIONS, SECTION_KEYS, type SectionKey } from './app/sections';
+import { Fragment, Suspense, useEffect, useRef, useState } from 'react';
+import { GROUPS, SECTIONS, SECTION_KEYS, sectionsIn, type SectionKey } from './app/sections';
 import { useHashRoute } from './app/useHashRoute';
 import { SectionErrorBoundary } from './app/SectionErrorBoundary';
 import { Home } from './app/Home';
@@ -100,18 +100,23 @@ function App() {
                     <span className="header-menu-label">Overview of all lessons</span>
                   </a>
                 </li>
-                {SECTIONS.map(s => (
-                  <li key={s.key}>
-                    <a
-                      href={`#/${s.key}`}
-                      className={`header-menu-item${s.key === sectionKey ? ' header-menu-item-active' : ''}`}
-                      aria-current={s.key === sectionKey ? 'page' : undefined}
-                      onClick={(e) => { e.preventDefault(); go(s.key); }}
-                    >
-                      <span className="header-menu-icon" aria-hidden="true">{s.icon}</span>
-                      <span className="header-menu-label">{s.label}</span>
-                    </a>
-                  </li>
+                {GROUPS.map(group => (
+                  <Fragment key={group.key}>
+                    <li className="header-menu-group" aria-hidden="true">{group.icon} {group.label}</li>
+                    {sectionsIn(group.key).map(s => (
+                      <li key={s.key}>
+                        <a
+                          href={`#/${s.key}`}
+                          className={`header-menu-item${s.key === sectionKey ? ' header-menu-item-active' : ''}`}
+                          aria-current={s.key === sectionKey ? 'page' : undefined}
+                          onClick={(e) => { e.preventDefault(); go(s.key); }}
+                        >
+                          <span className="header-menu-icon" aria-hidden="true">{s.icon}</span>
+                          <span className="header-menu-label">{s.label}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </Fragment>
                 ))}
               </ul>
             </nav>

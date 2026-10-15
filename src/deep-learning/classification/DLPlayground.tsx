@@ -5,7 +5,9 @@ import { ShowCodeButton } from '../../components/CodeViewer';
 import {
   buildLeNet, disposeLeNet, evaluateTestSet, LENET_PARAMS, predictDigit, snapshotLeNet, trainModel, type EvalResult, type TrainingEpochData,
 } from './lenet';
-import { loadMnist, type MnistData, type MnistSplit } from '../shared/mnist';
+import type { MnistData, MnistSplit } from '../shared/mnist';
+import { getMnist } from '../shared/useMnist';
+import { publishLeNet } from '../shared/modelStore';
 import { toMnistInput } from './preprocess';
 import { TrainingProgress } from './TrainingProgress';
 import { DRAW_SIZE, DrawingCanvas } from './DrawingCanvas';
@@ -107,7 +109,7 @@ export function DLPlayground() {
 
     try {
       if (!dataRef.current) {
-        dataRef.current = await loadMnist();
+        dataRef.current = await getMnist();
         setTestSplit(dataRef.current.test);
       }
       if (stale()) return;
@@ -119,6 +121,7 @@ export function DLPlayground() {
       const weightsChanged = () => {
         const snapshot = snapshotLeNet(model, snapshotRef.current ?? undefined);
         snapshotRef.current = snapshot;
+        publishLeNet(model, 'the Classification lesson');
         setTrained(prev => ({ model: snapshot, version: (prev?.version ?? 0) + 1 }));
       };
 

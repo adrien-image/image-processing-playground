@@ -1,0 +1,42 @@
+.lk-select {
+  width: auto;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.lk-bottom {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
+.lk-kernels {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.lk-kernel figcaption {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+
+.lk-kernel-grid {
+  display: grid;
+  gap: 2px;
+}
+
+.lk-cell {
+  min-width: 48px;
+  padding: 0.45rem 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: #fff;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.lk-gap {
+  margin-left: 0.75rem;
+}

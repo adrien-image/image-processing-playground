@@ -1,0 +1,84 @@
+.rf-editor {
+  align-items: flex-start;
+}
+
+.rf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  display: block;
+  overflow-x: auto;
+}
+
+.rf-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+}
+
+.rf-table td {
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+
+.rf-invalid td {
+  color: var(--error);
+}
+
+.rf-input {
+  width: auto;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.78rem;
+}
+
+select.rf-input {
+  padding-right: 1.6rem;
+  background-position: right 0.4rem center;
+}
+
+.rf-number {
+  width: 3.5rem;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+}
+
+.rf-add {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rf-summary {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.rf-summary strong {
+  color: var(--text);
+}
+
+.rf-layers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.rf-panel {
+  padding: 0.75rem;
+}
+
+.rf-canvas {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  border-radius: 4px;
+}
