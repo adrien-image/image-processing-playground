@@ -1,0 +1,89 @@
+.jpeg-picker {
+  position: absolute;
+  inset: 0;
+  cursor: crosshair;
+}
+
+.jpeg-block {
+  position: absolute;
+  box-sizing: border-box;
+  border: 2px solid #ffdd44;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.jpeg-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.jpeg-stats > div {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 0.6rem;
+}
+
+.jpeg-stats strong {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+}
+
+.jpeg-stats span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.jpeg-inspector {
+  overflow-x: auto;
+}
+
+.jpeg-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: max-content;
+  justify-content: center;
+}
+
+.jpeg-arrow {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.jpeg-grid-wrap figcaption {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.jpeg-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 26px);
+  gap: 1px;
+}
+
+.jpeg-cell {
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  color: #fff;
+  border-radius: 2px;
+}
+
+.jpeg-cell-zero {
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.jpeg-basis {
+  align-self: center;
+  text-align: center;
+}

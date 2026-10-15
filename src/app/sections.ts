@@ -1,8 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
+  'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -68,6 +68,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'frequency', group: 'image-processing', icon: '🌀', label: 'Frequency',
     blurb: 'The 2-D Fourier spectrum, with low-, high- and band-pass filters.',
     Component: lazy(() => import('../image-processing/frequency/FrequencySection').then(m => ({ default: m.FrequencySection }))) },
+  { key: 'jpeg', group: 'image-processing', icon: '🗜', label: 'JPEG',
+    blurb: 'How JPEG shrinks images: 8×8 DCT, quantisation and zigzag run-lengths, with a block-by-block inspector.',
+    Component: lazy(() => import('../image-processing/jpeg/JpegSection').then(m => ({ default: m.JpegSection }))) },
   { key: 'pyramids', group: 'image-processing', icon: '🔺', label: 'Pyramids',
     blurb: 'Resampling and aliasing, Gaussian and Laplacian pyramids, multiband blending.',
     Component: lazy(() => import('../image-processing/pyramids/PyramidsSection').then(m => ({ default: m.PyramidsSection }))) },
@@ -83,6 +86,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'denoising', group: 'image-processing', icon: '🧹', label: 'Denoising',
     blurb: 'Median vs. Gaussian filtering on noisy images, scored with PSNR.',
     Component: lazy(() => import('../image-processing/denoising/DenoisingSection').then(m => ({ default: m.DenoisingSection }))) },
+  { key: 'deblur', group: 'image-processing', icon: '🔬', label: 'Deblurring',
+    blurb: 'Undo motion blur and defocus: the inverse filter, the Wiener filter and Richardson–Lucy, and why noise makes it hard.',
+    Component: lazy(() => import('../image-processing/deblur/DeblurSection').then(m => ({ default: m.DeblurSection }))) },
   { key: 'template', group: 'image-processing', icon: '🔍', label: 'Template',
     blurb: 'Find a patch in an image with normalised cross-correlation.',
     Component: lazy(() => import('../image-processing/template/TemplateSection').then(m => ({ default: m.TemplateSection }))) },
