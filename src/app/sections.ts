@@ -1,7 +1,7 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'superpixels', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency', 'jpeg',
+  'convolution', 'segmentation', 'superpixels', 'matching', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
@@ -65,6 +65,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'regions', group: 'image-processing', icon: '🧩', label: 'Regions',
     blurb: 'Label connected components and measure area, centroid, perimeter and circularity.',
     Component: lazy(() => import('../image-processing/regions/RegionsSection').then(m => ({ default: m.RegionsSection }))) },
+  { key: 'watershed', group: 'image-processing', icon: '💧', label: 'Watershed',
+    blurb: 'Split touching coins: distance transform, markers, and flooding a landscape until the basins meet.',
+    Component: lazy(() => import('../image-processing/watershed/WatershedSection').then(m => ({ default: m.WatershedSection }))) },
   { key: 'edges', group: 'image-processing', icon: '⚡', label: 'Edges',
     blurb: 'Sobel, Prewitt, Laplacian and Canny edge detectors side by side.',
     Component: lazy(() => import('../image-processing/edges/EdgeComparisonSection').then(m => ({ default: m.EdgeComparisonSection }))) },
