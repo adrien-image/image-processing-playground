@@ -14,18 +14,26 @@ The lessons come in two groups, which are also the two source folders: `src/imag
 |---|---|
 | Convolution | See Sobel, Gaussian blur (3×3 to 9×9) and sharpen on a 256 px image, or switch to 32 px and step through the kernel pixel by pixel. Click any pixel to see its multiply-and-sum |
 | Segmentation | Otsu thresholding vs. k-means clustering, with the histogram |
+| Superpixels | SLIC step by step: k-means on colour and position, compactness, mean-colour regions |
 | Matching | Harris corners → rotation-normalised descriptors → RANSAC similarity estimate, compared with the ground truth |
 | Color | RGB / HSV channels, hue, saturation, brightness and gamma adjustments |
 | Morphology | Erosion, dilation, opening and closing on binary and grayscale images |
 | Regions | Connected-component labelling (4/8-connectivity) and per-object measurements: area, centroid, bounding box, perimeter, circularity |
+| Watershed | Touching coins split with the distance transform, markers and an animated flood |
 | Edges | Sobel, Prewitt, Laplacian and Canny side by side |
 | Frequency | 2-D FFT spectrum, ideal and Gaussian low/high/band filters |
+| JPEG | 8×8 DCT, quality-scaled quantisation, zigzag and an entropy estimate of the file size; a block inspector and the 64 basis images |
 | Pyramids | Resampling and aliasing, nearest/bilinear/bicubic interpolation, Gaussian and Laplacian pyramids, multiband blending |
 | Hough | Line segments and circles from the Hough transform, with the accumulators |
 | Histogram | Histogram equalisation and its mapping curve |
 | Augmentation | Chained random transformations used to grow training sets |
 | Denoising | Median vs. Gaussian filtering on salt-and-pepper or Gaussian noise, scored with PSNR |
+| Deblurring | Motion, Gaussian and defocus blur; inverse filter vs. Wiener vs. Richardson–Lucy, with the blur's frequency response |
+| Inpainting | Paint a hole and fill it by diffusion or by copying patches (Criminisi), patch by patch |
 | Template | Normalised cross-correlation template matching with its score map |
+| Optical flow | Pyramidal Lucas–Kanade on synthetic motions, the aperture problem, errors against the true flow |
+| Stereo depth | Block matching along rows, window size, occlusions and the left–right check |
+| Panorama stitching | Corners → matches → RANSAC homography → warping, with overwrite / average / feather blending |
 
 ### Deep learning
 
@@ -97,6 +105,7 @@ src/
 <group>/<lesson>/            ← every lesson folder has the same shape:
 ├── <algorithm>.ts           ←   algorithm code, no DOM (what "Show code" displays)
 ├── <algorithm>.test.ts      ←   its unit tests
+├── <algorithm>.py           ←   the same algorithm in Python / PyTorch (the "Python" tab of "Show code")
 ├── <Lesson>Section.tsx      ←   UI
 └── <lesson>.css             ←   styles
 ```
@@ -109,6 +118,21 @@ through one `PixelCanvas` component that keeps the aspect ratio.
 `scripts/build-mnist-sprite.mjs` packs a balanced MNIST subset (600 train / 100 validation /
 100 test images per digit) from the `mnist` package into a 1.2 MB gzip file, so the browser never
 downloads the package's 20 MB of JSON.
+
+## Python / PyTorch versions
+
+Every lesson also has its algorithm written with PyTorch tensor operations (`F.conv2d`, `unfold`,
+`grid_sample`, `torch.fft`, autograd, `nn.Module`…), shown in the **Python · PyTorch** tab of "Show code".
+Each `.py` file is standalone and ends with a self-check on synthetic data:
+
+```bash
+pip install -r requirements.txt          # torch (the CPU wheel is enough)
+python scripts/check_python.py           # run every self-check
+python scripts/check_python.py stereo    # or only the files whose path contains "stereo"
+python src/image-processing/stereo/stereo.py
+```
+
+CI runs `scripts/check_python.py` in a separate job.
 
 ## Adding a new convolution filter
 
