@@ -43,7 +43,10 @@ export function PixelCanvas({
   }, [image]);
 
   const aspect = image ? image.width / image.height : placeholderAspect;
-  const width = aspect >= 1 ? size : Math.round(size * aspect);
+  // Not rounded: for very thin portrait images rounding the width to whole pixels
+  // would change the displayed height (via aspect-ratio), so panels showing the same
+  // image at different resolutions would no longer line up.
+  const width = aspect >= 1 ? size : size * aspect;
 
   return (
     <div

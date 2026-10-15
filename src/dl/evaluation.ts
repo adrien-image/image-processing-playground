@@ -36,3 +36,22 @@ export function selectExamples(
 
   return [...right, ...mistakes.slice(0, wrong)];
 }
+
+/**
+ * Indices in round-robin order over the labels — first image of each digit 0…9, then
+ * the second of each, … — so stepping through a digit-sorted split shows every digit.
+ */
+export function interleaveByLabel(labels: ArrayLike<number>): number[] {
+  const groups = new Map<number, number[]>();
+  for (let i = 0; i < labels.length; i++) {
+    const group = groups.get(labels[i]);
+    if (group) group.push(i);
+    else groups.set(labels[i], [i]);
+  }
+  const ordered = [...groups.entries()].sort((a, b) => a[0] - b[0]).map(([, indices]) => indices);
+  const order: number[] = [];
+  for (let round = 0; order.length < labels.length; round++) {
+    for (const indices of ordered) if (round < indices.length) order.push(indices[round]);
+  }
+  return order;
+}

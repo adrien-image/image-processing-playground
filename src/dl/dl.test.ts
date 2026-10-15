@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { confusionMatrix, selectExamples } from './evaluation';
+import { confusionMatrix, interleaveByLabel, selectExamples } from './evaluation';
 import { MNIST_SIZE, toMnistInput } from './preprocess';
 import { decodeMnist } from './mnist';
 
@@ -27,6 +27,19 @@ describe('confusionMatrix', () => {
   it('counts (true, predicted) pairs', () => {
     const cm = confusionMatrix([0, 0, 1, 2], [0, 1, 1, 2], 3);
     expect(cm).toEqual([[1, 1, 0], [0, 1, 0], [0, 0, 1]]);
+  });
+});
+
+describe('interleaveByLabel', () => {
+  it('visits the labels round-robin', () => {
+    expect(interleaveByLabel([0, 0, 1, 1, 2, 2])).toEqual([0, 2, 4, 1, 3, 5]);
+  });
+
+  it('copes with uneven groups and unsorted labels', () => {
+    const labels = [3, 1, 3, 3, 1];
+    const order = interleaveByLabel(labels);
+    expect(order).toEqual([1, 0, 4, 2, 3]);
+    expect([...order].sort()).toEqual([0, 1, 2, 3, 4]);
   });
 });
 

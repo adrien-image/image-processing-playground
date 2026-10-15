@@ -1,0 +1,102 @@
+/* Pyramids section: resampling & aliasing, Gaussian/Laplacian pyramids, multiband blending. */
+
+/* Tab panels reuse .demo-section (display: flex), which would override the `hidden` attribute. */
+.pyr-panel[hidden] {
+  display: none;
+}
+
+.pyr-code {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.pyr-code-select {
+  width: auto;
+  padding: 0.25rem 1.6rem 0.25rem 0.5rem;
+  background-position: right 0.5rem center;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Outline of the crop that the upscaling comparison enlarges. */
+.pyr-crop-box {
+  position: absolute;
+  border: 2px solid #ffd166;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+/* A row of pyramid levels, bottom-aligned so the halving sizes read as a staircase. */
+.pyr-levels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.pyr-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  max-width: 100%;
+}
+
+.pyr-level .pixel-canvas {
+  margin: 0;
+  border-radius: 4px;
+}
+
+.pyr-level figcaption {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pyr-bands {
+  align-items: flex-start;
+}
+
+.demo-panel .segmented .demo-label {
+  align-self: center;
+}
+
+/* Greek letters and subscripts in uppercase panel headings must keep their case (σ, not Σ). */
+.pyr-keep-case {
+  text-transform: none;
+}
+
+.demo-panel > .pyr-formula {
+  margin: -0.2rem 0 0.6rem;
+}
+
+.demo-slider-section .panel-heading {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 640px) {
+  .pyr-levels { gap: 0.5rem; }
+  .pyr-code-select { font-size: 0.7rem; padding: 0.2rem 1.4rem 0.2rem 0.35rem; background-position: right 0.35rem center; }
+}
+
+/* Thumbnails only a few pixels wide: a rounded corner would eat most of the image. */
+.pyr-level .pixel-canvas.pyr-tiny {
+  border-radius: 1px;
+}
+
+/* "×2" after a level drawn larger than to scale. */
+.pyr-zoom {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* The three shrink panels stay as wide as their 256 px images; long captions wrap. */
+.pyr-shrink-panel .caption {
+  max-width: 256px;
+  margin-inline: auto;
+}

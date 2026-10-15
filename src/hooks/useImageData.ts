@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { rgbaToGrayscale } from '../processors/utils';
-import { createCanvas, fitWithin } from '../lib/canvas';
+import { createCanvas, fitWithin, quietImageData } from '../lib/canvas';
 
 /** A URL (data:, blob:, same-origin) or an already-drawn canvas. */
 export type ImageSource = string | HTMLCanvasElement;
@@ -25,7 +25,7 @@ function rasterise(source: CanvasImageSource, srcW: number, srcH: number, maxSiz
   const { ctx } = createCanvas(width, height);
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(source, 0, 0, width, height);
-  const imageData = ctx.getImageData(0, 0, width, height);
+  const imageData = quietImageData(ctx.getImageData(0, 0, width, height));
   return { imageData, gray: rgbaToGrayscale(imageData.data, width, height), width, height };
 }
 

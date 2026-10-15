@@ -2,24 +2,28 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import type * as tf from '@tensorflow/tfjs';
 import lenetCode from './lenet.ts?raw';
 import { ShowCodeButton } from '../components/CodeViewer';
-import { buildLeNet, evaluateTestSet, LENET_PARAMS, predictDigit, trainModel, type EvalResult, type TrainingEpochData } from './lenet';
-import { loadMnist, type MnistData } from './mnist';
+import {
+  buildLeNet, disposeLeNet, evaluateTestSet, LENET_PARAMS, predictDigit, snapshotLeNet, trainModel, type EvalResult, type TrainingEpochData,
+} from './lenet';
+import { loadMnist, type MnistData, type MnistSplit } from './mnist';
 import { toMnistInput } from './preprocess';
 import { TrainingProgress } from './TrainingProgress';
 import { DRAW_SIZE, DrawingCanvas } from './DrawingCanvas';
 import { PredictionDisplay } from './PredictionDisplay';
 import { ConfusionMatrix } from './ConfusionMatrix';
 import { DigitCanvas, TestResults } from './TestResults';
+import { InsideCnn, type TrainedModel } from './InsideCnn';
 import './dl.css';
 
 type Status = 'idle' | 'loading' | 'training' | 'done' | 'error';
-type DlTab = 'training' | 'prediction' | 'test-results' | 'confusion-matrix';
+type DlTab = 'training' | 'prediction' | 'test-results' | 'confusion-matrix' | 'inside-cnn';
 
 const TABS: { key: DlTab; label: string; needsModel: boolean }[] = [
   { key: 'training', label: 'Training', needsModel: false },
   { key: 'prediction', label: 'Prediction', needsModel: true },
   { key: 'test-results', label: 'Test Results', needsModel: true },
   { key: 'confusion-matrix', label: 'Confusion Matrix', needsModel: true },
+  { key: 'inside-cnn', label: 'Inside the CNN', needsModel: true },
 ];
 
 const ARCH = [
@@ -34,6 +38,8 @@ const ARCH = [
 
 export function DLPlayground() {
   const modelRef = useRef<tf.LayersModel | null>(null);
+  /** Frozen copy of the weights for "Inside the CNN", refreshed only when an epoch ends. */
+  const snapshotRef = useRef<tf.LayersModel | null>(null);
   const dataRef = useRef<MnistData | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -54,22 +60,35 @@ export function DLPlayground() {
   const [showCode, setShowCode] = useState(false);
   const [stopping, setStopping] = useState(false);
   const [emptyDrawing, setEmptyDrawing] = useState(false);
+  /** The weight snapshot with a version bumped whenever it is refreshed, so views can recompute. */
+  const [trained, setTrained] = useState<TrainedModel | null>(null);
+  /** The held-out test split, once MNIST is loaded (state, not a ref, so the views re-render). */
+  const [testSplit, setTestSplit] = useState<MnistSplit | null>(null);
+  /** Last drawing that was classified, kept for the "Inside the CNN" tab. */
+  const [lastDrawing, setLastDrawing] = useState<Float32Array | null>(null);
 
   const clearAnimation = () => {
     animTimers.current.forEach(clearTimeout);
     animTimers.current = [];
   };
 
+  /** Free the model, its optimizer state and the snapshot (GPU memory). */
+  const disposeModels = () => {
+    for (const ref of [modelRef, snapshotRef]) {
+      if (ref.current) disposeLeNet(ref.current);
+      ref.current = null;
+    }
+  };
+
   // Leaving the section stops training and frees the model's GPU memory.
   useEffect(() => () => {
     abortRef.current?.abort();
     abortRef.current = null;
-    modelRef.current?.dispose();
-    modelRef.current = null;
+    disposeModels();
     clearAnimation();
   }, []);
 
-  const isTrained = history.length > 0 && modelRef.current !== null;
+  const isTrained = history.length > 0;
   const busy = status === 'loading' || status === 'training';
   // Clear the "stopping" flag once training has actually ended.
   if (stopping && !busy) setStopping(false);
@@ -87,11 +106,21 @@ export function DLPlayground() {
     setBatchProgress(null);
 
     try {
-      if (!dataRef.current) dataRef.current = await loadMnist();
+      if (!dataRef.current) {
+        dataRef.current = await loadMnist();
+        setTestSplit(dataRef.current.test);
+      }
       if (stale()) return;
       if (!modelRef.current) modelRef.current = buildLeNet();
       const model = modelRef.current;
       const data = dataRef.current;
+      // "Inside the CNN" looks at a copy refreshed only here, so all its views show the same
+      // weights — those at the end of the last epoch — even while the next epoch trains.
+      const weightsChanged = () => {
+        const snapshot = snapshotLeNet(model, snapshotRef.current ?? undefined);
+        snapshotRef.current = snapshot;
+        setTrained(prev => ({ model: snapshot, version: (prev?.version ?? 0) + 1 }));
+      };
 
       setStatus('training');
       setRun({ epochs: epochsToRun, done: 0 });
@@ -103,6 +132,7 @@ export function DLPlayground() {
           if (stale()) return;
           epochsTrained.current = epochData.epoch;
           setHistory(prev => [...prev, epochData]);
+          weightsChanged();
           setRun(r => ({ ...r, done: r.done + 1 }));
           setBatchProgress(null);
         },
@@ -112,6 +142,7 @@ export function DLPlayground() {
 
       // Finished, or stopped by the user: evaluate whatever has been learned.
       setBatchProgress(null);
+      if (controller.signal.aborted) weightsChanged(); // stopped mid-epoch: some batches were applied
       if (epochsTrained.current > 0) {
         setEvalResult(evaluateTestSet(model, data.test));
         setStatus('done');
@@ -135,13 +166,14 @@ export function DLPlayground() {
     abortRef.current?.abort();
     abortRef.current = null;
     epochsTrained.current = 0;
-    modelRef.current?.dispose();
-    modelRef.current = null;
+    disposeModels();
     clearAnimation();
     setHistory([]);
     setEvalResult(null);
     setPredictions(null);
     setNetworkInput(null);
+    setTrained(null);
+    setLastDrawing(null);
     setRun({ epochs: 0, done: 0 });
     setBatchProgress(null);
     setStatus('idle');
@@ -165,6 +197,7 @@ export function DLPlayground() {
       setPredictions(null);
       return;
     }
+    setLastDrawing(input);
 
     clearAnimation();
     setArchStep(0);
@@ -243,7 +276,7 @@ export function DLPlayground() {
                 <h2>🧠 LeNet-5 on MNIST</h2>
                 <p>Click <strong>Train LeNet on MNIST</strong> to train a convolutional neural network in your browser on 6,000 handwritten digits (600 per digit).
                 After every epoch it is checked on 1,000 separate <em>validation</em> digits; a further 1,000 <em>test</em> digits are kept aside for the final evaluation.</p>
-                <p>After training, explore the <strong>Prediction</strong>, <strong>Test Results</strong>, and <strong>Confusion Matrix</strong> tabs.</p>
+                <p>After training, explore the <strong>Prediction</strong>, <strong>Test Results</strong>, <strong>Confusion Matrix</strong> and <strong>Inside the CNN</strong> tabs.</p>
                 <div className="dl-welcome-info">
                   <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">6,000</span><span className="dl-welcome-stat-label">Training</span></div>
                   <div className="dl-welcome-stat"><span className="dl-welcome-stat-value">1,000</span><span className="dl-welcome-stat-label">Validation</span></div>
@@ -298,6 +331,10 @@ export function DLPlayground() {
         )}
 
         {activeTab === 'confusion-matrix' && evalResult && <ConfusionMatrix matrix={evalResult.confusionMatrix} />}
+
+        {activeTab === 'inside-cnn' && trained && (
+          <InsideCnn trained={trained} drawing={lastDrawing} test={testSplit} training={busy} />
+        )}
       </div>
     </div>
   );
