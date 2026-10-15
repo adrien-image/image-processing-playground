@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'matching', 'color', 'morphology', 'regions', 'edges', 'frequency',
   'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'template', 'classification',
-  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'detection',
+  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'detection',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -101,6 +101,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'adversarial', group: 'deep-learning', icon: '🎭', label: 'Adversarial',
     blurb: 'Fool a trained network with changes too small to see: FGSM, targeted and iterative attacks.',
     Component: lazy(() => import('../deep-learning/adversarial/AdversarialSection').then(m => ({ default: m.AdversarialSection }))) },
+  { key: 'regularisation', group: 'deep-learning', icon: '🛡', label: 'Overfitting',
+    blurb: 'Watch a network memorise its training set, then fight back with dropout, weight decay, augmentation and more data.',
+    Component: lazy(() => import('../deep-learning/regularisation/RegularisationSection').then(m => ({ default: m.RegularisationSection }))) },
   { key: 'detection', group: 'deep-learning', icon: '📦', label: 'Detection',
     blurb: 'How detectors turn thousands of boxes into answers: IoU, non-max suppression, precision–recall and anchors.',
     Component: lazy(() => import('../deep-learning/detection/DetectionSection').then(m => ({ default: m.DetectionSection }))) },
