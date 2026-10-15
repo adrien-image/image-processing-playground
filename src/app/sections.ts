@@ -2,7 +2,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -95,6 +95,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'deblur', group: 'image-processing', icon: '🔬', label: 'Deblurring',
     blurb: 'Undo motion blur and defocus: the inverse filter, the Wiener filter and Richardson–Lucy, and why noise makes it hard.',
     Component: lazy(() => import('../image-processing/deblur/DeblurSection').then(m => ({ default: m.DeblurSection }))) },
+  { key: 'inpainting', group: 'image-processing', icon: '🩹', label: 'Inpainting',
+    blurb: 'Fill scratches and holes: diffusion from the border versus copying matching patches (Criminisi), patch by patch.',
+    Component: lazy(() => import('../image-processing/inpainting/InpaintingSection').then(m => ({ default: m.InpaintingSection }))) },
   { key: 'template', group: 'image-processing', icon: '🔍', label: 'Template',
     blurb: 'Find a patch in an image with normalised cross-correlation.',
     Component: lazy(() => import('../image-processing/template/TemplateSection').then(m => ({ default: m.TemplateSection }))) },
