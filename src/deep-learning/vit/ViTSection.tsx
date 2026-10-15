@@ -45,10 +45,11 @@ export function ViTSection() {
         <p>The prediction is read from the [CLS] token, so the attention maps show which patches it gathered information from.
         Click a patch to see what <em>that</em> patch attends to instead. Each head learns its own pattern. Rollout combines
         all blocks and heads.</p>
-        <p>A convolution only ever looks at neighbours; a transformer starts with no idea which patches are near each other.
-        The position-similarity grid shows it learning the layout: after training, each patch's embedding resembles its
-        neighbours'. That missing built-in prior is why ViTs need more data than CNNs: compare this model's accuracy with
-        LeNet's in the Classification lesson.</p>
+        <p>A convolution only ever looks at neighbours; a transformer starts with no idea which patches are near each other
+        and has to learn the layout from the position embeddings. Trained on millions of images, neighbouring patches end up
+        with similar embeddings; with 6,000 digits and a few epochs that structure in the grid stays faint. This missing
+        built-in prior is why ViTs need far more data than CNNs: compare this model's accuracy after a few epochs with LeNet's
+        in the Classification lesson.</p>
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ import { Autoencoder } from './vae';
 import '../shared/dl-shared.css';
 import './autoencoder.css';
 
-const BATCH = 100;
+const BATCH = 50;
 const SCATTER = 360;
 const SHOWN = 1000;
 const GRID = 15;
@@ -54,7 +54,7 @@ export function AutoencoderSection() {
 function Trainer({ data }: { data: MnistData }) {
   const [mode, setMode] = useState<Mode>('vae');
   const [beta, setBeta] = useState(1);
-  const [epochsToRun, setEpochsToRun] = useState(10);
+  const [epochsToRun, setEpochsToRun] = useState(15);
   const [history, setHistory] = useState<EpochLog[]>([]);
   const [progress, setProgress] = useState<string | null>(null);
   const [version, setVersion] = useState(0);
@@ -84,7 +84,7 @@ function Trainer({ data }: { data: MnistData }) {
     const controller = new AbortController();
     abortRef.current = controller;
     modelRef.current ??= new Autoencoder();
-    optRef.current ??= tf.train.adam(0.001);
+    optRef.current ??= tf.train.adam(0.002);
     const model = modelRef.current, optimizer = optRef.current;
     const variational = mode === 'vae';
     const random = seededRandom(history.length + 1);
@@ -138,8 +138,9 @@ function Trainer({ data }: { data: MnistData }) {
         rgba[i + 3] = 255;
       }
     }
-    const recon = model.reconstruct(data.test.images.subarray(0, 8 * 784), 8);
-    return { codes, range, manifold: toImageData(rgba, GRID * 28, GRID * 28), recon };
+    const examples = firstOfEachDigit(data.test.labels);
+    const recon = model.reconstruct(gatherRows(data.test.images, 784, examples), examples.length);
+    return { codes, range, manifold: toImageData(rgba, GRID * 28, GRID * 28), recon, examples };
   }, [data, version, mode]);
 
   const hovered = useMemo(() => {
@@ -190,9 +191,9 @@ function Trainer({ data }: { data: MnistData }) {
             <p className="caption mono">{hover ? `z = (${hover[0].toFixed(2)}, ${hover[1].toFixed(2)})` : 'move over the latent space'}</p>
             <h3>Reconstructions</h3>
             <div className="ae-recon">
-              {Array.from({ length: 8 }, (_, k) => (
+              {view.examples.map((index, k) => (
                 <div key={k}>
-                  <PixelCanvas image={floatImage(data.test.images.subarray(k * 784, (k + 1) * 784), 28, 28)} size={40} label="Original" />
+                  <PixelCanvas image={floatImage(data.test.images.subarray(index * 784, (index + 1) * 784), 28, 28)} size={40} label="Original" />
                   <PixelCanvas image={floatImage(view.recon.subarray(k * 784, (k + 1) * 784), 28, 28)} size={40} label="Reconstruction" />
                 </div>
               ))}
@@ -220,6 +221,11 @@ function Trainer({ data }: { data: MnistData }) {
       )}
     </>
   );
+}
+
+/** Index of the first test image of each digit 0–9. */
+function firstOfEachDigit(labels: Uint8Array): number[] {
+  return Array.from({ length: 10 }, (_, d) => labels.indexOf(d)).filter(i => i >= 0);
 }
 
 interface ScatterProps {

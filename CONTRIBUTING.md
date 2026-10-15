@@ -12,6 +12,19 @@ CI runs the same four checks on every pull request.
 - Algorithms live in pure `.ts` modules next to their section and come with a `*.test.ts`. Keep DOM and React out of them, so they run under Vitest in Node.
 - UI state flows one way: section state → `useMemo` derived pixels → `<PixelCanvas image={…} />`. Load images with `useImageData(source, maxSize)`, which also downscales uploads.
 
+## Adding a lesson
+
+1. Create a folder in the right group: `src/image-processing/<lesson>/` or `src/deep-learning/<lesson>/`,
+   with the algorithm in a `.ts` file (plus its `.test.ts`) and the UI in `<Lesson>Section.tsx`.
+2. Add the lesson's key to `SECTION_KEYS` and an entry to `SECTIONS` in `src/app/sections.ts`, with its
+   `group`, icon, label, one-line `blurb` (shown on the home page) and lazy import.
+
+Deep-learning lessons can reuse `src/deep-learning/shared/`: `useMnist()` loads MNIST once per page,
+`LeNetGate` provides the LeNet trained in the Classification lesson (or trains one), `optimise()` runs a
+training loop that keeps the page responsive, and `render.ts` turns arrays into gray, signed or heat-map
+images. Dispose every TensorFlow.js model when the lesson unmounts, and test that functions don't leak
+tensors (`tf.memory().numTensors`), as the existing tests do.
+
 ## Adding a new convolution filter
 
 The Convolution section uses a **Processor Registry**. A processor describes a kernel; the section

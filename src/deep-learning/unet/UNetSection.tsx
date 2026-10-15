@@ -188,9 +188,9 @@ export function UNetSection() {
         bright as objects. Deciding whether a pixel belongs to an object needs its <em>neighbourhood</em>: is it part of a
         filled blob or a thin line?</p>
         <p>A <strong>U-Net</strong> classifies every pixel at once. Its encoder pools the image down to 8×8 so each unit sees a
-        large area (see the Receptive field lesson); its decoder upsamples back to 32×32. The <strong>skip connections</strong>
-        copy the encoder's full-resolution features across, so the output keeps sharp edges. Untick them and retrain: the
-        network still finds the objects but their outlines come out blurred and blocky. Then raise the lighting, noise or
+        large area (see the Receptive field lesson); its decoder upsamples back to 32×32. The <strong>skip connections</strong>{' '}
+        copy the encoder's full-resolution features across, so the output keeps sharp edges. Untick them and retrain to compare:
+        without them the decoder has to rebuild every outline from the 8×8 bottleneck alone. Then raise the lighting, noise or
         clutter beyond what it was trained on and watch where it starts to fail.</p>
       </div>
     </div>

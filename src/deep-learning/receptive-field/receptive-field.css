@@ -3,6 +3,7 @@
 }
 
 .rf-table {
+  position: relative; /* contains the visually hidden header, so it can't widen the page */
   width: 100%;
   border-collapse: collapse;
   font-size: 0.78rem;
