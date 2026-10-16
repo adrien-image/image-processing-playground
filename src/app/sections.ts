@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'snakes', 'edges', 'frequency', 'jpeg',
   'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
-  'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
+  'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'batchnorm', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -146,6 +146,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'regularisation', group: 'deep-learning', icon: '🛡', label: 'Overfitting',
     blurb: 'Watch a network memorise its training set, then fight back with dropout, weight decay, augmentation and more data.',
     Component: lazy(() => import('../deep-learning/regularisation/RegularisationSection').then(m => ({ default: m.RegularisationSection }))) },
+  { key: 'batchnorm', group: 'deep-learning', icon: '📏', label: 'Batch normalisation',
+    blurb: 'Train the same sigmoid network with and without batch norm, and watch one unit\'s inputs drift or stay put.',
+    Component: lazy(() => import('../deep-learning/batchnorm/BatchNormSection').then(m => ({ default: m.BatchNormSection }))) },
   { key: 'autoencoder', group: 'deep-learning', icon: '🗜', label: 'Autoencoder',
     blurb: 'Squeeze every digit into two numbers and explore the latent space: plain vs. variational autoencoder.',
     Component: lazy(() => import('../deep-learning/autoencoder/AutoencoderSection').then(m => ({ default: m.AutoencoderSection }))) },
