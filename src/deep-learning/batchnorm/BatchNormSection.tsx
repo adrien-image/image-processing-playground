@@ -89,7 +89,8 @@ function Trainer({ data }: { data: MnistData }) {
     models.current ??= { plain: buildMlp({ batchNorm: false, learningRate: lr }), bn: buildMlp({ batchNorm: true, learningRate: lr }), lr };
     const { plain, bn } = models.current;
     const probes = { plain: probeModel(plain), bn: probeModel(bn) };
-    const probeImages = data.val.images.subarray(0, PROBE_IMAGES * 784);
+    // A random sample: MNIST is stored digit by digit.
+    const probeImages = gatherRows(data.val.images, 784, shuffled(data.val.count, seededRandom(42)).slice(0, PROBE_IMAGES));
     const random = seededRandom(stepRef.current + 1);
     const perEpoch = Math.floor(data.train.count / BATCH);
     const record = () => {
