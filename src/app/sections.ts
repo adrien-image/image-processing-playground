@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'snakes', 'edges', 'frequency', 'jpeg',
   'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
-  'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
+  'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -131,6 +131,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'learn-kernel', group: 'deep-learning', icon: '🎓', label: 'Learn a kernel',
     blurb: 'Gradient descent finds a convolution kernel from examples: watch the loss fall and the weights converge.',
     Component: lazy(() => import('../deep-learning/learn-kernel/LearnKernelSection').then(m => ({ default: m.LearnKernelSection }))) },
+  { key: 'optimizers', group: 'deep-learning', icon: '⛷', label: 'Optimizers',
+    blurb: 'SGD, momentum, RMSprop and Adam race down the same loss surfaces: ravines, curved valleys and saddle points.',
+    Component: lazy(() => import('../deep-learning/optimizers/OptimizersSection').then(m => ({ default: m.OptimizersSection }))) },
   { key: 'receptive-field', group: 'deep-learning', icon: '🔭', label: 'Receptive field',
     blurb: 'Which input pixels can a unit deep in a CNN see? Kernel size, stride, pooling and dilation, layer by layer.',
     Component: lazy(() => import('../deep-learning/receptive-field/ReceptiveFieldSection').then(m => ({ default: m.ReceptiveFieldSection }))) },
