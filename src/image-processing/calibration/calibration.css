@@ -1,0 +1,53 @@
+.cal-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.cal-overlay polyline {
+  fill: none;
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.cal-bent {
+  stroke: rgba(244, 114, 182, 0.8);
+}
+
+.cal-straight {
+  stroke: rgba(52, 211, 153, 0.85);
+}
+
+.cal-corner {
+  fill: #22d3ee;
+}
+
+.cal-results,
+.cal-chart {
+  flex: 1 1 320px;
+  max-width: 560px;
+}
+
+.cal-table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.cal-table th,
+.cal-table td {
+  padding: 0.3rem 0.75rem;
+  text-align: right;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.cal-table td {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.cal-table th {
+  color: var(--text-secondary);
+  font-weight: 600;
+}

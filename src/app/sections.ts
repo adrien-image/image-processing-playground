@@ -1,8 +1,8 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'superpixels', 'matching', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'classification',
+  'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
+  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -56,6 +56,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'matching', group: 'image-processing', icon: '🔗', label: 'Matching',
     blurb: 'Harris corners, descriptors and RANSAC to find one image inside another.',
     Component: lazy(() => import('../image-processing/matching/MatchingSection').then(m => ({ default: m.MatchingSection }))) },
+  { key: 'keypoints', group: 'image-processing', icon: '🔑', label: 'Scale-space keypoints',
+    blurb: 'SIFT-style detection: blobs found at every scale with differences of Gaussians, and found again when the image is zoomed.',
+    Component: lazy(() => import('../image-processing/keypoints/KeypointsSection').then(m => ({ default: m.KeypointsSection }))) },
   { key: 'color', group: 'image-processing', icon: '🎨', label: 'Color',
     blurb: 'RGB and HSV channels, hue, saturation, brightness and gamma.',
     Component: lazy(() => import('../image-processing/color/ColorSection').then(m => ({ default: m.ColorSection }))) },
@@ -92,6 +95,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'denoising', group: 'image-processing', icon: '🧹', label: 'Denoising',
     blurb: 'Median vs. Gaussian filtering on noisy images, scored with PSNR.',
     Component: lazy(() => import('../image-processing/denoising/DenoisingSection').then(m => ({ default: m.DenoisingSection }))) },
+  { key: 'edge-preserving', group: 'image-processing', icon: '🪞', label: 'Edge-preserving filters',
+    blurb: 'Smooth the noise but keep the edges: the bilateral filter and non-local means, with their weights pixel by pixel.',
+    Component: lazy(() => import('../image-processing/edge-preserving/EdgePreservingSection').then(m => ({ default: m.EdgePreservingSection }))) },
   { key: 'deblur', group: 'image-processing', icon: '🔬', label: 'Deblurring',
     blurb: 'Undo motion blur and defocus: the inverse filter, the Wiener filter and Richardson–Lucy, and why noise makes it hard.',
     Component: lazy(() => import('../image-processing/deblur/DeblurSection').then(m => ({ default: m.DeblurSection }))) },
@@ -110,6 +116,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'stitching', group: 'image-processing', icon: '🧷', label: 'Panorama stitching',
     blurb: 'Match corners between two photos, fit a homography with RANSAC, warp one onto the other and blend the seam.',
     Component: lazy(() => import('../image-processing/stitching/StitchingSection').then(m => ({ default: m.StitchingSection }))) },
+  { key: 'calibration', group: 'image-processing', icon: '📷', label: 'Lens distortion',
+    blurb: 'Barrel and pincushion distortion, and calibrating the lens from a photo of a checkerboard until straight lines are straight again.',
+    Component: lazy(() => import('../image-processing/calibration/CalibrationSection').then(m => ({ default: m.CalibrationSection }))) },
   { key: 'classification', group: 'deep-learning', icon: '🧠', label: 'Classification',
     blurb: 'Train a CNN on MNIST in your browser, draw digits and look inside the network.',
     Component: lazy(() => import('../deep-learning/classification/DLPlayground').then(m => ({ default: m.DLPlayground }))) },
