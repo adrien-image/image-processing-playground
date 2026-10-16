@@ -1,7 +1,7 @@
 import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
-  'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
+  'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'snakes', 'edges', 'frequency', 'jpeg',
   'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
@@ -71,6 +71,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'watershed', group: 'image-processing', icon: '💧', label: 'Watershed',
     blurb: 'Split touching coins: distance transform, markers, and flooding a landscape until the basins meet.',
     Component: lazy(() => import('../image-processing/watershed/WatershedSection').then(m => ({ default: m.WatershedSection }))) },
+  { key: 'snakes', group: 'image-processing', icon: '🐍', label: 'Active contours',
+    blurb: 'A curve that shrinks or inflates onto an object\'s outline: elasticity, rigidity, edge forces and the balloon.',
+    Component: lazy(() => import('../image-processing/snakes/SnakesSection').then(m => ({ default: m.SnakesSection }))) },
   { key: 'edges', group: 'image-processing', icon: '⚡', label: 'Edges',
     blurb: 'Sobel, Prewitt, Laplacian and Canny edge detectors side by side.',
     Component: lazy(() => import('../image-processing/edges/EdgeComparisonSection').then(m => ({ default: m.EdgeComparisonSection }))) },

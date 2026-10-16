@@ -1,0 +1,30 @@
+.snake-picker {
+  cursor: crosshair;
+}
+
+.snake-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.snake-curve {
+  fill: rgba(244, 114, 182, 0.12);
+  stroke: #f472b6;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.snake-point {
+  fill: #fff;
+}
+
+.snake-start {
+  fill: none;
+  stroke: rgba(34, 211, 238, 0.7);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 3;
+  vector-effect: non-scaling-stroke;
+}
