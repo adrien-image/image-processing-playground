@@ -43,9 +43,9 @@
 }
 
 .ip-key-source {
-  color: #22d3ee;
+  color: light-dark(#0e7490, #22d3ee);
 }
 
 .ip-key-target {
-  color: #ec4899;
+  color: light-dark(#be185d, #ec4899);
 }

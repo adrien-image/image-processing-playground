@@ -36,7 +36,7 @@ const ARCH = [
   { name: 'Conv2', size: '8×8×16', color: '#fb923c' },
   { name: 'Pool2', size: '4×4×16', color: '#34d399' },
   { name: 'FC', size: '256→120→84→10', color: '#f87171' },
-  { name: 'Output', size: '0–9', color: '#fff' },
+  { name: 'Output', size: '0–9', color: 'var(--text)' },
 ];
 
 export function DLPlayground() {

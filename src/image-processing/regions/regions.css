@@ -126,7 +126,7 @@
 }
 
 .regions-key-removed {
-  color: #f87171;
+  color: var(--error);
   font-weight: 600;
 }
 
@@ -153,7 +153,7 @@
 
 .regions-cap-note {
   font-size: 0.75rem;
-  color: #fbbf24;
+  color: var(--warning);
   margin-bottom: 0.5rem;
 }
 
@@ -176,7 +176,7 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: #171c2a;
+  background: var(--surface-solid);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -191,7 +191,7 @@
 .regions-table tbody th {
   padding: 0.25rem 0.5rem;
   text-align: right;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 4%, transparent);
   color: var(--text-secondary);
   white-space: nowrap;
 }
@@ -230,7 +230,7 @@
   padding: 0.1rem 0.45rem;
   font: inherit;
   color: var(--text);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   border: 1px solid var(--surface-border-hover);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -241,8 +241,8 @@
 }
 
 .regions-row-btn[aria-pressed="true"] {
-  border-color: #fbbf24;
-  color: #fbbf24;
+  border-color: var(--warning);
+  color: var(--warning);
 }
 
 .regions-swatch {

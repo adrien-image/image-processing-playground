@@ -4,6 +4,7 @@ import { useHashRoute } from './app/useHashRoute';
 import { SectionErrorBoundary } from './app/SectionErrorBoundary';
 import { Home } from './app/Home';
 import { SITE_TAGLINE, SITE_TITLE } from './app/site';
+import { ThemeSwitch } from './components/ThemeSwitch';
 
 const ROUTES = ['home', ...SECTION_KEYS] as const;
 type Route = (typeof ROUTES)[number];
@@ -122,6 +123,7 @@ function App() {
             </nav>
           )}
         </div>
+        <ThemeSwitch />
         {menuOpen && <div className="header-menu-backdrop" aria-hidden="true" />}
       </header>
 

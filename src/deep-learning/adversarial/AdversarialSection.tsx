@@ -125,7 +125,7 @@ function Attack({ lenet, test }: { lenet: SharedLeNet; test: MnistSplit }) {
         {sweep && sweep.version === version ? (
           <LineChart
             title="Accuracy on 500 test digits against FGSM strength epsilon"
-            series={[{ label: 'accuracy', color: '#34d399', values: sweep.values }]}
+            series={[{ label: 'accuracy', color: 'var(--series-green)', values: sweep.values }]}
             yMin={0}
             yMax={1}
             formatY={v => `${Math.round(v * 100)}%`}

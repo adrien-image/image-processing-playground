@@ -130,7 +130,7 @@
 .det-key-kept { border-color: #34d399; }
 .det-key-suppressed { border-color: #f87171; border-style: dashed; }
 .det-key-pending { border-color: #facc15; }
-.det-key-truth { border-color: #fff; border-style: dotted; }
+.det-key-truth { border-color: var(--text); border-style: dotted; }
 
 .det-counts {
   display: grid;

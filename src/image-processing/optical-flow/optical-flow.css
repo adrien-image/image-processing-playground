@@ -45,6 +45,6 @@
 }
 
 .of-key-truth {
-  border-top: 2px dotted rgba(255, 255, 255, 0.7);
+  border-top: 2px dotted color-mix(in srgb, var(--fg) 70%, transparent);
   height: 0;
 }

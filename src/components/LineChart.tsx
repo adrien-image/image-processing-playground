@@ -96,7 +96,7 @@ export function LineChart({
           <line x1={x(markerX)} x2={x(markerX)} y1={PAD.top} y2={H - PAD.bottom} className="line-chart-marker" />
         )}
         {series.map(s => (
-          <path key={s.label} d={path(s.values)} fill="none" stroke={s.color} strokeWidth={2}
+          <path key={s.label} d={path(s.values)} fill="none" style={{ stroke: s.color }} strokeWidth={2}
             strokeDasharray={s.dashed ? '5 4' : undefined} strokeLinejoin="round" />
         ))}
       </svg>

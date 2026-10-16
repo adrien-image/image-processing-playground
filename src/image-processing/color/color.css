@@ -1,4 +1,4 @@
-.swatch-red { color: #ff3333; }
-.swatch-green { color: #33ff33; }
-.swatch-blue { color: #6f6fff; }
-.swatch-yellow { color: #cccc33; }
+.swatch-red { color: light-dark(#dc2626, #ff3333); }
+.swatch-green { color: light-dark(#15803d, #33ff33); }
+.swatch-blue { color: light-dark(#4338ca, #6f6fff); }
+.swatch-yellow { color: light-dark(#854d0e, #cccc33); }

@@ -191,7 +191,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(30, 36, 52, 0.6);
+  background: var(--surface-2);
   color: var(--text-muted);
   font-size: 0.85rem;
   border-radius: var(--radius);
@@ -205,7 +205,7 @@
   color: var(--text-muted);
   margin-top: 0.5rem;
   padding: 0.15rem 0.6rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
   border-radius: 12px;
 }
 
@@ -324,10 +324,10 @@
   font-size: var(--cell-font, 0.78rem);
   font-family: var(--font-mono);
   font-weight: 600;
-  background: rgba(49, 46, 129, 0.6);
-  color: #c7d2fe;
+  background: light-dark(#e0e7ff, rgba(49, 46, 129, 0.6));
+  color: light-dark(#3730a3, #c7d2fe);
   border-radius: 4px;
-  border: 1px solid rgba(199, 210, 254, 0.1);
+  border: 1px solid light-dark(rgba(55, 48, 163, 0.15), rgba(199, 210, 254, 0.1));
   padding: 0 2px;
 }
 
@@ -407,21 +407,21 @@
 }
 
 .math-cell-nb {
-  background: rgba(30, 41, 59, 0.8);
-  color: #e2e8f0;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: light-dark(#f1f5f9, rgba(30, 41, 59, 0.8));
+  color: light-dark(#1e293b, #e2e8f0);
+  border: 1px solid color-mix(in srgb, var(--fg) 6%, transparent);
 }
 
 .math-cell-kernel {
-  background: rgba(49, 46, 129, 0.6);
-  color: #c7d2fe;
-  border: 1px solid rgba(199, 210, 254, 0.08);
+  background: light-dark(#e0e7ff, rgba(49, 46, 129, 0.6));
+  color: light-dark(#3730a3, #c7d2fe);
+  border: 1px solid light-dark(rgba(55, 48, 163, 0.15), rgba(199, 210, 254, 0.08));
 }
 
 .math-cell-prod {
-  background: rgba(20, 60, 30, 0.6);
-  color: #bbf7d0;
-  border: 1px solid rgba(187, 247, 208, 0.08);
+  background: light-dark(#dcfce7, rgba(20, 60, 30, 0.6));
+  color: light-dark(#166534, #bbf7d0);
+  border: 1px solid light-dark(rgba(22, 101, 52, 0.15), rgba(187, 247, 208, 0.08));
 }
 
 .math-op {
@@ -437,7 +437,7 @@
   color: var(--text-secondary);
   padding: 0.5rem 0.75rem;
   margin-bottom: 0.65rem;
-  background: rgba(0, 0, 0, 0.15);
+  background: color-mix(in srgb, var(--shade) 15%, transparent);
   border-radius: var(--radius);
   border: 1px solid var(--surface-border);
   line-height: 1.6;
@@ -451,7 +451,7 @@
   justify-content: center;
   gap: 2rem;
   padding: 0.5rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   border-radius: var(--radius);
   border: 1px solid var(--surface-border);
 }

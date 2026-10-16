@@ -10,10 +10,12 @@ import '@fontsource/jetbrains-mono/latin-500.css'
 import '@fontsource/jetbrains-mono/latin-700.css'
 import './styles/base.css'
 import { initProcessors } from './image-processing/processors'
+import { initTheme } from './lib/theme'
 import App from './App.tsx'
 
-// Populate the processor registry before anything renders.
+// Populate the processor registry and apply the remembered theme before anything renders.
 initProcessors()
+initTheme()
 
 const root = document.getElementById('root')
 if (!root) throw new Error('#root element missing from index.html')

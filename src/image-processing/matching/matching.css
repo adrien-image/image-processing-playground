@@ -118,7 +118,7 @@
   font-family: var(--font-mono);
   font-size: 0.82rem;
   color: var(--accent);
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
   border: 1px solid var(--surface-border);
@@ -188,8 +188,8 @@
   text-transform: none;
   margin-left: 0.4rem;
 }
-.legend-inlier { color: #34d399; }
-.legend-outlier { color: #f87171; }
+.legend-inlier { color: var(--success); }
+.legend-outlier { color: var(--error); }
 
 .matching-matrix {
   text-align: left;
