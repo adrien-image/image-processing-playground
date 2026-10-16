@@ -2,7 +2,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'edges', 'frequency', 'jpeg',
-  'pyramids', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
+  'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
   'learn-kernel', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
 ] as const;
 
@@ -83,6 +83,9 @@ export const SECTIONS: SectionDef[] = [
   { key: 'pyramids', group: 'image-processing', icon: '🔺', label: 'Pyramids',
     blurb: 'Resampling and aliasing, Gaussian and Laplacian pyramids, multiband blending.',
     Component: lazy(() => import('../image-processing/pyramids/PyramidsSection').then(m => ({ default: m.PyramidsSection }))) },
+  { key: 'warping', group: 'image-processing', icon: '🫠', label: 'Thin-plate warping',
+    blurb: 'Drag control points and the image bends smoothly between them: thin-plate splines, bending energy and smoothing.',
+    Component: lazy(() => import('../image-processing/warping/WarpingSection').then(m => ({ default: m.WarpingSection }))) },
   { key: 'hough', group: 'image-processing', icon: '📐', label: 'Hough',
     blurb: 'Find lines and circles by voting in the Hough accumulator.',
     Component: lazy(() => import('../image-processing/hough/HoughSection').then(m => ({ default: m.HoughSection }))) },
