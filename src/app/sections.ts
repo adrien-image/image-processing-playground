@@ -3,7 +3,7 @@ import { lazy, type ComponentType, type LazyExoticComponent } from 'react';
 export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'snakes', 'edges', 'frequency', 'jpeg',
   'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
-  'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'batchnorm', 'autoencoder', 'unet', 'detection', 'diffusion', 'vit',
+  'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'batchnorm', 'transfer', 'contrastive', 'autoencoder', 'gan', 'unet', 'detection', 'diffusion', 'vit', 'rnn',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -149,9 +149,18 @@ export const SECTIONS: SectionDef[] = [
   { key: 'batchnorm', group: 'deep-learning', icon: '📏', label: 'Batch normalisation',
     blurb: 'Train the same sigmoid network with and without batch norm, and watch one unit\'s inputs drift or stay put.',
     Component: lazy(() => import('../deep-learning/batchnorm/BatchNormSection').then(m => ({ default: m.BatchNormSection }))) },
+  { key: 'transfer', group: 'deep-learning', icon: '♻️', label: 'Transfer learning',
+    blurb: 'Pretrain on digits 0–4, then learn 5–9 from a few examples: from scratch, a linear probe on frozen features, or fine-tuning.',
+    Component: lazy(() => import('../deep-learning/transfer/TransferSection').then(m => ({ default: m.TransferSection }))) },
+  { key: 'contrastive', group: 'deep-learning', icon: '🧲', label: 'Contrastive learning',
+    blurb: 'Learn digit features without labels: two augmentations of the same image must find each other (SimCLR).',
+    Component: lazy(() => import('../deep-learning/contrastive/ContrastiveSection').then(m => ({ default: m.ContrastiveSection }))) },
   { key: 'autoencoder', group: 'deep-learning', icon: '🗜', label: 'Autoencoder',
     blurb: 'Squeeze every digit into two numbers and explore the latent space: plain vs. variational autoencoder.',
     Component: lazy(() => import('../deep-learning/autoencoder/AutoencoderSection').then(m => ({ default: m.AutoencoderSection }))) },
+  { key: 'gan', group: 'deep-learning', icon: '⚔️', label: 'GAN',
+    blurb: 'A generator and a discriminator play against each other on 2-D points: the decision boundary, saturation and mode collapse.',
+    Component: lazy(() => import('../deep-learning/gan/GanSection').then(m => ({ default: m.GanSection }))) },
   { key: 'unet', group: 'deep-learning', icon: '🧬', label: 'U-Net',
     blurb: 'Train a small U-Net to segment shapes where a global threshold fails, with and without skip connections.',
     Component: lazy(() => import('../deep-learning/unet/UNetSection').then(m => ({ default: m.UNetSection }))) },
@@ -164,4 +173,7 @@ export const SECTIONS: SectionDef[] = [
   { key: 'vit', group: 'deep-learning', icon: '🔀', label: 'Vision Transformer',
     blurb: 'Patches become tokens and attend to each other: train a tiny ViT and see where it looks.',
     Component: lazy(() => import('../deep-learning/vit/ViTSection').then(m => ({ default: m.ViTSection }))) },
+  { key: 'rnn', group: 'deep-learning', icon: '🔁', label: 'Recurrent network',
+    blurb: 'A GRU reads a digit one row at a time: watch its prediction form as the rows arrive, and what it keeps in memory.',
+    Component: lazy(() => import('../deep-learning/rnn/RnnSection').then(m => ({ default: m.RnnSection }))) },
 ];

@@ -1,0 +1,41 @@
+.tl-gap {
+  margin-left: 0.75rem;
+}
+
+.tl-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+}
+
+.tl-examples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+.tl-table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.tl-table th,
+.tl-table td {
+  padding: 0.35rem 0.9rem;
+  border-bottom: 1px solid var(--surface-border);
+  text-align: center;
+}
+
+.tl-table td {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.tl-table thead th {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.tl-hint {
+  text-align: center;
+}
