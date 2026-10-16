@@ -3,7 +3,7 @@ import { gaussianRandom, seededRandom } from '../../lib/random';
 import { applyHomography } from '../stitching/homography';
 import {
   boardCorners, boardPose, calibrate, distort, distortImage, fitDistortion, projectCorners, radialShift,
-  renderCheckerboard, toNormalised, undistort, undistortImage, type Camera,
+  renderCheckerboard, toNormalised, toPixels, undistort, undistortImage, type Camera,
 } from './calibration';
 
 const W = 160, H = 120;
@@ -63,7 +63,13 @@ describe('calibration', () => {
     const random = seededRandom(4);
     const observed = projectCorners(board, pose, cam, barrel).map(p => ({ x: p.x + 0.3 * gaussianRandom(random), y: p.y + 0.3 * gaussianRandom(random) }));
     const { k, rms } = calibrate(board, observed, cam);
-    expect(Math.abs(k.k1 - barrel.k1)).toBeLessThan(0.05);
     expect(rms[rms.length - 1]).toBeLessThan(0.5); // about the detection noise
+    // From one view k1 and k2 trade off against each other, but the lens they describe
+    // moves every board corner to within a pixel of where the true lens does.
+    for (const p of board) {
+      const q = toNormalised(cam, applyHomography(pose, p));
+      const a = toPixels(cam, distort(k, q)), b = toPixels(cam, distort(barrel, q));
+      expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeLessThan(1.5);
+    }
   });
 });

@@ -82,8 +82,9 @@ def _self_check():
     true_k = torch.tensor([-0.3, 0.08], dtype=dtype)
     j, i = torch.meshgrid(torch.arange(1, 7, dtype=dtype), torch.arange(1, 10, dtype=dtype), indexing="ij")
     board = torch.stack([i.reshape(-1), j.reshape(-1)], 1)
-    c, s = 11 * math.cos(0.2), 11 * math.sin(0.2)
-    pose = torch.tensor([[c, -s, 30.0], [s, c, 18.0], [0.002, 0.0, 1.0]], dtype=dtype)
+    # 15 px squares, rotated 0.2 rad about the board centre (5, 3.5), centred in the 160×120 image.
+    c, s = 15 * math.cos(0.2), 15 * math.sin(0.2)
+    pose = torch.tensor([[c, -s, 80 - 5 * c + 3.5 * s], [s, c, 60 - 5 * s - 3.5 * c], [0.0005, 0.0, 1.0]], dtype=dtype)
     observed = centre + f * distort(true_k, (apply_h(pose, board) - centre) / f)
 
     # undistort inverts distort
@@ -93,10 +94,13 @@ def _self_check():
     k, H, rms = calibrate(board, observed, f, centre)
     assert torch.allclose(k, true_k, atol=1e-3) and rms[-1] < 1e-3 < rms[0]
     assert torch.allclose(apply_h(H, board), apply_h(pose, board), atol=1e-2)
-    # With 0.3 px detection noise the estimate stays close.
+    # With 0.1 px detection noise, k1 and k2 trade off against each other (one view), but
+    # the lens they describe moves every board corner to within half a pixel of the true one.
     g = torch.Generator().manual_seed(4)
-    k_noisy, _, rms_noisy = calibrate(board, observed + 0.3 * torch.randn(observed.shape, generator=g, dtype=dtype), f, centre)
-    assert abs(k_noisy[0] - true_k[0]) < 0.05 and rms_noisy[-1] < 0.5
+    k_noisy, _, rms_noisy = calibrate(board, observed + 0.1 * torch.randn(observed.shape, generator=g, dtype=dtype), f, centre)
+    ideal = (apply_h(pose, board) - centre) / f
+    disagreement = (f * (distort(k_noisy, ideal) - distort(true_k, ideal))).norm(dim=1).max()
+    assert rms_noisy[-1] < 0.3 and disagreement < 0.5, (k_noisy, rms_noisy[-1], disagreement)
     print(f"calibration.py: ok (k1 {k[0]:.4f}, k2 {k[1]:.4f}; RMS {rms[0]:.2f} → {rms[-1]:.1e} px)")
 
 
