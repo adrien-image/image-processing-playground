@@ -1,0 +1,9 @@
+.gan-canvas {
+  display: block;
+  border-radius: var(--radius);
+}
+
+.gan-chart {
+  flex: 1 1 360px;
+  max-width: 560px;
+}
