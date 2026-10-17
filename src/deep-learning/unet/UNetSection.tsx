@@ -133,8 +133,8 @@ export function UNetSection() {
           <LineChart
             title="Mean intersection over union on validation images per epoch, against Otsu's threshold"
             series={[
-              { label: skips ? 'U-Net' : 'without skips', color: '#34d399', values: history.map(h => h.iou) },
-              { label: `Otsu threshold (${otsuVal.toFixed(2)})`, color: '#fb923c', values: Array(Math.max(2, history.length)).fill(otsuVal), dashed: true },
+              { label: skips ? 'U-Net' : 'without skips', color: 'var(--series-green)', values: history.map(h => h.iou) },
+              { label: `Otsu threshold (${otsuVal.toFixed(2)})`, color: 'var(--series-orange)', values: Array(Math.max(2, history.length)).fill(otsuVal), dashed: true },
             ]}
             yMin={0}
             yMax={1}
@@ -144,7 +144,7 @@ export function UNetSection() {
         </div>
         <div className="demo-panel">
           <h3>Training loss (binary cross-entropy)</h3>
-          <LineChart title="Training loss per epoch" series={[{ label: 'loss', color: '#f87171', values: history.map(h => h.loss) }]} xStart={1} xLabel="epoch" yMin={0} />
+          <LineChart title="Training loss per epoch" series={[{ label: 'loss', color: 'var(--series-red)', values: history.map(h => h.loss) }]} xStart={1} xLabel="epoch" yMin={0} />
         </div>
       </div>
 

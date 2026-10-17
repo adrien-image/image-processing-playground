@@ -94,8 +94,8 @@ function Forward({ test }: { test: MnistSplit }) {
           <LineChart
             title="Signal and noise coefficients across the diffusion steps"
             series={[
-              { label: '√ᾱ_t (signal)', color: '#34d399', values: Array.from(schedule.alphaBars, a => Math.sqrt(a)) },
-              { label: '√(1 − ᾱ_t) (noise)', color: '#f87171', values: Array.from(schedule.alphaBars, a => Math.sqrt(1 - a)) },
+              { label: '√ᾱ_t (signal)', color: 'var(--series-green)', values: Array.from(schedule.alphaBars, a => Math.sqrt(a)) },
+              { label: '√(1 − ᾱ_t) (noise)', color: 'var(--series-red)', values: Array.from(schedule.alphaBars, a => Math.sqrt(1 - a)) },
             ]}
             yMin={0}
             yMax={1}
@@ -239,7 +239,7 @@ function Reverse() {
         </div>
         <div className="demo-panel">
           <h3>Denoiser training loss (‖ε − ε̂‖²)</h3>
-          <LineChart title="Noise-prediction loss, averaged over 50 steps" series={[{ label: 'loss', color: '#f87171', values: smooth(losses, 50) }]}
+          <LineChart title="Noise-prediction loss, averaged over 50 steps" series={[{ label: 'loss', color: 'var(--series-red)', values: smooth(losses, 50) }]}
             xLabel="× 50 steps" yMin={0} />
           <p className="caption">A loss of 1 means the network has learned nothing (predicting 0 noise); below 1 it is recovering structure.</p>
         </div>

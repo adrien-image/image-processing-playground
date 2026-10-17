@@ -8,12 +8,12 @@
   display: block;
   width: 100%;
   height: auto;
-  background: rgba(0, 0, 0, 0.25);
+  background: var(--chart-bg);
   border-radius: var(--radius);
 }
 
 .line-chart-grid {
-  stroke: rgba(255, 255, 255, 0.07);
+  stroke: color-mix(in srgb, var(--fg) 7%, transparent);
 }
 
 .line-chart-marker {

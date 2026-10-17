@@ -16,24 +16,29 @@ The lessons come in two groups, which are also the two source folders: `src/imag
 | Segmentation | Otsu thresholding vs. k-means clustering, with the histogram |
 | Superpixels | SLIC step by step: k-means on colour and position, compactness, mean-colour regions |
 | Matching | Harris corners → rotation-normalised descriptors → RANSAC similarity estimate, compared with the ground truth |
+| Scale-space keypoints | SIFT-style detection: Gaussian and difference-of-Gaussian pyramids, extrema in space and scale, contrast and edge tests; zoom the image and see how many keypoints are found again |
 | Color | RGB / HSV channels, hue, saturation, brightness and gamma adjustments |
 | Morphology | Erosion, dilation, opening and closing on binary and grayscale images |
 | Regions | Connected-component labelling (4/8-connectivity) and per-object measurements: area, centroid, bounding box, perimeter, circularity |
 | Watershed | Touching coins split with the distance transform, markers and an animated flood |
+| Active contours | A snake shrinks or inflates onto an object's outline: elasticity, rigidity, the edge force and the balloon, with semi-implicit steps |
 | Edges | Sobel, Prewitt, Laplacian and Canny side by side |
 | Frequency | 2-D FFT spectrum, ideal and Gaussian low/high/band filters |
 | JPEG | 8×8 DCT, quality-scaled quantisation, zigzag and an entropy estimate of the file size; a block inspector and the 64 basis images |
 | Pyramids | Resampling and aliasing, nearest/bilinear/bicubic interpolation, Gaussian and Laplacian pyramids, multiband blending |
+| Thin-plate warping | Drag control points and the image bends smoothly between them; smoothing λ and bending energy |
 | Hough | Line segments and circles from the Hough transform, with the accumulators |
 | Histogram | Histogram equalisation and its mapping curve |
 | Augmentation | Chained random transformations used to grow training sets |
 | Denoising | Median vs. Gaussian filtering on salt-and-pepper or Gaussian noise, scored with PSNR |
+| Edge-preserving filters | Bilateral filter and non-local means against a Gaussian blur, scored with PSNR; click a pixel to see each filter's weights |
 | Deblurring | Motion, Gaussian and defocus blur; inverse filter vs. Wiener vs. Richardson–Lucy, with the blur's frequency response |
 | Inpainting | Paint a hole and fill it by diffusion or by copying patches (Criminisi), patch by patch |
 | Template | Normalised cross-correlation template matching with its score map |
 | Optical flow | Pyramidal Lucas–Kanade on synthetic motions, the aperture problem, errors against the true flow |
 | Stereo depth | Block matching along rows, window size, occlusions and the left–right check |
 | Panorama stitching | Corners → matches → RANSAC homography → warping, with overwrite / average / feather blending |
+| Lens distortion | Barrel, pincushion and moustache distortion; calibrate k1 and k2 from a checkerboard by Gauss–Newton on the reprojection error |
 
 ### Deep learning
 
@@ -43,20 +48,26 @@ Everything trains in the browser with TensorFlow.js, on a 6,000-image MNIST subs
 |---|---|
 | Classification | Train LeNet-5 on MNIST, draw digits to classify, and look inside the network: learned filters, activation maps and occlusion sensitivity |
 | Learn a kernel | Gradient descent recovers a hidden 3×3 kernel from input/output images: learning rate, momentum, label noise, ill-conditioning |
+| Optimizers | SGD, momentum, Nesterov, RMSprop and Adam on a ravine, Rosenbrock's valley and a saddle, with per-optimizer learning rates and gradient noise |
 | Receptive field | How far a unit sees through stacks of convolutions, pooling, strides and dilation, with path counts (effective receptive field) |
 | Saliency | Vanilla gradients, SmoothGrad, Grad-CAM and occlusion for any class, plus the untrained-network sanity check |
 | Adversarial | FGSM, targeted and iterative (PGD) attacks on LeNet, and accuracy as a function of ε |
 | Overfitting | A perceptron memorising small training sets; dropout, L2, augmentation and data size compared run by run |
+| Batch normalisation | The same sigmoid MLP trained with and without batch norm on the same batches; accuracy and the percentiles of one unit's input over training |
+| Transfer learning | Pretrain on digits 0–4, then learn 5–9 from 1 to 50 examples each: from scratch, frozen features with a new head, or fine-tuning |
+| Contrastive learning | SimCLR without labels: augmented pairs, the NT-Xent loss, a k-nearest-neighbour score and a PCA view of the learned features |
 | Autoencoder | A 2-D latent space for MNIST: plain vs. variational autoencoder, hover to decode, decoded grid, β |
+| GAN | A generator and a discriminator on 2-D points: the decision map, the saturating minimax loss and mode collapse on a ring of Gaussians |
 | U-Net | Segmentation of synthetic shapes where Otsu fails, with and without skip connections |
 | Detection | IoU, non-max suppression step by step, precision–recall and AP, anchor assignment |
 | Diffusion | The forward noising process on digits (linear vs. cosine schedule), and a denoiser trained to generate 2-D point clouds |
 | Vision Transformer | A tiny ViT written with tensor ops: attention maps per head, attention rollout, learned position embeddings |
+| Recurrent network | A GRU reads a digit row by row (or column by column): the prediction after every row, the hidden state, and accuracy against rows read |
 
 The lessons that need a trained digit classifier (Saliency, Adversarial) share the LeNet trained in
 Classification, or train a quick one themselves.
 
-The home page (`#/home`) introduces the playground and lists every lesson. Each section is its own
+The home page (`#/home`) introduces the playground and lists every lesson. The header's switch picks a light or dark theme, or follows the system setting. Each section is its own
 lazily-loaded chunk, and the current section is kept in the URL (`#/edges`), so sections can be
 bookmarked and shared.
 
@@ -99,8 +110,8 @@ src/
 │                                digit picker, probability bars, colour-mapped rendering
 ├── hooks/useImageData.ts    ← load a URL or canvas → downscaled RGBA + grayscale pixels
 ├── components/              ← PixelCanvas, ImageUploader, CodeViewer (+ tokenizer), LineChart
-├── lib/                     ← canvas helpers, demo images, colour maps, seeded random
-└── styles/base.css          ← design tokens and shared building blocks
+├── lib/                     ← canvas helpers, demo images, colour maps, seeded random, theme
+└── styles/base.css          ← design tokens (light-dark() pairs) and shared building blocks
 
 <group>/<lesson>/            ← every lesson folder has the same shape:
 ├── <algorithm>.ts           ←   algorithm code, no DOM (what "Show code" displays)

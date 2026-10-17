@@ -102,8 +102,8 @@ export function RegularisationSection() {
             <LineChart
               title="Training and validation loss per epoch"
               series={[
-                { label: 'training', color: '#60a5fa', values: shown.history.map(h => h.trainLoss), dashed: true },
-                { label: 'validation', color: '#f87171', values: shown.history.map(h => h.valLoss) },
+                { label: 'training', color: 'var(--series-blue)', values: shown.history.map(h => h.trainLoss), dashed: true },
+                { label: 'validation', color: 'var(--series-red)', values: shown.history.map(h => h.valLoss) },
               ]}
               xStart={1}
               xLabel="epoch"
@@ -115,8 +115,8 @@ export function RegularisationSection() {
             <LineChart
               title="Training and validation accuracy per epoch"
               series={[
-                { label: 'training', color: '#60a5fa', values: shown.history.map(h => h.trainAccuracy), dashed: true },
-                { label: 'validation', color: '#34d399', values: shown.history.map(h => h.valAccuracy) },
+                { label: 'training', color: 'var(--series-blue)', values: shown.history.map(h => h.trainAccuracy), dashed: true },
+                { label: 'validation', color: 'var(--series-green)', values: shown.history.map(h => h.valAccuracy) },
               ]}
               xStart={1}
               xLabel="epoch"

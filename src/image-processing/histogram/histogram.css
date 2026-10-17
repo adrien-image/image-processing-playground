@@ -1,18 +1,18 @@
 .mapping-curve {
   display: block;
   margin: 0 auto;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--chart-bg);
   border-radius: var(--radius);
   border: 1px solid var(--surface-border);
 }
 
 .mapping-curve-frame {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
+  stroke: color-mix(in srgb, var(--fg) 8%, transparent);
 }
 
 .mapping-curve-identity {
-  stroke: rgba(255, 255, 255, 0.2);
+  stroke: color-mix(in srgb, var(--fg) 20%, transparent);
   stroke-dasharray: 6 6;
   vector-effect: non-scaling-stroke;
 }

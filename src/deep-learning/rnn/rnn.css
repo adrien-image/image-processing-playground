@@ -1,0 +1,8 @@
+.rnn-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+}
+
+.rnn-head {
+  justify-content: center;
+  margin-top: 0.5rem;
+}

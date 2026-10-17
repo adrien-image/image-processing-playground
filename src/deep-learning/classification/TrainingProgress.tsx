@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 import type { TrainingEpochData } from './lenet';
+import { cssColor, useTheme } from '../../lib/theme';
 
 interface TrainingProgressProps {
   history: TrainingEpochData[];
@@ -15,11 +16,11 @@ const W = 440;
 const H = 220;
 const PAD = { top: 24, right: 44, bottom: 30, left: 44 };
 
-const COLORS = {
-  loss: '#f87171',
-  valLoss: '#fb923c',
-  acc: '#34d399',
-  valAcc: '#6ee7b7',
+const SERIES = {
+  loss: 'var(--series-red)',
+  valLoss: 'var(--series-orange)',
+  acc: 'var(--series-green)',
+  valAcc: 'var(--series-light-green)',
 };
 
 /** "−0.1234" when the value went down, "+0.0123" when it went up. */
@@ -27,6 +28,7 @@ const signed = (v: number, digits: number, suffix = '') => `${v > 0 ? '+' : v < 
 
 export function TrainingProgress({ history, runEpochs, runDone, status, batchProgress }: TrainingProgressProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
 
   const stats = useMemo(() => {
     if (history.length === 0) return null;
@@ -53,7 +55,8 @@ export function TrainingProgress({ history, runEpochs, runDone, status, batchPro
     const plotW = W - PAD.left - PAD.right;
     const plotH = H - PAD.top - PAD.bottom;
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    const COLORS = Object.fromEntries(Object.entries(SERIES).map(([k, v]) => [k, cssColor(v)])) as Record<keyof typeof SERIES, string>;
+    ctx.fillStyle = cssColor('var(--chart-bg)');
     ctx.fillRect(0, 0, W, H);
 
     let maxLoss = 0.1;
@@ -66,7 +69,7 @@ export function TrainingProgress({ history, runEpochs, runDone, status, batchPro
     ctx.font = '10px monospace';
     for (let i = 0; i <= 4; i++) {
       const y = PAD.top + (i / 4) * plotH;
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = cssColor('color-mix(in srgb, var(--fg) 6%, transparent)');
       ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
       ctx.fillStyle = COLORS.loss;
       ctx.textAlign = 'right';
@@ -77,7 +80,7 @@ export function TrainingProgress({ history, runEpochs, runDone, status, batchPro
     }
 
     // x-axis: epoch numbers
-    ctx.fillStyle = '#6b728e';
+    ctx.fillStyle = cssColor('var(--text-muted)');
     ctx.textAlign = 'center';
     const every = Math.ceil(history.length / 10);
     history.forEach((d, i) => {
@@ -113,11 +116,11 @@ export function TrainingProgress({ history, runEpochs, runDone, status, batchPro
       ctx.setLineDash(l.dashed ? [3, 2] : []);
       ctx.beginPath(); ctx.moveTo(x, 10); ctx.lineTo(x + 14, 10); ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = '#949bb5';
+      ctx.fillStyle = cssColor('var(--text-secondary)');
       ctx.fillText(l.label, x + 18, 13);
       return x + 26 + ctx.measureText(l.label).width;
     }, PAD.left);
-  }, [history]);
+  }, [history, theme]);
 
   return (
     <div className="training-progress">

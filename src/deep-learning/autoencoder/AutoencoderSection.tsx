@@ -210,8 +210,8 @@ function Trainer({ data }: { data: MnistData }) {
             <LineChart
               title="Reconstruction and KL loss per epoch"
               series={[
-                { label: 'reconstruction (BCE)', color: '#60a5fa', values: history.map(h => h.reconstruction) },
-                ...(mode === 'vae' ? [{ label: 'KL', color: '#f472b6', values: history.map(h => h.kl) }] : []),
+                { label: 'reconstruction (BCE)', color: 'var(--series-blue)', values: history.map(h => h.reconstruction) },
+                ...(mode === 'vae' ? [{ label: 'KL', color: 'var(--series-pink)', values: history.map(h => h.kl) }] : []),
               ]}
               xStart={1}
               xLabel="epoch"

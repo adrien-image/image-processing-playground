@@ -190,12 +190,12 @@ function Trainer({ data }: { data: MnistData }) {
       <div className="dl-grid vit-charts">
         <div className="demo-panel">
           <h3>Validation accuracy</h3>
-          <LineChart title="Validation accuracy per epoch" series={[{ label: 'ViT', color: '#34d399', values: accuracy }]}
+          <LineChart title="Validation accuracy per epoch" series={[{ label: 'ViT', color: 'var(--series-green)', values: accuracy }]}
             xStart={1} xLabel="epoch" yMax={1} formatY={v => `${Math.round(v * 100)}%`} height={170} />
         </div>
         <div className="demo-panel">
           <h3>Training loss</h3>
-          <LineChart title="Training loss, averaged over 20 batches" series={[{ label: 'loss', color: '#f87171', values: smooth(losses, 20) }]}
+          <LineChart title="Training loss, averaged over 20 batches" series={[{ label: 'loss', color: 'var(--series-red)', values: smooth(losses, 20) }]}
             xLabel="× 20 batches" yMin={0} height={170} />
         </div>
       </div>

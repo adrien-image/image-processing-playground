@@ -213,7 +213,7 @@ function PrView({ image, truth, dets }: { image: ImageData; truth: Box[]; dets: 
       <div className="det-layout">
         <div className="demo-panel">
           <h3>Precision–recall curve</h3>
-          <PrCurve curves={[{ label: 'without NMS', color: '#fb923c', ev: raw }, { label: 'after NMS', color: '#34d399', ev: kept }]} />
+          <PrCurve curves={[{ label: 'without NMS', color: 'var(--series-orange)', ev: raw }, { label: 'after NMS', color: 'var(--series-green)', ev: kept }]} />
           <div className="dl-stat-row">
             <span>AP without NMS <strong>{raw.averagePrecision.toFixed(3)}</strong></span>
             <span>AP after NMS <strong>{kept.averagePrecision.toFixed(3)}</strong></span>
@@ -268,7 +268,7 @@ function PrCurve({ curves }: { curves: { label: string; color: string; ev: Evalu
         <text x={W / 2} y={W - 4} className="line-chart-tick" textAnchor="middle">recall →</text>
         <text x={8} y={P - 10} className="line-chart-tick">precision</text>
         {curves.map(c => (
-          <path key={c.label} fill="none" stroke={c.color} strokeWidth={2}
+          <path key={c.label} fill="none" style={{ stroke: c.color }} strokeWidth={2}
             d={`M${x(0)},${y(1)}` + c.ev.curve.map(pt => `L${x(pt.recall)},${y(pt.precision)}`).join('')} />
         ))}
       </svg>

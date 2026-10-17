@@ -201,7 +201,7 @@ export function LearnKernelSection() {
           <h3>Loss (mean squared error)</h3>
           <LineChart
             title="Training loss per step, logarithmic scale"
-            series={[{ label: 'loss', color: '#f87171', values: history }]}
+            series={[{ label: 'loss', color: 'var(--series-red)', values: history }]}
             logY
             xLabel="step"
           />

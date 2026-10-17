@@ -1,0 +1,34 @@
+.warp-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.warp-arrow {
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.warp-src {
+  fill: rgba(255, 255, 255, 0.8);
+}
+
+.warp-landed {
+  fill: none;
+  stroke: #fbbf24;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.warp-handle {
+  fill: #f472b6;
+  stroke: #fff;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  cursor: grab;
+}

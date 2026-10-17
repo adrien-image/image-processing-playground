@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { cssColor, useTheme } from '../../lib/theme';
 import './HistogramView.css';
 
 interface HistogramViewProps {
@@ -18,6 +19,7 @@ const FOREGROUND = [248, 113, 113];
 
 export function HistogramView({ histogram, threshold, otsuThreshold, width = 360, height = 160, label }: HistogramViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -37,7 +39,7 @@ export function HistogramView({ histogram, threshold, otsuThreshold, width = 360
     const xOfLevel = (v: number) => pad.left + ((v + 1) / 256) * plotW;
 
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillStyle = cssColor('var(--chart-bg)');
     ctx.fillRect(0, 0, width, height);
 
     let maxFreq = 0;
@@ -61,7 +63,8 @@ export function HistogramView({ histogram, threshold, otsuThreshold, width = 360
 
     if (otsuThreshold !== undefined) {
       const x = xOfLevel(otsuThreshold);
-      ctx.strokeStyle = '#34d399';
+      const otsuColor = cssColor('var(--success)');
+      ctx.strokeStyle = otsuColor;
       ctx.lineWidth = 2;
       ctx.setLineDash([4, 3]);
       ctx.beginPath();
@@ -69,30 +72,31 @@ export function HistogramView({ histogram, threshold, otsuThreshold, width = 360
       ctx.lineTo(x, pad.top + plotH);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = '#34d399';
+      ctx.fillStyle = otsuColor;
       ctx.fillText('Otsu', x, pad.top - 3);
     }
 
     if (threshold !== undefined && threshold !== otsuThreshold) {
       const x = xOfLevel(threshold);
-      ctx.strokeStyle = '#fbbf24';
+      const userColor = cssColor('var(--warning)');
+      ctx.strokeStyle = userColor;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.moveTo(x, pad.top);
       ctx.lineTo(x, pad.top + plotH);
       ctx.stroke();
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = userColor;
       ctx.fillText('You', x, pad.top + plotH + 12);
     }
 
-    ctx.fillStyle = '#6b728e';
+    ctx.fillStyle = cssColor('var(--text-muted)');
     ctx.font = '9px monospace';
     ctx.textAlign = 'left';
     ctx.fillText('0', pad.left, pad.top + plotH + 14);
     ctx.textAlign = 'right';
     ctx.fillText('255', pad.left + plotW, pad.top + plotH + 14);
     ctx.fillText(`${bins} bins`, width - pad.right, pad.top - 3);
-  }, [histogram, threshold, otsuThreshold, width, height]);
+  }, [histogram, threshold, otsuThreshold, width, height, theme]);
 
   return <canvas ref={canvasRef} className="histogram-canvas" style={{ maxWidth: width, aspectRatio: `${width} / ${height}` }} role="img" aria-label={label} />;
 }

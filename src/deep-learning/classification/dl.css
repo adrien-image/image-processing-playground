@@ -148,7 +148,7 @@
 .prediction-bar-track {
   flex: 1;
   height: 14px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
   border-radius: 7px;
   overflow: hidden;
 }
@@ -203,7 +203,7 @@
   padding: 0.5rem 0.75rem;
   border: 2px solid var(--surface-border);
   border-radius: var(--radius);
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   transition: all 0.3s ease;
 }
 
@@ -420,7 +420,7 @@
   align-items: center;
   gap: 0.2rem;
   padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   border-radius: var(--radius);
   border: 1px solid var(--surface-border);
   min-width: 90px;
@@ -449,7 +449,7 @@
 
 .dl-model-untrained {
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
 }
 
 .dl-model-trained {
@@ -475,7 +475,7 @@
 .training-loading-bar {
   width: 200px;
   height: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
   border-radius: 2px;
   margin: 0 auto 0.75rem;
   overflow: hidden;
@@ -506,12 +506,12 @@
 }
 
 .training-metric-best .training-metric-value {
-  color: #fbbf24;
+  color: var(--warning);
   text-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
 }
 
 .training-metric-best .training-metric-delta {
-  color: #fbbf24;
+  color: var(--warning);
 }
 
 /* ---- Epoch table ---- */
@@ -532,7 +532,7 @@
 .training-epoch-table th {
   position: sticky;
   top: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: color-mix(in srgb, var(--shade) 40%, transparent);
   color: var(--text-muted);
   font-weight: 600;
   text-transform: uppercase;
@@ -545,16 +545,16 @@
 .training-epoch-table td {
   padding: 0.3rem 0.5rem;
   text-align: center;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid color-mix(in srgb, var(--fg) 3%, transparent);
   color: var(--text-secondary);
 }
 
 .training-epoch-table tr:hover td {
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--fg) 3%, transparent);
 }
 
 .training-epoch-table .tr-best td {
-  color: #fbbf24;
+  color: var(--warning);
   background: rgba(251, 191, 36, 0.06);
 }
 
@@ -581,7 +581,7 @@
 .training-batch-track {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--fg) 6%, transparent);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -626,7 +626,7 @@
 .tr-card {
   display: flex;
   gap: 0.6rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius);
   padding: 0.65rem;
@@ -755,7 +755,7 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: color-mix(in srgb, var(--shade) 20%, transparent);
   padding: 0.5rem 0.75rem;
   border-radius: var(--radius);
   margin-bottom: 0.5rem;
@@ -992,7 +992,7 @@
   max-width: 40vw;
   height: 10px;
   border-radius: 5px;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 12%, transparent);
 }
 
 .cnn-legend-gray { background: linear-gradient(90deg, #000, #fff); }
