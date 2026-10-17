@@ -180,7 +180,7 @@ export const SECTIONS: SectionDef[] = [
     blurb: 'A GRU reads a digit one row at a time: watch its prediction form as the rows arrive, and what it keeps in memory.',
     Component: lazy(() => import('../deep-learning/rnn/RnnSection').then(m => ({ default: m.RnnSection }))) },
   { key: 'linear-models', group: 'machine-learning', icon: '📈', label: 'Linear & logistic regression',
-    blurb: 'Drag points and watch a line fit them: the exact least-squares solution, gradient descent, and the logistic loss for classes.',
+    blurb: 'Click to add points and watch a line fit them: the exact least-squares solution, gradient descent, and the logistic loss for classes.',
     Component: lazy(() => import('../machine-learning/linear/LinearSection').then(m => ({ default: m.LinearSection }))) },
   { key: 'knn', group: 'machine-learning', icon: '👥', label: 'k-nearest neighbours',
     blurb: 'Classify by asking the closest training points: how k smooths the boundary, and why distance fails in 784 dimensions.',
