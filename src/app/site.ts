@@ -6,4 +6,5 @@ export const SITE_DESCRIPTION =
   'Interactive lessons that run classic computer-vision algorithms on demo images or your own photos, ' +
   'then train neural networks live in your browser: step through a convolution kernel, compare edge detectors, ' +
   'watch gradient descent learn a filter, fool a classifier, explore a latent space or generate with diffusion, ' +
+  'fit the classic machine-learning models (SVMs, forests, boosting, PCA, t-SNE), ' +
   'and open the source code behind every result.';
