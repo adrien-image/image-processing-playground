@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ChangeEvent } from 'react';
+import { useText } from '../lib/i18n';
 
 interface ImageUploaderProps {
   /** Receives an object URL for the chosen file (valid until the next upload or unmount). */
@@ -10,11 +11,26 @@ interface ImageUploaderProps {
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
+const TEXT = {
+  en: {
+    upload: '📁 Upload image',
+    notImage: (name: string) => `"${name}" is not an image.`,
+    tooLarge: (mb: string) => `File too large: ${mb} MB (max ${MAX_FILE_SIZE / 1024 / 1024} MB)`,
+  },
+  fr: {
+    upload: '📁 Charger une image',
+    notImage: (name: string) => `« ${name} » n'est pas une image.`,
+    tooLarge: (mb: string) => `Fichier trop gros : ${mb} Mo (max. ${MAX_FILE_SIZE / 1024 / 1024} Mo)`,
+  },
+};
+
 /**
  * File picker for images. Decoding, the pixel-count limit and downscaling happen in
  * `useImageData`, which reports decode failures through its `error` value.
  */
-export function ImageUploader({ onImage, onError, label = '📁 Upload image', disabled }: ImageUploaderProps) {
+export function ImageUploader({ onImage, onError, label: labelProp, disabled }: ImageUploaderProps) {
+  const t = useText(TEXT);
+  const label = labelProp ?? t.upload;
   const inputRef = useRef<HTMLInputElement>(null);
   const urlRef = useRef<string | null>(null);
 
@@ -31,11 +47,11 @@ export function ImageUploader({ onImage, onError, label = '📁 Upload image', d
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      onError?.(`"${file.name}" is not an image.`);
+      onError?.(t.notImage(file.name));
       return;
     }
     if (file.size > MAX_FILE_SIZE) {
-      onError?.(`File too large: ${(file.size / 1024 / 1024).toFixed(1)} MB (max ${MAX_FILE_SIZE / 1024 / 1024} MB)`);
+      onError?.(t.tooLarge((file.size / 1024 / 1024).toFixed(1)));
       return;
     }
 

@@ -144,3 +144,15 @@
   .home-grid { grid-template-columns: 1fr; gap: 0.5rem; }
   .home-card { padding: 0.75rem 0.9rem; }
 }
+
+.home-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-width: 560px;
+}
+
+.home-search-status {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}

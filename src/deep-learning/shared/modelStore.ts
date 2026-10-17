@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import type * as tf from '@tensorflow/tfjs';
+import type { Texts } from '../../lib/i18n';
 import { snapshotLeNet } from '../classification/lenet';
 
 /**
@@ -13,13 +14,13 @@ export interface SharedLeNet {
   /** Changes whenever the weights do, so views can recompute. */
   version: number;
   /** Where the weights came from, for display. */
-  source: string;
+  source: Texts<string>;
 }
 
 let current: SharedLeNet | null = null;
 const listeners = new Set<() => void>();
 
-export function publishLeNet(model: tf.LayersModel, source: string): void {
+export function publishLeNet(model: tf.LayersModel, source: Texts<string>): void {
   const copy = snapshotLeNet(model, current?.model);
   current = { model: copy, version: (current?.version ?? 0) + 1, source };
   listeners.forEach(l => l());

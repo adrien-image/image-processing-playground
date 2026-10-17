@@ -122,7 +122,7 @@ export function DLPlayground() {
       const weightsChanged = () => {
         const snapshot = snapshotLeNet(model, snapshotRef.current ?? undefined);
         snapshotRef.current = snapshot;
-        publishLeNet(model, 'the Classification lesson');
+        publishLeNet(model, { en: 'the Classification lesson', fr: 'la leçon Classification' });
         setTrained(prev => ({ model: snapshot, version: (prev?.version ?? 0) + 1 }));
       };
 

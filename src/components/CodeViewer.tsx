@@ -1,4 +1,5 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useText } from '../lib/i18n';
 import { highlight, type Language } from './highlight';
 import './CodeViewer.css';
 
@@ -10,6 +11,11 @@ export interface SourceFile {
 
 const LANGUAGE_LABEL: Record<Language, string> = { ts: 'TypeScript', py: 'Python · PyTorch' };
 const PREFERENCE_KEY = 'code-viewer-language';
+
+const TEXT = {
+  en: { language: 'Language', close: 'Close code viewer', source: (title: string) => `Source code of ${title}`, show: '💻 Show code' },
+  fr: { language: 'Langage', close: 'Fermer le code', source: (title: string) => `Code source de ${title}`, show: '💻 Voir le code' },
+};
 
 /** The language the viewer last showed, remembered per browser (storage may be unavailable). */
 function preferredLanguage(): Language | null {
@@ -37,6 +43,7 @@ interface CodeViewerProps {
 
 /** Modal dialog showing a source file with syntax highlighting, with a tab per language. */
 export function CodeViewer({ files, onClose }: CodeViewerProps) {
+  const t = useText(TEXT);
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -87,7 +94,7 @@ export function CodeViewer({ files, onClose }: CodeViewerProps) {
         <div className="code-viewer-header">
           <span className="code-viewer-title" id={titleId}>{title}</span>
           {files.length > 1 && (
-            <div className="code-viewer-tabs" role="tablist" aria-label="Language">
+            <div className="code-viewer-tabs" role="tablist" aria-label={t.language}>
               {files.map((f, i) => (
                 <button key={f.language} type="button" role="tab" aria-selected={f === file}
                   className={`code-viewer-tab${f === file ? ' code-viewer-tab-active' : ''}`} onClick={() => select(i)}>
@@ -96,11 +103,11 @@ export function CodeViewer({ files, onClose }: CodeViewerProps) {
               ))}
             </div>
           )}
-          <button ref={closeRef} type="button" className="code-viewer-close" onClick={onClose} aria-label="Close code viewer">
+          <button ref={closeRef} type="button" className="code-viewer-close" onClick={onClose} aria-label={t.close}>
             ✕
           </button>
         </div>
-        <pre className="code-viewer-content" role="region" tabIndex={0} aria-label={`Source code of ${title}`}>
+        <pre className="code-viewer-content" role="region" tabIndex={0} aria-label={t.source(title)}>
           <code>
             {lines.map((line, i) => (
               <div key={i} className="code-viewer-line">
@@ -128,11 +135,12 @@ export function ShowCodeButton({ code, title, python, open, onOpenChange }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const t = useText(TEXT);
   const files: SourceFile[] = [{ code, title, language: 'ts' }];
   if (python) files.push({ ...python, language: 'py' });
   return (
     <>
-      <button type="button" className="btn btn-sm" onClick={() => onOpenChange(true)}>💻 Show code</button>
+      <button type="button" className="btn btn-sm" onClick={() => onOpenChange(true)}>{t.show}</button>
       {open && <CodeViewer files={files} onClose={() => onOpenChange(false)} />}
     </>
   );

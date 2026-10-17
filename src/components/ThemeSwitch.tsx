@@ -1,23 +1,28 @@
+import { useText } from '../lib/i18n';
 import { setThemeChoice, useThemeChoice, type ThemeChoice } from '../lib/theme';
 
 const NEXT: Record<ThemeChoice, ThemeChoice> = { system: 'light', light: 'dark', dark: 'system' };
 const ICON: Record<ThemeChoice, string> = { system: '🖥', light: '☀️', dark: '🌙' };
-const LABEL: Record<ThemeChoice, string> = { system: 'System', light: 'Light', dark: 'Dark' };
+const TEXT = {
+  en: { names: { system: 'System', light: 'Light', dark: 'Dark' }, theme: 'Theme', switchTo: 'Switch to', clickFor: 'click for' },
+  fr: { names: { system: 'Système', light: 'Clair', dark: 'Sombre' }, theme: 'Thème', switchTo: 'Passer en', clickFor: 'cliquer pour' },
+};
 
 /** Header button cycling System → Light → Dark. */
 export function ThemeSwitch() {
   const choice = useThemeChoice();
+  const t = useText(TEXT);
   const next = NEXT[choice];
   return (
     <button
       type="button"
       className="theme-switch"
       onClick={() => setThemeChoice(next)}
-      aria-label={`Theme: ${LABEL[choice]}. Switch to ${LABEL[next].toLowerCase()}`}
-      title={`Theme: ${LABEL[choice]} (click for ${LABEL[next].toLowerCase()})`}
+      aria-label={`${t.theme}: ${t.names[choice]}. ${t.switchTo} ${t.names[next].toLowerCase()}`}
+      title={`${t.theme}: ${t.names[choice]} (${t.clickFor} ${t.names[next].toLowerCase()})`}
     >
       <span aria-hidden="true">{ICON[choice]}</span>
-      <span className="theme-switch-label">{LABEL[choice]}</span>
+      <span className="theme-switch-label">{t.names[choice]}</span>
     </button>
   );
 }

@@ -9,5 +9,11 @@
     "jsx-a11y/prefer-tag-over-role": "off",
     "jsx-a11y/no-noninteractive-tabindex": ["warn", { "roles": ["region"], "tags": [] }]
   },
+  "overrides": [
+    {
+      "files": ["**/*.text.tsx"],
+      "rules": { "react/only-export-components": "off" }
+    }
+  ],
   "ignorePatterns": ["dist", "public"]
 }

@@ -203,6 +203,12 @@ body {
   border-color: var(--surface-border-hover);
 }
 
+.lang-switch {
+  margin-left: 0;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .header-menu-title {
   background: var(--accent-gradient);
   -webkit-background-clip: text;
@@ -913,4 +919,103 @@ body {
 /* Toggle button in its "off" state */
 .btn-off {
   opacity: 0.55;
+}
+
+/* ---- Lesson search (menu and home page) ---- */
+.lesson-search {
+  width: 100%;
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.8rem;
+}
+
+.lesson-search:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.header-menu-search {
+  margin-bottom: 0.5rem;
+}
+
+.header-menu-empty {
+  grid-column: 1 / -1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ---- Previous / next / related lessons, under every lesson ---- */
+.lesson-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+.lesson-nav-steps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.lesson-nav-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius);
+  color: var(--text);
+  text-decoration: none;
+}
+
+.lesson-nav-step:hover {
+  border-color: var(--surface-border-hover);
+}
+
+.lesson-nav-next {
+  text-align: right;
+}
+
+.lesson-nav-dir {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.lesson-nav-title {
+  font-weight: 600;
+}
+
+.lesson-nav-related {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+.lesson-nav-related ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.lesson-nav-chip {
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .lesson-nav-steps { gap: 0.5rem; }
+  .lesson-nav-step { padding: 0.55rem 0.65rem; font-size: 0.85rem; }
 }

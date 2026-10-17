@@ -1,8 +1,14 @@
 import { useMemo, useState } from 'react';
 import { PixelCanvas } from '../../components/PixelCanvas';
+import { useText } from '../../lib/i18n';
 import type { MnistSplit } from './mnist';
 import { floatImage } from './render';
 import './dl-shared.css';
+
+const TEXT = {
+  en: { pick: 'Pick a test digit', image: (d: number) => `Test image of a ${d}`, other: 'Other examples' },
+  fr: { pick: 'Choisissez un chiffre de test', image: (d: number) => `Image de test d'un ${d}`, other: 'Autres exemples' },
+};
 
 interface DigitPickerProps {
   split: MnistSplit;
@@ -20,7 +26,9 @@ function byDigit(split: MnistSplit): number[][] {
 }
 
 /** One example of each digit from a held-out split, with a button for other examples. */
-export function DigitPicker({ split, value, onChange, label = 'Pick a test digit' }: DigitPickerProps) {
+export function DigitPicker({ split, value, onChange, label: labelProp }: DigitPickerProps) {
+  const t = useText(TEXT);
+  const label = labelProp ?? t.pick;
   const groups = useMemo(() => byDigit(split), [split]);
   const [page, setPage] = useState(0);
   const choices = groups.map(g => g[page % g.length]);
@@ -42,7 +50,7 @@ export function DigitPicker({ split, value, onChange, label = 'Pick a test digit
             type="button"
             className={`digit-picker-btn${index === value ? ' digit-picker-active' : ''}`}
             aria-pressed={index === value}
-            aria-label={`Test image of a ${d}`}
+            aria-label={t.image(d)}
             onClick={() => onChange(index)}
           >
             <PixelCanvas image={images[d]} size={36} label="" />
@@ -59,7 +67,7 @@ export function DigitPicker({ split, value, onChange, label = 'Pick a test digit
           onChange(groups[d][next % groups[d].length]);
         }}
       >
-        🎲 Other examples
+        🎲 {t.other}
       </button>
     </div>
   );
