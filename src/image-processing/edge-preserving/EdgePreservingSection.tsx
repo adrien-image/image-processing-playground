@@ -11,6 +11,8 @@ import { seededRandom } from '../../lib/random';
 import { heatImage } from '../../deep-learning/shared/render';
 import { addGaussianNoise, gaussianFilter, psnr } from '../denoising/denoise';
 import { bilateralFilter, bilateralWeights, nlmWeights, nonLocalMeans, type NlmOptions } from './edgePreserving';
+import { useText } from '../../lib/i18n';
+import { TEXT } from './EdgePreservingSection.text';
 import './edge-preserving.css';
 
 const SIZE = 112;
@@ -40,6 +42,7 @@ function demoImage(): HTMLCanvasElement {
 const fmtDb = (v: number) => (Number.isFinite(v) ? `${v.toFixed(1)} dB` : '∞');
 
 export function EdgePreservingSection() {
+  const t = useText(TEXT);
   const [source, setSource] = useState<ImageSource>(demoImage);
   const [isDemo, setIsDemo] = useState(true);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -96,10 +99,10 @@ export function EdgePreservingSection() {
   return (
     <div className="demo-section">
       <div className="demo-controls">
-        <span className="demo-label">Smooth the noise, keep the edges</span>
-        <button type="button" className="btn btn-sm" onClick={() => setSeed(s => s + 1)}>🎲 New noise</button>
-        <ImageUploader label="📁 Upload" onImage={src => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
-        {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(demoImage()); setIsDemo(true); }}>Demo image</button>}
+        <span className="demo-label">{t.heading}</span>
+        <button type="button" className="btn btn-sm" onClick={() => setSeed(s => s + 1)}>{t.newNoise}</button>
+        <ImageUploader label={t.upload} onImage={src => { setSource(src); setIsDemo(false); setUploadError(null); }} onError={setUploadError} />
+        {!isDemo && <button type="button" className="btn btn-sm" onClick={() => { setSource(demoImage()); setIsDemo(true); }}>{t.demoImage}</button>}
         <span className="ml-auto">
           <ShowCodeButton code={filtersCode} title="edge-preserving/edgePreserving.ts" python={{ code: pythonCode, title: 'edge-preserving/edge_preserving.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
@@ -109,22 +112,22 @@ export function EdgePreservingSection() {
 
       <div className="demo-controls">
         <div className="dl-sliders">
-          <label className="dl-slider">Noise σ <strong>{sigma}</strong>
+          <label className="dl-slider">{t.noiseSigma} <strong>{sigma}</strong>
             <input type="range" min={5} max={40} value={sigma} onChange={e => setSigma(Number(e.target.value))} />
           </label>
-          <label className="dl-slider">Bilateral σs <strong>{sigmaSpace.toFixed(1)}</strong>
+          <label className="dl-slider">{t.bilateralSs} <strong>{sigmaSpace.toFixed(1)}</strong>
             <input type="range" min={0.5} max={4} step={0.1} value={sigmaSpace} onChange={e => setSigmaSpace(Number(e.target.value))} />
           </label>
-          <label className="dl-slider">Bilateral σr <strong>{sigmaRange}</strong>
+          <label className="dl-slider">{t.bilateralSr} <strong>{sigmaRange}</strong>
             <input type="range" min={5} max={150} step={5} value={sigmaRange} onChange={e => setSigmaRange(Number(e.target.value))} />
           </label>
-          <label className="dl-slider">NLM h <strong>{hFactor.toFixed(1)}σ</strong>
+          <label className="dl-slider">{t.nlmH} <strong>{hFactor.toFixed(1)}σ</strong>
             <input type="range" min={0.2} max={2} step={0.1} value={hFactor} onChange={e => setHFactor(Number(e.target.value))} />
           </label>
-          <label className="dl-slider">Patch <strong>{2 * patchRadius + 1}×{2 * patchRadius + 1}</strong>
+          <label className="dl-slider">{t.patch} <strong>{2 * patchRadius + 1}×{2 * patchRadius + 1}</strong>
             <input type="range" min={1} max={2} value={patchRadius} onChange={e => setPatchRadius(Number(e.target.value))} />
           </label>
-          <label className="dl-slider">Search <strong>{2 * searchRadius + 1}×{2 * searchRadius + 1}</strong>
+          <label className="dl-slider">{t.search} <strong>{2 * searchRadius + 1}×{2 * searchRadius + 1}</strong>
             <input type="range" min={2} max={7} value={searchRadius} onChange={e => setSearchRadius(Number(e.target.value))} />
           </label>
         </div>
@@ -132,9 +135,9 @@ export function EdgePreservingSection() {
 
       <div className="demo-images">
         <div className="demo-panel">
-          <h3>Noisy · click a pixel</h3>
+          <h3>{t.noisyClick}</h3>
           <div className="ep-picker" onClick={pick} role="presentation">
-            <PixelCanvas image={image && noisy ? grayToImageData(noisy, image.width, image.height) : null} size={DISPLAY} label="Noisy image; click to inspect the filters' weights at a pixel">
+            <PixelCanvas image={image && noisy ? grayToImageData(noisy, image.width, image.height) : null} size={DISPLAY} label={t.noisyLabel}>
               {weights && image && (
                 <svg className="ep-overlay" viewBox={`0 0 ${image.width} ${image.height}`} preserveAspectRatio="none" aria-hidden="true">
                   <rect className="ep-search" x={weights.x - searchRadius} y={weights.y - searchRadius} width={2 * searchRadius + 1} height={2 * searchRadius + 1} />
@@ -145,43 +148,27 @@ export function EdgePreservingSection() {
           </div>
           {image && noisy && <p className="caption">PSNR {fmtDb(psnr(image.gray, noisy))}</p>}
         </div>
-        {panel(`Gaussian ${2 * BILATERAL_RADIUS + 1}×${2 * BILATERAL_RADIUS + 1}`, gaussian, 'Gaussian-filtered image')}
-        {panel('Bilateral', bilateral, 'Bilateral-filtered image')}
-        {panel('Non-local means', nlm, 'Non-local means result')}
+        {panel(t.gaussian(2 * BILATERAL_RADIUS + 1), gaussian, t.gaussianLabel)}
+        {panel(t.bilateral, bilateral, t.bilateralLabel)}
+        {panel(t.nlm, nlm, t.nlmLabel)}
       </div>
 
       {weights && (
         <div className="demo-images">
           <div className="demo-panel">
-            <h3>Bilateral weights at ({weights.x}, {weights.y})</h3>
-            <PixelCanvas image={weights.bilateral} size={150} label="Bilateral filter weights in the 7×7 window" />
-            <p className="caption">7×7 window · bright = large weight</p>
+            <h3>{t.bilateralWeights(weights.x, weights.y)}</h3>
+            <PixelCanvas image={weights.bilateral} size={150} label={t.bilateralWeightsLabel} />
+            <p className="caption">{t.bilateralCaption}</p>
           </div>
           <div className="demo-panel">
-            <h3>Non-local means weights</h3>
-            <PixelCanvas image={weights.nlm} size={150} label="Non-local means weights in the search window" />
-            <p className="caption">{2 * searchRadius + 1}×{2 * searchRadius + 1} search window (the box on the noisy image)</p>
+            <h3>{t.nlmWeights}</h3>
+            <PixelCanvas image={weights.nlm} size={150} label={t.nlmWeightsLabel} />
+            <p className="caption">{t.nlmCaption(2 * searchRadius + 1)}</p>
           </div>
         </div>
       )}
 
-      <div className="demo-explanation">
-        <h4>Average only with what looks alike</h4>
-        <p>A Gaussian blur gives each neighbour a weight that depends on distance alone, so near an edge it averages the two
-        sides and the edge turns into a ramp. The <strong>bilateral filter</strong> multiplies that weight by a second
-        Gaussian of the <em>value</em> difference:</p>
-        <p className="formula"><code>w(p, q) = exp(−‖p − q‖² / 2σs²) · exp(−(I(q) − I(p))² / 2σr²)</code></p>
-        <p>Pixels across an edge differ by much more than σr, so they get no weight: click next to an edge and the weight map
-        is cut in two. But it compares single, noisy pixels: σr must be well above the noise σ, or the filter keeps the noise
-        too. With σr huge it is a Gaussian blur again.</p>
-        <p><strong>Non-local means</strong> compares whole patches instead, which averages the noise out of the comparison,
-        and looks further away. The weight of a candidate q is</p>
-        <p className="formula"><code>w(p, q) = exp(−max(d²(P(p), P(q)) − 2σ², 0) / h²)</code></p>
-        <p>where d² is the mean squared difference of the two patches and 2σ² is what noise alone puts between two copies of
-        the same patch. Click a stripe: the weights light up the <em>other</em> stripes, because a repeated texture is
-        averaged with its own copies. That is why non-local means usually wins on PSNR, at a much higher cost:
-        every pixel compares (2S+1)² patches.</p>
-      </div>
+      <div className="demo-explanation">{t.explanation}</div>
     </div>
   );
 }

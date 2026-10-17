@@ -12,6 +12,8 @@ import { hotColor } from '../hough/hough';
 import { psnr } from '../denoising/denoise';
 import { nextPowerOf2 } from '../frequency/fft';
 import { blurImage, makePsf, psfSpectrum, responseImage, richardsonLucy, wiener, type PsfKind } from './deblur';
+import { useText } from '../../lib/i18n';
+import { TEXT } from './DeblurSection.text';
 import './deblur.css';
 
 const PSF_SIZE = 21;
@@ -29,13 +31,14 @@ function toSquare(gray: Float64Array, w: number, h: number) {
   return { pixels: out, n };
 }
 
-const PARAM: Record<PsfKind, { label: string; min: number; max: number; step: number; initial: number }> = {
-  motion: { label: 'Length (px)', min: 2, max: 20, step: 1, initial: 11 },
-  gaussian: { label: 'σ (px)', min: 0.5, max: 5, step: 0.25, initial: 2 },
-  defocus: { label: 'Radius (px)', min: 1, max: 9, step: 0.5, initial: 4 },
+const PARAM: Record<PsfKind, { min: number; max: number; step: number; initial: number }> = {
+  motion: { min: 2, max: 20, step: 1, initial: 11 },
+  gaussian: { min: 0.5, max: 5, step: 0.25, initial: 2 },
+  defocus: { min: 1, max: 9, step: 0.5, initial: 4 },
 };
 
 export function DeblurSection() {
+  const t = useText(TEXT);
   const [source, setSource] = useState<ImageSource>(() => scene(256));
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [kind, setKind] = useState<PsfKind>('motion');
@@ -82,34 +85,34 @@ export function DeblurSection() {
   return (
     <div className="demo-section">
       <div className="demo-controls">
-        <span className="demo-label">Blur:</span>
+        <span className="demo-label">{t.blur}</span>
         {(['motion', 'gaussian', 'defocus'] as const).map(k => (
           <button key={k} type="button" aria-pressed={kind === k} className={`btn btn-sm${kind === k ? ' btn-primary' : ''}`}
             onClick={() => { setKind(k); setParam(PARAM[k].initial); }}>
-            {k === 'motion' ? 'Camera shake (motion)' : k === 'gaussian' ? 'Gaussian' : 'Out of focus (disc)'}
+            {t.kinds[k]}
           </button>
         ))}
-        <ImageUploader label="📁 Upload" onImage={src => { setSource(src); setUploadError(null); }} onError={setUploadError} />
+        <ImageUploader label={t.upload} onImage={src => { setSource(src); setUploadError(null); }} onError={setUploadError} />
         <span className="ml-auto">
           <ShowCodeButton code={deblurCode} title="deblur/deblur.ts" python={{ code: pythonCode, title: 'deblur/deblur.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       <div className="demo-controls">
-        <label className="dl-slider">{p.label} <strong>{param}</strong>
+        <label className="dl-slider">{t.param[kind]} <strong>{param}</strong>
           <input type="range" min={p.min} max={p.max} step={p.step} value={param} onChange={e => setParam(Number(e.target.value))} />
         </label>
         {kind === 'motion' && (
-          <label className="dl-slider">Angle <strong>{angle}°</strong>
+          <label className="dl-slider">{t.angle} <strong>{angle}°</strong>
             <input type="range" min={0} max={180} value={angle} onChange={e => setAngle(Number(e.target.value))} />
           </label>
         )}
-        <label className="dl-slider">Noise σ <strong>{noise}</strong>
+        <label className="dl-slider">{t.noiseSigma} <strong>{noise}</strong>
           <input type="range" min={0} max={20} step={0.5} value={noise} onChange={e => setNoise(Number(e.target.value))} />
         </label>
-        <label className="dl-slider">Wiener K <strong>{K < 0.001 ? K.toExponential(0) : K.toFixed(3)}</strong>
+        <label className="dl-slider">{t.wienerK} <strong>{K < 0.001 ? K.toExponential(0) : K.toFixed(3)}</strong>
           <input type="range" min={-5} max={0} step={0.1} value={logK} onChange={e => setLogK(Number(e.target.value))} />
         </label>
-        <label className="dl-slider">R–L iterations <strong>{iterations}</strong>
+        <label className="dl-slider">{t.rlIterations} <strong>{iterations}</strong>
           <input type="range" min={1} max={60} value={iterations} onChange={e => setIterations(Number(e.target.value))} />
         </label>
       </div>
@@ -117,35 +120,22 @@ export function DeblurSection() {
 
       {setup && (
         <div className="deblur-grid">
-          <Panel title="Sharp original" image={show(setup.sharp)} />
+          <Panel title={t.sharp} image={show(setup.sharp)} />
           <div className="demo-panel deblur-psf">
-            <h3>Blur kernel (PSF)</h3>
-            <PixelCanvas image={psfImage} size={96} label="The point spread function" />
-            <h3>Its frequency response |H|</h3>
-            <PixelCanvas image={response} size={96} label="Magnitude of the blur's frequency response, zero frequency in the centre" />
-            <p className="caption">Dark = frequencies the blur destroys.</p>
+            <h3>{t.kernel}</h3>
+            <PixelCanvas image={psfImage} size={96} label={t.kernelLabel} />
+            <h3>{t.response}</h3>
+            <PixelCanvas image={response} size={96} label={t.responseLabel} />
+            <p className="caption">{t.responseCaption}</p>
           </div>
-          <Panel title={`Blurred${noise ? ' + noise' : ''}`} image={show(setup.blurred)} caption={score(setup.blurred)} />
-          <Panel title="Inverse filter G / H" image={show(inverse)} caption={score(inverse)} />
-          <Panel title={`Wiener, K = ${K < 0.001 ? K.toExponential(0) : K.toFixed(3)}`} image={show(wienerOut)} caption={score(wienerOut)} />
-          <Panel title={`Richardson–Lucy, ${deferredIterations} iterations`} image={show(rl)} caption={score(rl)} />
+          <Panel title={t.blurred(noise > 0)} image={show(setup.blurred)} caption={score(setup.blurred)} />
+          <Panel title={t.inverse} image={show(inverse)} caption={score(inverse)} />
+          <Panel title={t.wiener(K < 0.001 ? K.toExponential(0) : K.toFixed(3))} image={show(wienerOut)} caption={score(wienerOut)} />
+          <Panel title={t.rl(deferredIterations)} image={show(rl)} caption={score(rl)} />
         </div>
       )}
 
-      <div className="demo-explanation">
-        <h4>Why undoing a blur is hard</h4>
-        <p>A blur replaces every point with the kernel's shape: the image is <strong>convolved</strong> with the point spread function.
-        In the frequency domain (see the Frequency lesson) that is just a multiplication, G = H · F, so dividing by H should undo it.
-        Set the noise to 0 and the <strong>inverse filter</strong> is nearly perfect.</p>
-        <p>Add even a little noise and it explodes. The response |H| has frequencies where it is close to zero (the dark stripes and
-        rings), and noise divided by almost nothing becomes enormous. The <strong>Wiener filter</strong> divides by |H|² + K instead:
-        where the blur kept the signal it inverts it, where it destroyed it, it gives up gracefully. Larger K means less noise but
-        less sharpening. <strong>Richardson–Lucy</strong> instead refines an estimate step by step, keeping it positive; run too many
-        iterations on a noisy image and it starts sharpening the noise too.</p>
-        <p className="formula"><code>F̂ = H* · G / (|H|² + K)</code></p>
-        <p>This lesson uses circular convolution, so blur wraps around the image edges. Real photos need their borders handled, and real
-        deblurring also has to estimate the PSF itself (blind deconvolution).</p>
-      </div>
+      <div className="demo-explanation">{t.explanation}</div>
     </div>
   );
 }

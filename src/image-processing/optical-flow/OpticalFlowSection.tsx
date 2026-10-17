@@ -5,6 +5,8 @@ import { ShowCodeButton } from '../../components/CodeViewer';
 import { PixelCanvas } from '../../components/PixelCanvas';
 import { grayToImageData } from '../../lib/image';
 import { gridPoints, lucasKanade, makeFrames, type Motion } from './opticalFlow';
+import { useText } from '../../lib/i18n';
+import { TEXT } from './OpticalFlowSection.text';
 import './optical-flow.css';
 
 const SIZE = 160;
@@ -14,13 +16,14 @@ const ARROW_SCALE = 2;
 /** Below this minimum eigenvalue (per pixel) the motion counts as ambiguous. */
 const AMBIGUOUS = 0.5;
 
-const AMOUNT: Record<Motion, { label: string; max: number; step: number; initial: number; unit: string }> = {
-  translate: { label: 'Shift', max: 14, step: 0.5, initial: 3, unit: ' px' },
-  rotate: { label: 'Angle', max: 10, step: 0.5, initial: 4, unit: '°' },
-  zoom: { label: 'Zoom', max: 15, step: 0.5, initial: 6, unit: '%' },
+const AMOUNT: Record<Motion, { max: number; step: number; initial: number; unit: string }> = {
+  translate: { max: 14, step: 0.5, initial: 3, unit: ' px' },
+  rotate: { max: 10, step: 0.5, initial: 4, unit: '°' },
+  zoom: { max: 15, step: 0.5, initial: 6, unit: '%' },
 };
 
 export function OpticalFlowSection() {
+  const t = useText(TEXT);
   const [motion, setMotion] = useState<Motion>('translate');
   const [amount, setAmount] = useState(AMOUNT.translate.initial);
   const [pattern, setPattern] = useState<'texture' | 'stripes'>('texture');
@@ -61,42 +64,42 @@ export function OpticalFlowSection() {
   return (
     <div className="demo-section">
       <div className="demo-controls">
-        <span className="demo-label">Motion:</span>
+        <span className="demo-label">{t.motion}</span>
         {(['translate', 'rotate', 'zoom'] as const).map(m => (
           <button key={m} type="button" aria-pressed={motion === m} className={`btn btn-sm${motion === m ? ' btn-primary' : ''}`}
-            onClick={() => { setMotion(m); setAmount(AMOUNT[m].initial); }}>{m}</button>
+            onClick={() => { setMotion(m); setAmount(AMOUNT[m].initial); }}>{t.motions[m]}</button>
         ))}
-        <span className="demo-label of-gap">Pattern:</span>
+        <span className="demo-label of-gap">{t.pattern}</span>
         {(['texture', 'stripes'] as const).map(p => (
           <button key={p} type="button" aria-pressed={pattern === p} className={`btn btn-sm${pattern === p ? ' btn-primary' : ''}`}
-            onClick={() => setPattern(p)}>{p}</button>
+            onClick={() => setPattern(p)}>{t.patterns[p]}</button>
         ))}
         <span className="ml-auto">
           <ShowCodeButton code={flowCode} title="optical-flow/opticalFlow.ts" python={{ code: pythonCode, title: 'optical-flow/optical_flow.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
       </div>
       <div className="demo-controls">
-        <label className="dl-slider">{a.label} <strong>{amount}{a.unit}</strong>
+        <label className="dl-slider">{t.amount[motion]} <strong>{amount}{a.unit}</strong>
           <input type="range" min={0} max={a.max} step={a.step} value={amount} onChange={e => setAmount(Number(e.target.value))} />
         </label>
-        <label className="dl-slider">Window <strong>{2 * radius + 1}×{2 * radius + 1}</strong>
+        <label className="dl-slider">{t.window} <strong>{2 * radius + 1}×{2 * radius + 1}</strong>
           <input type="range" min={1} max={10} value={radius} onChange={e => setRadius(Number(e.target.value))} />
         </label>
-        <label className="dl-slider">Pyramid levels <strong>{levels}</strong>
+        <label className="dl-slider">{t.levels} <strong>{levels}</strong>
           <input type="range" min={1} max={4} value={levels} onChange={e => setLevels(Number(e.target.value))} />
         </label>
-        <label className="dl-slider"><input type="checkbox" checked={blink} onChange={e => setBlink(e.target.checked)} /> Flick between the frames</label>
+        <label className="dl-slider"><input type="checkbox" checked={blink} onChange={e => setBlink(e.target.checked)} /> {t.flick}</label>
       </div>
 
       <div className="demo-images">
         <div className="demo-panel">
-          <h3>{showingSecond ? 'Frame 2' : 'Frame 1'}</h3>
-          <PixelCanvas image={showingSecond ? images.b : images.a} size={DISPLAY} label={showingSecond ? 'Second frame' : 'First frame'} />
-          <p className="caption">{blink ? 'Flicking every 0.6 s: watch the pattern move.' : 'Tick "Flick" to see the motion.'}</p>
+          <h3>{showingSecond ? t.frame2 : t.frame1}</h3>
+          <PixelCanvas image={showingSecond ? images.b : images.a} size={DISPLAY} label={showingSecond ? t.secondFrame : t.firstFrame} />
+          <p className="caption">{blink ? t.flicking : t.tickFlick}</p>
         </div>
         <div className="demo-panel">
-          <h3>Lucas–Kanade estimate vs truth</h3>
-          <PixelCanvas image={images.a} size={DISPLAY} label="Estimated and true motion vectors over the first frame">
+          <h3>{t.estimate}</h3>
+          <PixelCanvas image={images.a} size={DISPLAY} label={t.estimateLabel}>
             <svg className="of-overlay" viewBox={`0 0 ${SIZE} ${SIZE}`}>
               <defs>
                 <marker id="of-head" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto-start-reverse">
@@ -119,36 +122,23 @@ export function OpticalFlowSection() {
             </svg>
           </PixelCanvas>
           <ul className="of-legend">
-            <li><i className="of-key" style={{ background: '#34d399' }} />error &lt; 0.3 px</li>
-            <li><i className="of-key" style={{ background: '#facc15' }} />&lt; 1 px</li>
-            <li><i className="of-key" style={{ background: '#f87171' }} />wrong</li>
-            <li><i className="of-key" style={{ background: '#9ca3af' }} />ambiguous</li>
-            <li><i className="of-key of-key-truth" />true motion</li>
+            <li><i className="of-key" style={{ background: '#34d399' }} />{t.legendGood}</li>
+            <li><i className="of-key" style={{ background: '#facc15' }} />{t.legendOk}</li>
+            <li><i className="of-key" style={{ background: '#f87171' }} />{t.legendWrong}</li>
+            <li><i className="of-key" style={{ background: '#9ca3af' }} />{t.legendAmbiguous}</li>
+            <li><i className="of-key of-key-truth" />{t.legendTruth}</li>
           </ul>
-          <p className="caption">Arrows drawn {ARROW_SCALE}× longer than the motion.</p>
+          <p className="caption">{t.arrowsScale(ARROW_SCALE)}</p>
         </div>
       </div>
 
       <div className="dl-stat-row">
-        <span>Mean error <strong>{stats.mean.toFixed(2)} px</strong></span>
-        <span>Wrong by &gt; 1 px <strong>{(stats.bad * 100).toFixed(0)}%</strong></span>
-        <span>Ambiguous <strong>{stats.ambiguous}/{flow.length}</strong></span>
+        <span>{t.meanError} <strong>{stats.mean.toFixed(2)} px</strong></span>
+        <span>{t.wrongBy} <strong>{(stats.bad * 100).toFixed(0)}%</strong></span>
+        <span>{t.ambiguous} <strong>{stats.ambiguous}/{flow.length}</strong></span>
       </div>
 
-      <div className="demo-explanation">
-        <h4>Lucas–Kanade optical flow</h4>
-        <p>If a patch keeps its brightness while moving by (u, v), then for every pixel of a small window
-        <code> Ix·u + Iy·v + It = 0</code>, where Ix, Iy are the image gradients and It the change between frames. One equation per pixel,
-        two unknowns: least squares over the window gives a 2×2 system, solved independently at each arrow.</p>
-        <p className="formula"><code>[ΣIx² ΣIxIy; ΣIxIy ΣIy²] · (u, v) = −(ΣIxIt, ΣIyIt)</code></p>
-        <p>Try the <strong>stripes</strong>: moving along a stripe changes nothing in the image, so only the motion across the stripes can be measured.
-        This is the <strong>aperture problem</strong>; the matrix is singular and the arrows turn gray. Then push the <strong>shift</strong> above
-        about 7 px: the linear approximation only holds for small motions and the estimates go wrong, until you add <strong>pyramid levels</strong>.
-        On a half-size image the motion is half as large; estimate it there, double it, and refine on the next finer level.</p>
-        <p>Rotation and zoom move every pixel differently, but the method assumes one motion per window: a bigger window averages more
-        (smoother, less noise-sensitive) but blurs the flow field. Deep networks such as RAFT have replaced Lucas–Kanade for dense flow,
-        but the brightness-constancy idea is the same.</p>
-      </div>
+      <div className="demo-explanation">{t.explanation}</div>
     </div>
   );
 }

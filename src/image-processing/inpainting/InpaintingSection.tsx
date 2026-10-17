@@ -8,6 +8,8 @@ import { useImageData, type ImageSource } from '../../hooks/useImageData';
 import { toImageData } from '../../lib/canvas';
 import { scene } from '../../lib/demoImages';
 import { diffusionInpaint, exemplarInpaint, holeError } from './inpaint';
+import { useText } from '../../lib/i18n';
+import { TEXT } from './InpaintingSection.text';
 import './inpainting.css';
 
 const SIZE = 160;
@@ -50,6 +52,7 @@ function presetMask(preset: Preset, width: number, height: number): Mask {
 }
 
 export function InpaintingSection() {
+  const t = useText(TEXT);
   const [source, setSource] = useState<ImageSource>(() => scene(256));
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [preset, setPreset] = useState<Preset>('scratch');
@@ -112,20 +115,20 @@ export function InpaintingSection() {
   return (
     <div className="demo-section">
       <div className="demo-controls">
-        <span className="demo-label">Damage:</span>
+        <span className="demo-label">{t.damage}</span>
         {(['scratch', 'box', 'text'] as const).map(p => (
           <button key={p} type="button" aria-pressed={!painted && preset === p} className={`btn btn-sm${!painted && preset === p ? ' btn-primary' : ''}`}
             onClick={() => { setPreset(p); setPainted(null); setProgress(1); }}>
-            {p === 'scratch' ? 'Scratch' : p === 'box' ? 'Missing block' : 'Watermark'}
+            {t.presets[p]}
           </button>
         ))}
         <button type="button" className="btn btn-sm" onClick={() => image && setPainted({ width: image.width, height: image.height, data: new Uint8Array(image.width * image.height) })}>
-          Clear (paint your own)
+          {t.clear}
         </button>
-        <label className="dl-slider">Brush <strong>{brush} px</strong>
+        <label className="dl-slider">{t.brush} <strong>{brush} px</strong>
           <input type="range" min={1} max={10} value={brush} onChange={e => setBrush(Number(e.target.value))} />
         </label>
-        <ImageUploader label="📁 Upload" onImage={src => { setSource(src); setUploadError(null); }} onError={setUploadError} />
+        <ImageUploader label={t.upload} onImage={src => { setSource(src); setUploadError(null); }} onError={setUploadError} />
         <span className="ml-auto">
           <ShowCodeButton code={inpaintCode} title="inpainting/inpaint.ts" python={{ code: pythonCode, title: 'inpainting/inpaint.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
@@ -135,8 +138,8 @@ export function InpaintingSection() {
       {views && image && (
         <div className="ip-grid">
           <div className="demo-panel">
-            <h3>Damaged (paint on it)</h3>
-            <PixelCanvas image={views.damaged} size={DISPLAY} label="The image with the hole to fill in pink; drag to paint more">
+            <h3>{t.damaged}</h3>
+            <PixelCanvas image={views.damaged} size={DISPLAY} label={t.damagedLabel}>
               <div
                 ref={surface}
                 className="ip-paint"
@@ -146,19 +149,19 @@ export function InpaintingSection() {
                 onPointerCancel={() => setDrawing(null)}
               />
             </PixelCanvas>
-            <p className="caption">{views.holePixels.toLocaleString()} missing pixels. Drag to paint more.</p>
+            <p className="caption">{t.missing(views.holePixels.toLocaleString())}</p>
           </div>
           <div className="demo-panel">
-            <h3>Diffusion</h3>
-            <PixelCanvas image={views.diffusion} size={DISPLAY} label="Hole filled by diffusion" />
-            <label className="dl-slider ip-slider">Sweeps <strong>{iterations}</strong>
+            <h3>{t.diffusion}</h3>
+            <PixelCanvas image={views.diffusion} size={DISPLAY} label={t.diffusionLabel} />
+            <label className="dl-slider ip-slider">{t.sweeps} <strong>{iterations}</strong>
               <input type="range" min={0} max={1000} step={10} value={iterations} onChange={e => setIterations(Number(e.target.value))} />
             </label>
-            <p className="caption">RMS error in the hole: {views.diffusionError.toFixed(1)}</p>
+            <p className="caption">{t.rmsError} {views.diffusionError.toFixed(1)}</p>
           </div>
           <div className="demo-panel">
-            <h3>Exemplar-based (Criminisi)</h3>
-            <PixelCanvas image={views.exemplar} size={DISPLAY} label="Hole filled by copying patches">
+            <h3>{t.exemplar}</h3>
+            <PixelCanvas image={views.exemplar} size={DISPLAY} label={t.exemplarLabel}>
               {views.step && progress < 1 && (
                 <svg className="ip-boxes" viewBox={`0 0 ${image.width} ${image.height}`} preserveAspectRatio="none" aria-hidden="true">
                   {box(views.step.source, 'ip-source')}
@@ -166,30 +169,16 @@ export function InpaintingSection() {
                 </svg>
               )}
             </PixelCanvas>
-            <label className="dl-slider ip-slider">Progress <strong>{Math.round(progress * 100)}%</strong>
+            <label className="dl-slider ip-slider">{t.progress} <strong>{Math.round(progress * 100)}%</strong>
               <input type="range" min={0} max={1} step={0.01} value={progress} onChange={e => setProgress(Number(e.target.value))} />
             </label>
-            <label className="dl-slider ip-slider"><input type="checkbox" checked={usePriority} onChange={e => setUsePriority(e.target.checked)} /> Edges first (priority)</label>
-            <p className="caption">RMS error in the hole: {views.exemplarError.toFixed(1)}{progress < 1 && <> · <span className="ip-key-source">source</span> → <span className="ip-key-target">target</span></>}</p>
+            <label className="dl-slider ip-slider"><input type="checkbox" checked={usePriority} onChange={e => setUsePriority(e.target.checked)} /> {t.edgesFirst}</label>
+            <p className="caption">{t.rmsError} {views.exemplarError.toFixed(1)}{progress < 1 && <> · <span className="ip-key-source">{t.source}</span> → <span className="ip-key-target">{t.target}</span></>}</p>
           </div>
         </div>
       )}
 
-      <div className="demo-explanation">
-        <h4>Filling holes</h4>
-        <p>Removing a scratch, a watermark or an unwanted object leaves a hole, and the only information about what belongs there is
-        what surrounds it. <strong>Diffusion</strong> makes each missing pixel the average of its four neighbours, sweep after sweep,
-        until nothing changes: colour flows in from the border like heat. The result is as smooth as possible, which is right for sky
-        and wrong for edges and texture: watch the stripes and the box edge turn to mush. Set the sweeps low to see the fill creep in.</p>
-        <p className="formula"><code>u(x, y) ← ¼ · [u(x−1, y) + u(x+1, y) + u(x, y−1) + u(x, y+1)]</code></p>
-        <p><strong>Exemplar-based</strong> inpainting copies instead of averaging. It takes a patch on the edge of the hole, searches the
-        image for the known patch that best matches the part it can see, and pastes the rest. Drag the progress slider back to watch it
-        patch by patch (pink box: the patch being filled; cyan: where it copies from). The <strong>order</strong> matters: Criminisi et al.
-        fill first where many pixels are already known (confidence) and where an edge runs into the hole (data term), so lines get
-        continued before flat areas close over them. Untick "edges first" to fill in plain scan order and compare.</p>
-        <p>Modern tools (content-aware fill, diffusion-model inpainting) use the same two ideas, matching and propagation, with
-        learned priors about what images look like.</p>
-      </div>
+      <div className="demo-explanation">{t.explanation}</div>
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { makeCanvas } from '../../lib/demoImages';
 import { grayToImageData, rgbImage } from '../../lib/image';
 import { hotColor } from '../hough/hough';
 import { extractPatch, nccMatch } from './ncc';
+import { useText } from '../../lib/i18n';
+import { TEXT } from './TemplateSection.text';
 import './template.css';
 
 const W = 180, H = 180;
@@ -52,6 +54,7 @@ const pct = (v: number, of: number) => `${(v / of) * 100}%`;
 const box = (x: number, y: number) => ({ left: pct(x, W), top: pct(y, H), width: pct(PATCH_W, W), height: pct(PATCH_H, H) });
 
 export function TemplateSection() {
+  const t = useText(TEXT);
   const [showCode, setShowCode] = useState(false);
   const [corner, setCorner] = useState<{ x: number; y: number } | null>(null);
   // Keyboard cursor (patch corner) before Enter confirms it.
@@ -102,7 +105,7 @@ export function TemplateSection() {
   return (
     <div className="demo-section">
       <div className="demo-controls">
-        <span className="demo-label">Template Matching (NCC) — click Scene A, or focus it and use the arrow keys + Enter, to pick a template</span>
+        <span className="demo-label">{t.heading}</span>
         <span className="ml-auto">
           <ShowCodeButton code={nccCode} title="template/ncc.ts" python={{ code: pythonCode, title: 'template/ncc.py' }} open={showCode} onOpenChange={setShowCode} />
         </span>
@@ -110,43 +113,43 @@ export function TemplateSection() {
 
       <div className="demo-images">
         <div className="demo-panel">
-          <h3>Scene A — pick template</h3>
+          <h3>{t.sceneAPick}</h3>
           <div
             className="template-picker"
             role="button"
             tabIndex={0}
-            aria-label={`Scene A. Template at ${cursor.x}, ${cursor.y}. Arrow keys move, Enter selects.`}
+            aria-label={t.sceneAAria(cursor.x, cursor.y)}
             onClick={pick}
             onKeyDown={onKey}
           >
-            <PixelCanvas image={imgA?.imageData ?? null} size={DISPLAY} label="Scene A">
+            <PixelCanvas image={imgA?.imageData ?? null} size={DISPLAY} label={t.sceneA}>
               <div className="template-box template-box-cursor" style={box(cursor.x, cursor.y)} />
               {corner && <div className="template-box template-box-selected" style={box(corner.x, corner.y)} />}
             </PixelCanvas>
           </div>
         </div>
         <div className="demo-panel">
-          <h3>Template ({PATCH_W}×{PATCH_H})</h3>
-          <PixelCanvas image={templateImage} size={180} placeholderAspect={PATCH_W / PATCH_H} label="Selected template" placeholder="Click Scene A" />
+          <h3>{t.template(PATCH_W, PATCH_H)}</h3>
+          <PixelCanvas image={templateImage} size={180} placeholderAspect={PATCH_W / PATCH_H} label={t.templateLabel} placeholder={t.clickSceneA} />
         </div>
         <div className="demo-panel">
-          <h3>Scene B — find match</h3>
-          <PixelCanvas image={imgB?.imageData ?? null} size={DISPLAY} label="Scene B">
+          <h3>{t.sceneBFind}</h3>
+          <PixelCanvas image={imgB?.imageData ?? null} size={DISPLAY} label={t.sceneB}>
             {match && <div className="template-box template-box-match" style={box(match.x, match.y)} />}
           </PixelCanvas>
         </div>
         <div className="demo-panel">
-          <h3>NCC score map</h3>
+          <h3>{t.scoreMap}</h3>
           <PixelCanvas
             image={scoreImage}
             size={200}
             placeholderAspect={(W - PATCH_W + 1) / (H - PATCH_H + 1)}
-            label="NCC score at every template position"
-            placeholder={result ? 'No score map for a flat patch' : 'Pick a template'}
+            label={t.scoreLabel}
+            placeholder={result ? t.flatPlaceholder : t.pickPlaceholder}
           >
             {match && <div className="template-peak" style={{ left: pct(match.x + 0.5, match.scoresWidth), top: pct(match.y + 0.5, match.scoresHeight) }} />}
           </PixelCanvas>
-          <p className="caption">Black = −1 · white = +1 (best match ringed)</p>
+          <p className="caption">{t.scoreCaption}</p>
         </div>
       </div>
 
@@ -154,26 +157,18 @@ export function TemplateSection() {
         <div className="demo-slider-section">
           {match ? (
             <div className="demo-slider-row template-result">
-              <span className="mono">Match at <strong className="text-success">({match.x}, {match.y})</strong></span>
-              <span className="mono">NCC score: <strong className={match.score > 0.5 ? 'text-success' : 'text-error'}>{match.score.toFixed(3)}</strong></span>
+              <span className="mono">{t.matchAt} <strong className="text-success">({match.x}, {match.y})</strong></span>
+              <span className="mono">{t.nccScore} <strong className={match.score > 0.5 ? 'text-success' : 'text-error'}>{match.score.toFixed(3)}</strong></span>
             </div>
           ) : (
             <p className="note-warning" role="alert">
-              ⚠ That patch is flat — it has no texture, so NCC is undefined (it would match every flat area equally).
-              Pick a patch containing an edge or corner.
+              {t.flat}
             </p>
           )}
         </div>
       )}
 
-      <div className="demo-explanation">
-        <h4>Template Matching — Normalised Cross-Correlation</h4>
-        <p><strong>Pick a patch in Scene A</strong> to extract a {PATCH_W}×{PATCH_H} template.
-        The algorithm slides it over every position in <strong>Scene B</strong> — a different image where the shapes are at new positions — and scores each one.</p>
-        <p>The <span className="text-success">green rectangle</span> marks the best score; the score map shows how strongly every position matched.
-        NCC subtracts the mean and divides by the standard deviation of both the template and the image window, so a shape that is uniformly darker or lighter in Scene B still scores ~1.</p>
-        <p>Because of that normalisation, a perfectly flat patch can't be matched: its standard deviation is zero.</p>
-      </div>
+      <div className="demo-explanation">{t.explanation(PATCH_W, PATCH_H)}</div>
     </div>
   );
 }
