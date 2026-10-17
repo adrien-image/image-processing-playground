@@ -53,9 +53,13 @@ export function TransferSection() {
           <li><strong>Fine-tune</strong>: start from the pretrained weights and train everything, with a small learning rate so
           the features are adjusted rather than overwritten.</li>
         </ul>
-        <p>With one or two examples per class the pretrained features win by a wide margin; with more examples the network
-        trained from scratch catches up, and fine-tuning usually ends best. This is how most vision models are built today:
-        a backbone pretrained on millions of images, adapted to a new task with a few hundred.</p>
+        <p>The pretrained features help most when examples are scarcest: with one example per digit the linear probe scored
+        about 13 points above the network trained from scratch in our runs. By five examples per digit the three are within a
+        few points of each other, and with fifty they are equal. The gap is small here because digits are simple: a fresh
+        network learns their strokes from a handful of examples. On photographs it is far larger, which is why most vision
+        models today start from a backbone pretrained on millions of images and are adapted to a new task with a few
+        hundred. With so few examples the numbers also depend on which ones were picked, so read differences of a few points as
+        noise.</p>
       </div>
     </div>
   );
