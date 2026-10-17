@@ -66,11 +66,14 @@ function Trainer({ data }: { data: MnistData }) {
   const stepRef = useRef(0);
   const orderRef = useRef<number[]>([]);
   const lr = 10 ** logLr;
+  // The learning rate the current networks were built with (null before the first run).
+  const [builtLr, setBuiltLr] = useState<number | null>(null);
 
   const dispose = () => {
     abort.current?.abort();
     if (models.current) { disposeModel(models.current.plain); disposeModel(models.current.bn); }
     models.current = null;
+    setBuiltLr(null);
   };
   useEffect(() => dispose, []);
 
@@ -86,7 +89,10 @@ function Trainer({ data }: { data: MnistData }) {
     const controller = new AbortController();
     abort.current = controller;
     setError(null);
-    models.current ??= { plain: buildMlp({ batchNorm: false, learningRate: lr }), bn: buildMlp({ batchNorm: true, learningRate: lr }), lr };
+    if (!models.current) {
+      models.current = { plain: buildMlp({ batchNorm: false, learningRate: lr }), bn: buildMlp({ batchNorm: true, learningRate: lr }), lr };
+      setBuiltLr(lr);
+    }
     const { plain, bn } = models.current;
     const probes = { plain: probeModel(plain), bn: probeModel(bn) };
     // A random sample: MNIST is stored digit by digit.
@@ -160,7 +166,7 @@ function Trainer({ data }: { data: MnistData }) {
         </div>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}
-      {models.current && models.current.lr !== lr && <p className="dl-status">A new learning rate restarts both networks from the same initial weights.</p>}
+      {builtLr !== null && builtLr !== lr && <p className="dl-status">A new learning rate restarts both networks from the same initial weights.</p>}
 
       {latest && (
         <div className="dl-stat-row">

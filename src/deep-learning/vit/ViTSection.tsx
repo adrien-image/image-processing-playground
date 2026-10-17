@@ -61,7 +61,8 @@ function Trainer({ data }: { data: MnistData }) {
   const [losses, setLosses] = useState<number[]>([]);
   const [accuracy, setAccuracy] = useState<number[]>([]);
   const [progress, setProgress] = useState<string | null>(null);
-  const [version, setVersion] = useState(0);
+  // The model as of its last epoch: a new object after every epoch, so the views recompute.
+  const [trained, setTrained] = useState<{ model: TinyViT } | null>(null);
   const [index, setIndex] = useState(700);
   const [view, setView] = useState<View>({ kind: 'rollout' });
   const [query, setQuery] = useState<number | null>(null);
@@ -83,7 +84,7 @@ function Trainer({ data }: { data: MnistData }) {
     dispose();
     setLosses([]);
     setAccuracy([]);
-    setVersion(v => v + 1);
+    setTrained(null);
   };
 
   const train = async () => {
@@ -111,7 +112,7 @@ function Trainer({ data }: { data: MnistData }) {
         if (controller.signal.aborted || modelRef.current !== model) break;
         setLosses(l => [...l, ...stepLosses]);
         setAccuracy(a => [...a, model.accuracy(data.val.images, data.val.labels, data.val.count)]);
-        setVersion(v => v + 1);
+        setTrained({ model });
       }
     } catch (err) {
       // Reset or leaving the page disposes the model mid-training: that is a normal stop.
@@ -123,11 +124,11 @@ function Trainer({ data }: { data: MnistData }) {
 
   const image = data.test.images.subarray(index * 784, (index + 1) * 784);
   const result = useMemo(() => {
-    const model = modelRef.current;
-    if (!model || version < 0) return null;
+    if (!trained) return null;
+    const { model } = trained;
     const { probs, attention } = model.run(image, 1);
     return { probs, attention, similarity: model.positionSimilarity(), heads: model.config.heads, layers: model.config.layers };
-  }, [image, version]);
+  }, [image, trained]);
 
   /** The 16 patch weights to draw, for the selected view and query token. */
   const weights = useMemo(() => {
@@ -183,7 +184,7 @@ function Trainer({ data }: { data: MnistData }) {
           <input type="range" min={1} max={15} value={epochsToRun} disabled={!!progress} onChange={e => setEpochsToRun(Number(e.target.value))} />
         </label>
         <button type="button" className="btn btn-sm" disabled={!!progress} onClick={reset}>↺ Reset</button>
-        <span className="muted vit-note">{modelRef.current ? `${modelRef.current.variables.reduce((n, v) => n + v.size, 0).toLocaleString('en')} weights` : ''} · 2 blocks · 2 heads · 32-number tokens</span>
+        <span className="muted vit-note">{trained ? `${trained.model.variables.reduce((n, v) => n + v.size, 0).toLocaleString('en')} weights` : ''} · 2 blocks · 2 heads · 32-number tokens</span>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}
 

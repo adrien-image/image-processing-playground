@@ -34,7 +34,8 @@ export function UNetSection() {
   const [status, setStatus] = useState<'idle' | 'training'>('idle');
   const [batch, setBatch] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [version, setVersion] = useState(0);
+  // The model as of its last epoch: a new object after every epoch, so the predictions recompute.
+  const [trained, setTrained] = useState<{ model: tf.LayersModel } | null>(null);
   const [testSeed, setTestSeed] = useState(1);
   const [difficulty, setDifficulty] = useState<Difficulty>(DEFAULT_DIFFICULTY);
   const [showCode, setShowCode] = useState(false);
@@ -68,7 +69,7 @@ export function UNetSection() {
     modelRef.current = null;
     setSkips(nextSkips);
     setHistory([]);
-    setVersion(v => v + 1);
+    setTrained(null);
   };
 
   const start = async () => {
@@ -85,7 +86,7 @@ export function UNetSection() {
         let iou = 0;
         for (let n = 0; n < VAL_COUNT; n++) iou += maskIoU(p.subarray(n * N * N, (n + 1) * N * N), val.masks.subarray(n * N * N, (n + 1) * N * N));
         setHistory(h => [...h, { loss, iou: iou / VAL_COUNT }]);
-        setVersion(v => v + 1);
+        setTrained({ model });
       }
     } catch (err) {
       // Reset or leaving the page disposes the model under a running epoch: that is a normal stop.
@@ -97,12 +98,11 @@ export function UNetSection() {
   };
 
   const predictions = useMemo(() => {
-    const model = modelRef.current;
-    if (!model || version < 0) return null;
+    if (!trained) return null;
     const packed = new Float32Array(GALLERY * N * N);
     gallery.forEach((s, k) => packed.set(s.image, k * N * N));
-    return predictMasks(model, packed, GALLERY);
-  }, [gallery, version]);
+    return predictMasks(trained.model, packed, GALLERY);
+  }, [gallery, trained]);
 
   const setD = (key: keyof Difficulty, v: number) => setDifficulty(d => ({ ...d, [key]: v }));
 
