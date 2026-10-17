@@ -57,11 +57,11 @@ def _self_check():
     images[torch.arange(n), 2 + 3 * labels] = 1
     model = RowReader(32)
     opt = torch.optim.Adam(model.parameters(), lr=0.01)
-    for _ in range(200):
+    for _ in range(300):
         loss = F.cross_entropy(model(images)[:, -1], labels)
         opt.zero_grad()
         loss.backward()
-        nn.utils.clip_grad_norm_(model.parameters(), 1.0)   # the gradient through 25 steps can spike
+        nn.utils.clip_grad_norm_(model.parameters(), 0.5)   # the gradient through 25 steps can spike
         opt.step()
     with torch.no_grad():
         logits = model(images)

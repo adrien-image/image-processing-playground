@@ -99,14 +99,17 @@ def _self_check():
         loss.backward()
         opt.step()
         losses.append(loss.item())
-    assert sum(losses[-20:]) / 20 < 0.8 * sum(losses[:20]) / 20
+    # Chance is log(2·64 − 1) ≈ 4.84. The loss cannot go near zero: with ten glyph classes a batch holds
+    # several copies of each glyph, and the loss counts them as negatives it cannot tell apart.
+    early, late = sum(losses[:20]) / 20, sum(losses[-20:]) / 20
+    assert late < early - 0.3 and late < 0.75 * math.log(127), (early, late)
     # Labels only now: a 5-nearest-neighbour vote on the learned representation.
     with torch.no_grad():
         labelled_x, labelled_y = glyphs(500, g)
         test_x, test_y = glyphs(300, g)
         acc = knn_accuracy(enc(labelled_x), labelled_y, enc(augment(test_x, g)), test_y)
     assert acc > 0.5, acc
-    print(f"contrastive.py: ok (loss {sum(losses[:20]) / 20:.2f} → {sum(losses[-20:]) / 20:.2f}, kNN accuracy {acc:.2f})")
+    print(f"contrastive.py: ok (loss {early:.2f} → {late:.2f}, kNN accuracy {acc:.2f})")
 
 
 if __name__ == "__main__":
