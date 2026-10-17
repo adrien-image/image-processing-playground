@@ -1,0 +1,61 @@
+.svm-key-line {
+  display: inline-block;
+  width: 1.2rem;
+  margin-right: 0.3rem;
+  vertical-align: 0.2rem;
+  border-top: 2px solid var(--text);
+}
+
+.svm-key-dashed {
+  border-top: 2px dashed color-mix(in srgb, var(--text) 75%, transparent);
+}
+
+.svm-key-ring {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.3rem;
+  vertical-align: -0.12rem;
+  border: 2px solid var(--text);
+  border-radius: 50%;
+}
+
+.svm-removal {
+  max-width: 400px;
+  text-align: center;
+  color: var(--accent);
+}
+
+.svm-kkt {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  background: var(--chart-bg);
+  border-radius: var(--radius);
+}
+
+.svm-kkt-grid {
+  stroke: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+.svm-kkt-one {
+  stroke: var(--text-secondary);
+  stroke-dasharray: 4 3;
+}
+
+.svm-kkt-safe {
+  fill: color-mix(in srgb, var(--success) 7%, transparent);
+}
+
+.svm-kkt-tick {
+  fill: var(--text-muted);
+  font-size: 10px;
+  font-family: var(--font-mono);
+}
+
+.svm-kkt-dot {
+  stroke: var(--chart-bg);
+  stroke-width: 0.8;
+  fill-opacity: 0.85;
+}
