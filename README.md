@@ -84,7 +84,11 @@ The classic models, written from scratch in plain TypeScript (no library), on 2-
 | Evaluation metrics | A threshold slider driving the confusion matrix, precision, recall, F1, ROC and precision–recall curves, with class imbalance |
 | Bias, variance & cross-validation | Polynomial fits of growing degree, the validation U-curve, k-fold cross-validation, and the bias–variance decomposition measured |
 
-The home page (`#/home`) introduces the playground and lists every lesson. The header's switch picks a light or dark theme, or follows the system setting. Each section is its own
+The home page (`#/home`) introduces the playground and lists every lesson, with a search box (also at the top of the
+lesson menu) that matches titles and descriptions in both languages. Under every lesson are links to the previous and
+next lessons and to three related ones. The header's switches pick a light or dark theme (or follow the system
+setting) and **English or French** (*l'interface et toutes les leçons existent en français*; the first visit follows the
+browser's language). The source code shown by "Show code" stays in English. Each section is its own
 lazily-loaded chunk, and the current section is kept in the URL (`#/edges`), so sections can be
 bookmarked and shared.
 
@@ -129,7 +133,7 @@ src/
 │   └── shared/              ←   2-D and 1-D datasets, small linear algebra, the scatter plot / decision map
 ├── hooks/useImageData.ts    ← load a URL or canvas → downscaled RGBA + grayscale pixels
 ├── components/              ← PixelCanvas, ImageUploader, CodeViewer (+ tokenizer), LineChart
-├── lib/                     ← canvas helpers, demo images, colour maps, seeded random, theme
+├── lib/                     ← canvas helpers, demo images, colour maps, seeded random, theme, i18n (EN / FR)
 └── styles/base.css          ← design tokens (light-dark() pairs) and shared building blocks
 
 <group>/<lesson>/            ← every lesson folder has the same shape:
@@ -137,6 +141,7 @@ src/
 ├── <algorithm>.test.ts      ←   its unit tests
 ├── <algorithm>.py           ←   the same algorithm in Python / PyTorch (the "Python" tab of "Show code")
 ├── <Lesson>Section.tsx      ←   UI
+├── <Lesson>Section.text.tsx ←  its texts in English and French ({ en, fr }, same shape)
 └── <lesson>.css             ←   styles
 ```
 
