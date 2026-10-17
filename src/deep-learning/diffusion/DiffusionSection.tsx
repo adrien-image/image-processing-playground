@@ -135,11 +135,12 @@ function Reverse() {
   const [forwardT, setForwardT] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const modelRef = useRef<tf.LayersModel | null>(null);
+  const [hasModel, setHasModel] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const schedule = useMemo(() => cosineSchedule(T_TOY), []);
   const data = useMemo(() => sampleToy(shape, 2000, seededRandom(1)), [shape]);
 
-  const dispose = () => { abortRef.current?.abort(); modelRef.current?.dispose(); modelRef.current = null; };
+  const dispose = () => { abortRef.current?.abort(); modelRef.current?.dispose(); modelRef.current = null; setHasModel(false); };
   useEffect(() => dispose, []);
 
   const reset = (next: ToyShape = shape) => {
@@ -155,6 +156,7 @@ function Reverse() {
     abortRef.current = controller;
     modelRef.current ??= buildDenoiser();
     const model = modelRef.current;
+    setHasModel(true);
     const random = seededRandom(losses.length + 7);
     const batchLosses: number[] = [];
     try {
@@ -162,7 +164,8 @@ function Reverse() {
         batchLosses.push(await trainStep(model, data, schedule, BATCH, random));
         if (s % 25 === 24) {
           setProgress(s + 1);
-          setLosses(l => [...l, ...batchLosses.splice(0)]);
+          const chunk = batchLosses.splice(0);
+          setLosses(l => [...l, ...chunk]);
           await tf.nextFrame();
         }
       }
@@ -214,7 +217,7 @@ function Reverse() {
         ) : (
           <button type="button" className="btn btn-sm btn-primary" onClick={train}>▶ Train the denoiser ({TRAIN_STEPS} steps)</button>
         )}
-        <button type="button" className="btn btn-sm" disabled={!modelRef.current || progress !== null} onClick={generate}>✨ Generate {SAMPLES} points</button>
+        <button type="button" className="btn btn-sm" disabled={!hasModel || progress !== null} onClick={generate}>✨ Generate {SAMPLES} points</button>
       </div>
       {error && <div className="error-banner" role="alert">⚠ {error}</div>}
       <div className="dl-grid diff-reverse">

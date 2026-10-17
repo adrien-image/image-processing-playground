@@ -1,0 +1,14 @@
+.tsne-placeholder {
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--chart-bg);
+}
+
+.ml-stats.tsne-scores {
+  grid-template-columns: 1fr auto auto;
+  width: 100%;
+  align-items: baseline;
+}

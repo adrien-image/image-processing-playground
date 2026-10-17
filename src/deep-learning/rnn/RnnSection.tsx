@@ -61,7 +61,8 @@ function Trainer({ data }: { data: MnistData }) {
   const [epochs, setEpochs] = useState(2);
   const [losses, setLosses] = useState<number[]>([]);
   const [perStep, setPerStep] = useState<number[] | null>(null);
-  const [version, setVersion] = useState(0);
+  // The model as of its last epoch: a new object after every epoch, so the reading recomputes.
+  const [trained, setTrained] = useState<{ model: Recurrent } | null>(null);
   const [index, setIndex] = useState(3);
   const [head, setHead] = useState(STEPS);
   const [progress, setProgress] = useState<string | null>(null);
@@ -81,7 +82,7 @@ function Trainer({ data }: { data: MnistData }) {
     setOrder(nextOrder);
     setLosses([]);
     setPerStep(null);
-    setVersion(v => v + 1);
+    setTrained(null);
   };
 
   // A random validation sample: MNIST is stored digit by digit.
@@ -113,7 +114,7 @@ function Trainer({ data }: { data: MnistData }) {
           await tf.nextFrame();
         }
         setPerStep(Array.from({ length: STEPS }, (_, t) => accuracy(r, sequences.val, valLabels, VAL, t + 1)));
-        setVersion(v => v + 1);
+        setTrained({ model: r });
       }
     } catch (err) {
       if (!controller.signal.aborted) setError(err instanceof Error ? err.message : 'Training failed');
@@ -123,10 +124,9 @@ function Trainer({ data }: { data: MnistData }) {
   };
 
   const reading = useMemo(() => {
-    const r = model.current;
-    if (!r || version < 0) return null;
-    return readOne(r, sequences.test.subarray(index * 784, (index + 1) * 784));
-  }, [index, sequences, version]);
+    if (!trained) return null;
+    return readOne(trained.model, sequences.test.subarray(index * 784, (index + 1) * 784));
+  }, [index, sequences, trained]);
 
   const image = data.test.images.subarray(index * 784, (index + 1) * 784);
   // The digit with the part not yet read dimmed; a cyan line marks the reading head.
@@ -140,7 +140,7 @@ function Trainer({ data }: { data: MnistData }) {
 
   const probsAtHead = reading ? reading.probs.subarray((head - 1) * 10, head * 10) : null;
   const probMap = reading ? rgbImage(STEPS, 10, i => hotColor(reading.probs[(i % STEPS) * 10 + Math.floor(i / STEPS)])) : null;
-  const units = model.current?.units ?? 64;
+  const units = trained?.model.units ?? 64;
   const hiddenMap = reading ? signedImage(Float32Array.from({ length: units * STEPS }, (_, i) => reading.hidden[(i % STEPS) * units + Math.floor(i / STEPS)]), STEPS, units, 1) : null;
   const running = progress !== null;
 

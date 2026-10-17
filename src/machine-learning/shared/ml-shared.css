@@ -1,0 +1,58 @@
+/* Building blocks shared by the machine-learning lessons. */
+
+.ml-plot {
+  display: block;
+  border-radius: var(--radius);
+  touch-action: none;
+}
+
+.ml-plot-pick {
+  cursor: crosshair;
+}
+
+.ml-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.ml-grid .demo-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.ml-stats {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.15rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.ml-stats strong {
+  color: var(--text);
+  text-align: right;
+}
+
+.ml-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0.9rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.ml-swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  margin-right: 0.3rem;
+  vertical-align: -0.1rem;
+}

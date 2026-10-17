@@ -5,8 +5,8 @@ on demo images or your own uploads, and every section can show you its source co
 
 ## Lessons
 
-The lessons come in two groups, which are also the two source folders: `src/image-processing/` and
-`src/deep-learning/`.
+The lessons come in three groups, which are also the three source folders: `src/image-processing/`,
+`src/deep-learning/` and `src/machine-learning/`.
 
 ### Image processing
 
@@ -67,6 +67,23 @@ Everything trains in the browser with TensorFlow.js, on a 6,000-image MNIST subs
 The lessons that need a trained digit classifier (Saliency, Adversarial) share the LeNet trained in
 Classification, or train a quick one themselves.
 
+### Machine learning
+
+The classic models, written from scratch in plain TypeScript (no library), on 2-D points, 1-D curves or MNIST.
+
+| Lesson | What you can explore |
+|---|---|
+| Linear & logistic regression | Click to add points: the exact least-squares line, gradient descent on the loss surface, and logistic regression against least squares on class labels |
+| k-nearest neighbours | Decision maps against k and weighted votes, train vs. test accuracy, kNN on MNIST pixels, and distances concentrating as dimensions grow |
+| Support vector machines | SMO training with linear, RBF and polynomial kernels: the margin, the support vectors and the C and γ trade-offs |
+| Decision trees & forests | CART splits by Gini or entropy, the tree drawn level by level, depth and overfitting, and a random forest averaging it away |
+| Gradient boosting | A curve fitted one small tree at a time on the residuals: learning rate, tree depth, and train vs. test error over the rounds |
+| PCA & eigendigits | The principal components of MNIST as images, explained variance, a digit rebuilt from k components, and the 2-D projection |
+| t-SNE | A live t-SNE embedding of MNIST digits against PCA: perplexity, seeds, and what the picture does not tell you |
+| Gaussian mixtures & EM | Soft clusters with full covariances, E and M steps one at a time, the log-likelihood, and k-means failing on stretched clusters |
+| Evaluation metrics | A threshold slider driving the confusion matrix, precision, recall, F1, ROC and precision–recall curves, with class imbalance |
+| Bias, variance & cross-validation | Polynomial fits of growing degree, the validation U-curve, k-fold cross-validation, and the bias–variance decomposition measured |
+
 The home page (`#/home`) introduces the playground and lists every lesson. The header's switch picks a light or dark theme, or follows the system setting. Each section is its own
 lazily-loaded chunk, and the current section is kept in the URL (`#/edges`), so sections can be
 bookmarked and shared.
@@ -108,6 +125,8 @@ src/
 ├── deep-learning/           ← one folder per deep-learning lesson, plus:
 │   └── shared/              ←   MNIST loading, the LeNet shared between lessons, training helpers,
 │                                digit picker, probability bars, colour-mapped rendering
+├── machine-learning/        ← one folder per machine-learning lesson, plus:
+│   └── shared/              ←   2-D and 1-D datasets, small linear algebra, the scatter plot / decision map
 ├── hooks/useImageData.ts    ← load a URL or canvas → downscaled RGBA + grayscale pixels
 ├── components/              ← PixelCanvas, ImageUploader, CodeViewer (+ tokenizer), LineChart
 ├── lib/                     ← canvas helpers, demo images, colour maps, seeded random, theme

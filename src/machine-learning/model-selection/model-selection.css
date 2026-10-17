@@ -1,0 +1,130 @@
+/* Error-against-degree chart: the shared LineChart's look, with error bars and markers. */
+.ms-chart .ms-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.ms-train { stroke: var(--series-blue); }
+.ms-validation { stroke: var(--series-orange); }
+.ms-cv { stroke: var(--series-green); }
+.ms-cv-dot { fill: var(--series-green); }
+
+.ms-errbar {
+  stroke: color-mix(in srgb, var(--series-green) 60%, transparent);
+  stroke-width: 1.5;
+}
+
+.ms-noise {
+  stroke: var(--text-muted);
+  stroke-dasharray: 2 3;
+}
+
+.ms-cv-pick {
+  stroke: var(--series-green);
+  stroke-dasharray: 5 3;
+}
+
+.ms-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.ms-hit:hover {
+  fill: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+
+.ms-sw-train { border-color: var(--series-blue); }
+.ms-sw-validation { border-color: var(--series-orange); }
+.ms-sw-cv { border-color: var(--series-green); }
+.ms-sw-pick { border-color: var(--series-green); }
+.ms-sw-selected { border-color: var(--accent); }
+
+.ms-ring {
+  background: transparent;
+  border: 2px solid var(--series-orange);
+  box-sizing: border-box;
+}
+
+/* k-fold stripes: one button per round. */
+.ms-stripes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.ms-stripe {
+  display: grid;
+  grid-template-columns: 1.4rem 1fr 3.6rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 2px 4px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.ms-stripe:hover {
+  background: var(--surface-hover);
+}
+
+.ms-stripe[aria-pressed="true"] {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.ms-stripe svg {
+  display: block;
+  width: 100%;
+  height: 10px;
+}
+
+.ms-stripe-label,
+.ms-stripe-err {
+  font-family: var(--font-mono);
+}
+
+.ms-stripe-err {
+  text-align: right;
+}
+
+/* Bias² + variance + noise against the measured error. */
+.ms-bars {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.35rem 0.6rem;
+  width: 100%;
+  max-width: 420px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.ms-bar {
+  display: flex;
+  height: 14px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.ms-seg {
+  display: block;
+  height: 100%;
+}
+
+.ms-seg-bias { background: var(--series-red); }
+.ms-seg-var { background: var(--series-blue); }
+.ms-seg-noise { background: var(--text-muted); }
+.ms-seg-measured { background: var(--series-orange); }
+
+/* Two columns on a wide screen: the four panels as a 2 × 2 grid. */
+.ml-grid.ms-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+}

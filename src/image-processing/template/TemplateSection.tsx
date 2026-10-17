@@ -56,8 +56,8 @@ export function TemplateSection() {
   const [corner, setCorner] = useState<{ x: number; y: number } | null>(null);
   // Keyboard cursor (patch corner) before Enter confirms it.
   const [cursor, setCursor] = useState(() => patchCorner(W / 2, H / 2));
-  const canvasA = useMemo(sceneA, []);
-  const canvasB = useMemo(sceneB, []);
+  const canvasA = useMemo(() => sceneA(), []);
+  const canvasB = useMemo(() => sceneB(), []);
   const { image: imgA } = useImageData(canvasA, W);
   const { image: imgB } = useImageData(canvasB, W);
 

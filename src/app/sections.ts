@@ -4,11 +4,12 @@ export const SECTION_KEYS = [
   'convolution', 'segmentation', 'superpixels', 'matching', 'keypoints', 'color', 'morphology', 'regions', 'watershed', 'snakes', 'edges', 'frequency', 'jpeg',
   'pyramids', 'warping', 'hough', 'histogram', 'augmentation', 'denoising', 'edge-preserving', 'deblur', 'inpainting', 'template', 'optical-flow', 'stereo', 'stitching', 'calibration', 'classification',
   'learn-kernel', 'optimizers', 'receptive-field', 'saliency', 'adversarial', 'regularisation', 'batchnorm', 'transfer', 'contrastive', 'autoencoder', 'gan', 'unet', 'detection', 'diffusion', 'vit', 'rnn',
+  'linear-models', 'knn', 'svm', 'trees', 'boosting', 'pca', 'tsne', 'gmm', 'metrics', 'model-selection',
 ] as const;
 
 export type SectionKey = (typeof SECTION_KEYS)[number];
 
-export type GroupKey = 'image-processing' | 'deep-learning';
+export type GroupKey = 'image-processing' | 'deep-learning' | 'machine-learning';
 
 export interface GroupDef {
   key: GroupKey;
@@ -22,6 +23,8 @@ export const GROUPS: GroupDef[] = [
     blurb: 'Classic algorithms that transform, measure and match pixels: every step is a formula you can follow.' },
   { key: 'deep-learning', label: 'Deep learning', icon: '🧠',
     blurb: 'Networks that learn their filters from data, trained live in your browser, and the tools to see what they learned.' },
+  { key: 'machine-learning', label: 'Machine learning', icon: '📊',
+    blurb: 'The classic models before and beside deep learning: lines, neighbours, margins, trees, mixtures, and how to tell whether any of them works.' },
 ];
 
 export interface SectionDef {
@@ -176,4 +179,34 @@ export const SECTIONS: SectionDef[] = [
   { key: 'rnn', group: 'deep-learning', icon: '🔁', label: 'Recurrent network',
     blurb: 'A GRU reads a digit one row at a time: watch its prediction form as the rows arrive, and what it keeps in memory.',
     Component: lazy(() => import('../deep-learning/rnn/RnnSection').then(m => ({ default: m.RnnSection }))) },
+  { key: 'linear-models', group: 'machine-learning', icon: '📈', label: 'Linear & logistic regression',
+    blurb: 'Click to add points and watch a line fit them: the exact least-squares solution, gradient descent, and the logistic loss for classes.',
+    Component: lazy(() => import('../machine-learning/linear/LinearSection').then(m => ({ default: m.LinearSection }))) },
+  { key: 'knn', group: 'machine-learning', icon: '👥', label: 'k-nearest neighbours',
+    blurb: 'Classify by asking the closest training points: how k smooths the boundary, and why distance fails in 784 dimensions.',
+    Component: lazy(() => import('../machine-learning/knn/KnnSection').then(m => ({ default: m.KnnSection }))) },
+  { key: 'svm', group: 'machine-learning', icon: '↔️', label: 'Support vector machines',
+    blurb: 'The widest margin between two classes, the support vectors that hold it, and kernels that bend it.',
+    Component: lazy(() => import('../machine-learning/svm/SvmSection').then(m => ({ default: m.SvmSection }))) },
+  { key: 'trees', group: 'machine-learning', icon: '🌳', label: 'Decision trees & forests',
+    blurb: 'Axis-aligned splits chosen by impurity, a tree that memorises, and a forest of randomised trees that averages it away.',
+    Component: lazy(() => import('../machine-learning/trees/TreesSection').then(m => ({ default: m.TreesSection }))) },
+  { key: 'boosting', group: 'machine-learning', icon: '🚀', label: 'Gradient boosting',
+    blurb: 'Fit a curve one small tree at a time, each correcting the residual of the last: shrinkage, depth and overfitting.',
+    Component: lazy(() => import('../machine-learning/boosting/BoostingSection').then(m => ({ default: m.BoostingSection }))) },
+  { key: 'pca', group: 'machine-learning', icon: '🧭', label: 'PCA & eigendigits',
+    blurb: 'The directions in which digits vary most, shown as images: rebuild a digit from a few components.',
+    Component: lazy(() => import('../machine-learning/pca/PcaSection').then(m => ({ default: m.PcaSection }))) },
+  { key: 'tsne', group: 'machine-learning', icon: '🌌', label: 't-SNE',
+    blurb: 'Lay 784-dimensional digits out on a plane by keeping neighbours together, and learn what the picture does not tell you.',
+    Component: lazy(() => import('../machine-learning/tsne/TsneSection').then(m => ({ default: m.TsneSection }))) },
+  { key: 'gmm', group: 'machine-learning', icon: '🫧', label: 'Gaussian mixtures & EM',
+    blurb: 'Soft clusters with their own shapes, fitted by expectation–maximisation, where k-means draws the wrong lines.',
+    Component: lazy(() => import('../machine-learning/gmm/GmmSection').then(m => ({ default: m.GmmSection }))) },
+  { key: 'metrics', group: 'machine-learning', icon: '🎚', label: 'Evaluation metrics',
+    blurb: 'Slide a classifier\'s threshold and watch the confusion matrix, precision, recall, ROC and PR curves move together.',
+    Component: lazy(() => import('../machine-learning/metrics/MetricsSection').then(m => ({ default: m.MetricsSection }))) },
+  { key: 'model-selection', group: 'machine-learning', icon: '🎯', label: 'Bias, variance & cross-validation',
+    blurb: 'Fit polynomials of growing degree, see the validation error\'s U shape, and let k-fold cross-validation pick the degree.',
+    Component: lazy(() => import('../machine-learning/model-selection/ModelSelectionSection').then(m => ({ default: m.ModelSelectionSection }))) },
 ];

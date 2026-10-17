@@ -58,10 +58,10 @@ function Explain({ lenet, test }: { lenet: SharedLeNet; test: MnistSplit }) {
   const [randomModel, setRandomModel] = useState<tf.LayersModel | null>(null);
 
   // The sanity check's untrained network, built on first use and freed with the view.
-  useEffect(() => {
-    if (!untrained || randomModel) return;
-    setRandomModel(buildLeNet());
-  }, [untrained, randomModel]);
+  const toggleUntrained = (on: boolean) => {
+    setUntrained(on);
+    if (on && !randomModel) setRandomModel(buildLeNet());
+  };
   useEffect(() => () => { randomModel?.dispose(); }, [randomModel]);
 
   const image = test.images.subarray(index * 784, (index + 1) * 784);
@@ -100,7 +100,7 @@ function Explain({ lenet, test }: { lenet: SharedLeNet; test: MnistSplit }) {
             onClick={() => setExplainClass(d)}>{d}</button>
         ))}
         <label className="dl-slider sal-sanity">
-          <input type="checkbox" checked={untrained} onChange={e => setUntrained(e.target.checked)} /> Sanity check: untrained network
+          <input type="checkbox" checked={untrained} onChange={e => toggleUntrained(e.target.checked)} /> Sanity check: untrained network
         </label>
       </div>
 

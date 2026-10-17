@@ -58,7 +58,8 @@ function Trainer({ data }: { data: MnistData }) {
   const [epochsToRun, setEpochsToRun] = useState(15);
   const [history, setHistory] = useState<EpochLog[]>([]);
   const [progress, setProgress] = useState<string | null>(null);
-  const [version, setVersion] = useState(0);
+  // The model as of its last epoch: a new object after every epoch, so the views recompute.
+  const [trained, setTrained] = useState<{ model: Autoencoder } | null>(null);
   const [hover, setHover] = useState<[number, number] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const modelRef = useRef<Autoencoder | null>(null);
@@ -78,7 +79,7 @@ function Trainer({ data }: { data: MnistData }) {
     dispose();
     setMode(next);
     setHistory([]);
-    setVersion(v => v + 1);
+    setTrained(null);
   };
 
   const train = async () => {
@@ -103,7 +104,7 @@ function Trainer({ data }: { data: MnistData }) {
           return { reconstruction: l.reconstruction.dataSync()[0], kl: l.kl.dataSync()[0] };
         });
         setHistory(h => [...h, parts]);
-        setVersion(v => v + 1);
+        setTrained({ model });
       }
     } catch (err) {
       // Reset or leaving the page disposes the model under a running epoch: that is a normal stop.
@@ -115,8 +116,8 @@ function Trainer({ data }: { data: MnistData }) {
   };
 
   const view = useMemo(() => {
-    const model = modelRef.current;
-    if (!model || version < 0) return null;
+    if (!trained) return null;
+    const { model } = trained;
     const codes = model.codes(data.test.images, SHOWN);
     let lo = Infinity, hi = -Infinity;
     for (const v of codes) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
@@ -142,13 +143,12 @@ function Trainer({ data }: { data: MnistData }) {
     const examples = firstOfEachDigit(data.test.labels);
     const recon = model.reconstruct(gatherRows(data.test.images, 784, examples), examples.length);
     return { codes, range, manifold: toImageData(rgba, GRID * 28, GRID * 28), recon, examples };
-  }, [data, version, mode]);
+  }, [data, trained, mode]);
 
   const hovered = useMemo(() => {
-    const model = modelRef.current;
-    if (!model || !hover || version < 0) return null;
-    return floatImage(model.decode(Float32Array.from(hover)), 28, 28);
-  }, [hover, version]);
+    if (!trained || !hover) return null;
+    return floatImage(trained.model.decode(Float32Array.from(hover)), 28, 28);
+  }, [hover, trained]);
 
   return (
     <>
