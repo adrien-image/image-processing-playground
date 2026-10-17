@@ -16,15 +16,21 @@ export interface GroupDef {
   label: string;
   icon: string;
   blurb: string;
+  /** The lesson the home page suggests starting the group with, and its button text. */
+  start: SectionKey;
+  cta: string;
 }
 
 export const GROUPS: GroupDef[] = [
   { key: 'image-processing', label: 'Image processing', icon: '🖼',
-    blurb: 'Classic algorithms that transform, measure and match pixels: every step is a formula you can follow.' },
+    blurb: 'Classic algorithms that transform, measure and match pixels: every step is a formula you can follow.',
+    start: 'convolution', cta: 'Start with convolution' },
   { key: 'deep-learning', label: 'Deep learning', icon: '🧠',
-    blurb: 'Networks that learn their filters from data, trained live in your browser, and the tools to see what they learned.' },
+    blurb: 'Networks that learn their filters from data, trained live in your browser, and the tools to see what they learned.',
+    start: 'classification', cta: 'Train a neural network' },
   { key: 'machine-learning', label: 'Machine learning', icon: '📊',
-    blurb: 'The classic models before and beside deep learning: lines, neighbours, margins, trees, mixtures, and how to tell whether any of them works.' },
+    blurb: 'The classic models before and beside deep learning: lines, neighbours, margins, trees, mixtures, and how to tell whether any of them works.',
+    start: 'linear-models', cta: 'Fit a line to data' },
 ];
 
 export interface SectionDef {

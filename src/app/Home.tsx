@@ -15,22 +15,21 @@ export function Home({ onOpen }: HomeProps) {
         <p className="home-tagline">{SITE_TAGLINE}</p>
         <p className="home-intro">{SITE_DESCRIPTION}</p>
         <div className="home-actions">
-          <a
-            href="#/convolution"
-            className="btn btn-primary home-cta"
-            onClick={(e) => { e.preventDefault(); onOpen('convolution'); }}
-          >
-            Start with convolution →
-          </a>
-          <a
-            href="#/classification"
-            className="btn home-cta"
-            onClick={(e) => { e.preventDefault(); onOpen('classification'); }}
-          >
-            Train a neural network →
-          </a>
-          <span className="home-count">{SECTIONS.length} lessons · runs entirely in your browser · bring your own images</span>
+          {GROUPS.map((group, i) => (
+            <a
+              key={group.key}
+              href={`#/${group.start}`}
+              className={`btn home-cta${i === 0 ? ' btn-primary' : ''}`}
+              onClick={(e) => { e.preventDefault(); onOpen(group.start); }}
+            >
+              {group.cta} →
+            </a>
+          ))}
+          <button type="button" className="btn home-cta" onClick={() => onOpen(SECTIONS[Math.floor(Math.random() * SECTIONS.length)].key)}>
+            🎲 Surprise me
+          </button>
         </div>
+        <p className="home-count">{SECTIONS.length} lessons · runs entirely in your browser · bring your own images</p>
       </section>
 
       {GROUPS.map(group => (
