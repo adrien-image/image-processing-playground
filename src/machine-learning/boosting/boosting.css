@@ -1,0 +1,72 @@
+.boost-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+}
+
+.boost-plot {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  background: var(--chart-bg);
+  border-radius: var(--radius);
+}
+
+.boost-axis {
+  stroke: color-mix(in srgb, var(--fg) 12%, transparent);
+  stroke-width: 1;
+}
+
+.boost-tick {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--text-muted);
+}
+
+.boost-train {
+  fill: var(--text-secondary);
+  stroke: var(--surface-solid);
+  stroke-width: 1;
+}
+
+.boost-test {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.boost-truth,
+.boost-model,
+.boost-tree,
+.boost-tree-scaled {
+  fill: none;
+  stroke-linejoin: round;
+}
+
+.boost-truth {
+  stroke: var(--series-green);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.boost-model {
+  stroke: var(--series-blue);
+  stroke-width: 2.5;
+}
+
+.boost-tree {
+  stroke: var(--series-orange);
+  stroke-width: 2.5;
+}
+
+.boost-tree-scaled {
+  stroke: var(--series-pink);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.ml-legend .boost-sw-train { background: var(--text-secondary); }
+.ml-legend .boost-sw-test { border: 1.5px solid var(--text-muted); background: transparent; }
+.ml-legend .boost-sw-truth { background: var(--series-green); border-radius: 2px; height: 0.25rem; }
+.ml-legend .boost-sw-model { background: var(--series-blue); border-radius: 2px; height: 0.25rem; }
+.ml-legend .boost-sw-tree { background: var(--series-orange); border-radius: 2px; height: 0.25rem; }
+.ml-legend .boost-sw-scaled { background: var(--series-pink); border-radius: 2px; height: 0.2rem; }
