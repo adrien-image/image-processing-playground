@@ -1,0 +1,187 @@
+/* Evaluation metrics lesson. */
+
+.met-threshold input[type="range"] {
+  width: min(320px, 55vw);
+}
+
+.ml-grid.met-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+}
+
+.met-svg {
+  display: block;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  background: var(--chart-bg);
+  border-radius: var(--radius);
+  touch-action: none;
+}
+
+.met-curve {
+  max-width: 380px;
+}
+
+.met-pick {
+  cursor: ew-resize;
+}
+
+.met-bar {
+  opacity: 0.75;
+}
+
+.met-positive-zone {
+  fill: color-mix(in srgb, var(--series-orange) 8%, transparent);
+}
+
+.met-axis,
+.met-frame {
+  stroke: color-mix(in srgb, var(--fg) 25%, transparent);
+  fill: none;
+}
+
+.ml-grid.met-grid {
+  stroke: color-mix(in srgb, var(--fg) 7%, transparent);
+}
+
+.met-tick {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--text-muted);
+}
+
+.met-label {
+  font-size: 10px;
+  fill: var(--text-secondary);
+}
+
+.met-threshold-line {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.met-chance {
+  stroke: var(--text-muted);
+  stroke-dasharray: 5 4;
+}
+
+.met-area {
+  fill: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+.met-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+.met-point {
+  fill: var(--series-orange);
+  stroke: var(--surface-solid);
+  stroke-width: 2;
+}
+
+/* Confusion matrix: a 3 × 3 grid of headers and cells. */
+.met-confusion {
+  display: grid;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.met-row {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr 1fr;
+  gap: 0.35rem;
+}
+
+.met-head {
+  align-self: center;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.met-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.45rem 0.3rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--surface-border);
+  text-align: center;
+}
+
+.met-good {
+  background: color-mix(in srgb, var(--series-green) var(--share), transparent);
+}
+
+.met-bad {
+  background: color-mix(in srgb, var(--series-red) var(--share), transparent);
+}
+
+.met-cell strong {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.met-cell-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.met-cell-note {
+  font-size: 0.66rem;
+  color: var(--text-secondary);
+}
+
+.met-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.met-table th,
+.met-table td {
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid var(--surface-border);
+  color: var(--text);
+}
+
+.met-table th {
+  text-align: left;
+  font-weight: 600;
+}
+
+.met-table th span {
+  display: block;
+  font-weight: 400;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.met-table td {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.met-table td:nth-child(2) {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+}
+
+.met-baseline th,
+.met-baseline td {
+  color: var(--text-secondary);
+  border-bottom: none;
+}
+
+.met-corner {
+  font-size: 0.6rem;
+  text-transform: none;
+  letter-spacing: 0;
+}

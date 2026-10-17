@@ -1,0 +1,96 @@
+/* Linear & logistic regression lesson. */
+
+.lin-line {
+  display: inline-block;
+  width: 1.4rem;
+  border-top: 2.5px solid;
+  margin-right: 0.35rem;
+  vertical-align: 0.2rem;
+}
+
+.lin-dashed {
+  border-top-style: dashed;
+}
+
+.lin-ring {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 2px solid var(--text-secondary);
+  margin-right: 0.3rem;
+  vertical-align: -0.1rem;
+}
+
+.lin-surface {
+  position: relative;
+  max-width: 100%;
+}
+
+.lin-axis {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--text);
+  background: color-mix(in srgb, var(--surface-solid) 75%, transparent);
+  padding: 0 0.3rem;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+}
+
+.lin-axis-x {
+  right: 0.4rem;
+  bottom: 0.4rem;
+}
+
+.lin-axis-y {
+  left: 0.4rem;
+  top: 0.4rem;
+}
+
+.lin-stats {
+  width: 100%;
+  margin: 0;
+}
+
+.lin-stats dt {
+  text-align: left;
+}
+
+.lin-stats dd {
+  margin: 0;
+  text-align: right;
+}
+
+.lin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.lin-table th,
+.lin-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--surface-border);
+  text-align: right;
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+.lin-table th[scope="row"] {
+  text-align: left;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.lin-table thead th {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.lin-table .muted {
+  font-size: 0.68rem;
+}
